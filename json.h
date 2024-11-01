@@ -11,10 +11,10 @@ typedef union JSON_Data JSON_Data;
 typedef struct JSON_Array JSON_Array;
 typedef struct JSON_Object JSON_Object;
 typedef struct JSON JSON;
-typedef struct JSON_Root JSON_Root;
 typedef struct JSON_Key_Value JSON_Key_Value;
 
 typedef enum JSON_Type {
+    JSON_ERROR,
     JSON_STRING,
     JSON_FLOAT64,
     JSON_INT64,
@@ -22,8 +22,7 @@ typedef enum JSON_Type {
     JSON_ARRAY,
     JSON_OBJECT,
     JSON_NULL,
-    JSON_BOOL,
-    JSON_ERROR
+    JSON_BOOL
 } JSON_Type;
 
 typedef enum JSON_Error {
@@ -41,7 +40,6 @@ typedef enum JSON_Error {
     JSON_ARRAY_MISSING_COMMA_OR_RBRACKET,
     JSON_ARRAY_INVALID_VALUE,
     JSON_FAILED_TO_OPEN_FILE
-    
 } JSON_Error;
 
 struct JSON_Array {
@@ -70,12 +68,6 @@ union JSON_Data {
 struct JSON {
     JSON_Data value;
     JSON_Type type;
-};
-
-//this is the same thing as JSON but contains the tokens. This is the actual type JSON_parse returns. For convienance, JSON_parse returns a JSON*.
-struct JSON_Root {
-    JSON json;
-    JSON_Token_List tokens;
 };
 
 struct JSON_Key_Value {

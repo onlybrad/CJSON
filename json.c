@@ -1,11 +1,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <stdio.h>
 #include "json.h"
 #include "lexer.h"
 #include "token-list.h"
 #include "util.h"
+
+//this is the same thing as JSON but contains the tokens. This is the actual type JSON_parse returns. For convienance, JSON_parse returns a JSON*.
+typedef struct JSON_Root {
+    JSON json;
+    JSON_Token_List tokens;
+} JSON_Root;
 
 typedef enum ObjectParsingError {
     ObjectKeyError,
