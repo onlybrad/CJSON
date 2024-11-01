@@ -345,13 +345,20 @@ static bool parse_object(JSON *const json, JSON_Token_List *const tokens) {
         tokens->index += 2;
 
         JSON_Key_Value *const entry = JSON_Object_get_entry(object, key);
+        if(entry->key != NULL) {
+            free(key);
+            _JSON_free(&entry->value);
+        } else {
+            entry->key = key;
+        }
+        key = NULL;
+
         if(!parse_tokens(&entry->value, tokens)) {
             error = ObjectValueError;
             json_copy = entry->value;
             goto cleanup;
         }
 
-        entry->key = key;
         key = NULL;
         token = tokens->tokens + tokens->index;
 

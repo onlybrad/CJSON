@@ -384,6 +384,20 @@ static void test_nested_arrays(void) {
     JSON_free(root);
 }
 
+static void test_duplicate_keys(void) {
+    const char duplicate_keys[] = "{\"key\": \"value1\", \"key\": \"value2\"}";
+
+    JSON *const root = JSON_parse(duplicate_keys, sizeof(duplicate_keys) - 1);
+    assert(root->type == JSON_OBJECT);
+
+    bool success;
+    const char *const value = JSON_get_string(root, "key", &success);
+    assert(success);
+    assert(strcmp(value, "value2") == 0);
+
+    JSON_free(root);
+}
+
 int main(void) {
     test_empty_object();
     test_empty_array();
@@ -401,6 +415,7 @@ int main(void) {
     test_deep_nesting();
     test_no_quotes_key();
     test_nested_arrays();
+    test_duplicate_keys();
 
     return 0;
 }
