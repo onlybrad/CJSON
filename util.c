@@ -214,6 +214,11 @@ char *file_get_contents(const char *const path, size_t *const filesize) {
 #else
     FILE *const file = fopen(path, "rb");
 #endif
+    if(file == NULL) {
+        *filesize = 0;
+        return NULL;
+    }
+
     fseeko(file, 0, SEEK_END);
     const off_t length = ftello(file);
     fseeko(file, 0, SEEK_SET);
