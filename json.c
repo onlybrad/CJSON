@@ -190,7 +190,7 @@ static bool parse_number(JSON *const json, JSON_Token_List *const tokens) {
     bool success;
     const JSON_Token *const token = tokens->tokens + tokens->index; 
 
-    memcpy(str, token->value, MIN(sizeof(str), token->length));
+    memcpy(str, token->value, MIN(sizeof(str) - 1, token->length));
 
     if(token->type == JSON_TOKEN_FLOAT) {
         const double float64 = parse_float64(str, &success);
