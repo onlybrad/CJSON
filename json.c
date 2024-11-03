@@ -346,7 +346,7 @@ static bool parse_object(JSON *const json, JSON_Token_List *const tokens) {
 
         JSON_Key_Value *const entry = JSON_Object_get_entry(object, key);
         if(entry->key != NULL) {
-            free(key);
+            JSON_FREE(key);
             _JSON_free(&entry->value);
         } else {
             entry->key = key;
