@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "allocator.h"
 #include "token.h"
-#include "token-list.h"
+#include "tokens.h"
 
 typedef union JSON_Data JSON_Data;
 typedef struct JSON_Array JSON_Array;

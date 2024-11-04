@@ -3,13 +3,13 @@
 #include <assert.h>
 #include "json.h"
 #include "lexer.h"
-#include "token-list.h"
+#include "tokens.h"
 #include "util.h"
 
 //this is the same thing as JSON but contains the tokens. This is the actual type JSON_parse returns. For convienance, JSON_parse returns a JSON*.
 typedef struct JSON_Root {
     JSON json;
-    JSON_Token_List tokens;
+    JSON_Tokens tokens;
 } JSON_Root;
 
 typedef enum ObjectParsingError {
@@ -26,7 +26,7 @@ typedef enum ArrayParsingError {
     ArrayIncompleteError
 } ArrayParsingError;
  
-static bool parse_tokens(JSON *const json, JSON_Token_List *const tokens);
+static bool parse_tokens(JSON *const json, JSON_Tokens *const tokens);
 
 static char *parse_utf8_string(const JSON_Token *const token) {
     assert(token != NULL);
@@ -157,11 +157,11 @@ cleanup:
     return NULL;
 }
 
-static bool parse_string(JSON *const json, JSON_Token_List *const tokens) {
+static bool parse_string(JSON *const json, JSON_Tokens *const tokens) {
     assert(json != NULL);
     assert(tokens != NULL);
     
-    const JSON_Token *const token = tokens->tokens + tokens->index; 
+    const JSON_Token *const token = tokens->data + tokens->index; 
 
     char *string = parse_utf8_string(token);
     if(string == NULL) {
@@ -182,13 +182,13 @@ static bool parse_string(JSON *const json, JSON_Token_List *const tokens) {
     return true;
 }
 
-static bool parse_number(JSON *const json, JSON_Token_List *const tokens) {
+static bool parse_number(JSON *const json, JSON_Tokens *const tokens) {
     assert(json != NULL);
     assert(tokens != NULL);
     char str[1 << 9] = {0};
 
     bool success;
-    const JSON_Token *const token = tokens->tokens + tokens->index; 
+    const JSON_Token *const token = tokens->data + tokens->index; 
 
     memcpy(str, token->value, MIN(sizeof(str) - 1, token->length));
 
@@ -271,11 +271,11 @@ static bool parse_number(JSON *const json, JSON_Token_List *const tokens) {
     return true;
 }
 
-static void parse_bool(JSON *const json, JSON_Token_List *const tokens) {
+static void parse_bool(JSON *const json, JSON_Tokens *const tokens) {
     assert(json != NULL);
     assert(tokens != NULL);
 
-    const JSON_Token *const token = tokens->tokens + tokens->index; 
+    const JSON_Token *const token = tokens->data + tokens->index; 
 
     json->type = JSON_BOOL;
     json->value.boolean = token->value[0] == 't';
@@ -283,7 +283,7 @@ static void parse_bool(JSON *const json, JSON_Token_List *const tokens) {
     tokens->index++;
 }
 
-static void parse_null(JSON *const json, JSON_Token_List *const tokens) {
+static void parse_null(JSON *const json, JSON_Tokens *const tokens) {
     assert(json != NULL);
     assert(tokens != NULL);
 
@@ -293,7 +293,7 @@ static void parse_null(JSON *const json, JSON_Token_List *const tokens) {
     tokens->index++;
 }
 
-static bool parse_object(JSON *const json, JSON_Token_List *const tokens) {
+static bool parse_object(JSON *const json, JSON_Tokens *const tokens) {
     assert(json != NULL);
     assert(tokens != NULL);
 
@@ -314,7 +314,7 @@ static bool parse_object(JSON *const json, JSON_Token_List *const tokens) {
 
     ObjectParsingError error;
     JSON json_copy;
-    const JSON_Token *token = tokens->tokens + tokens->index;
+    const JSON_Token *token = tokens->data + tokens->index;
     char *key = NULL;
 
     if(token->type == JSON_TOKEN_RCURLY) {
@@ -359,7 +359,7 @@ static bool parse_object(JSON *const json, JSON_Token_List *const tokens) {
             goto cleanup;
         }
 
-        token = tokens->tokens + tokens->index;
+        token = tokens->data + tokens->index;
 
         if(token->type == JSON_TOKEN_COMMA) {
             tokens->index++;
@@ -430,7 +430,7 @@ cleanup:
     return false;
 }
 
-static bool parse_array(JSON *const json, JSON_Token_List *const tokens) {
+static bool parse_array(JSON *const json, JSON_Tokens *const tokens) {
     assert(json != NULL);
     assert(tokens != NULL);
 
@@ -449,7 +449,7 @@ static bool parse_array(JSON *const json, JSON_Token_List *const tokens) {
     json->type = JSON_ARRAY;
     JSON_Array_init(array);
 
-    const JSON_Token *token = tokens->tokens + tokens->index;
+    const JSON_Token *token = tokens->data + tokens->index;
     ArrayParsingError error;
 
     if(token->type == JSON_TOKEN_RBRACKET) {
@@ -465,7 +465,7 @@ static bool parse_array(JSON *const json, JSON_Token_List *const tokens) {
             goto cleanup;
         }
 
-        token = tokens->tokens + tokens->index;
+        token = tokens->data + tokens->index;
  
         if(token->type == JSON_TOKEN_COMMA) {
             tokens->index++;
@@ -520,11 +520,11 @@ cleanup:
     return false;
 }
 
-static bool parse_tokens(JSON *const json, JSON_Token_List *const tokens) {
+static bool parse_tokens(JSON *const json, JSON_Tokens *const tokens) {
     assert(json != NULL);
     assert(tokens != NULL);
 
-    const JSON_Token *const token = tokens->tokens + tokens->index; 
+    const JSON_Token *const token = tokens->data + tokens->index; 
 
     switch(token->type) {
     case JSON_TOKEN_STRING:
@@ -567,12 +567,12 @@ JSON *JSON_parse(const char *const data, const unsigned length) {
     JSON_Root *root = JSON_MALLOC(sizeof(JSON_Root));
     assert(root != NULL);
 
-    JSON_Token_List *tokens = &root->tokens;
-    JSON_Token_List_init(tokens);
+    JSON_Tokens *tokens = &root->tokens;
+    JSON_Tokens_init(tokens);
 
-    JSON_Token *token = JSON_Token_List_next(tokens);
+    JSON_Token *token = JSON_Tokens_next(tokens);
     while(JSON_Lexer_tokenize(&lexer, token)) {
-        token = JSON_Token_List_next(tokens);
+        token = JSON_Tokens_next(tokens);
     }
 
     if(token->type == JSON_TOKEN_INVALID) {
@@ -615,7 +615,7 @@ void JSON_free(JSON *const json) {
 
     JSON_Root *root = (JSON_Root*)json;
 
-    JSON_Token_list_free(&root->tokens);
+    JSON_Tokens_free(&root->tokens);
     _JSON_free(json);
     *root = (JSON_Root){0};
     JSON_FREE(root);
