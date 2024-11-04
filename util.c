@@ -173,15 +173,14 @@ void print_bytes(void *const buffer, size_t size) {
 
     if(size == 0) {
         puts("[]");
+        return;
     }
 
     putchar('[');
     for(size_t i = 0; i < size - 1; i++) {
-        printf("0x%02hhx", ((unsigned char*)buffer)[i]);
-        fputs(", ", stdout);
+        printf("0x%02hhx, ", ((unsigned char*)buffer)[i]);
     }
-    printf("0x%02hhx", ((unsigned char*)buffer)[size - 1]);
-    puts("]");
+    printf("0x%02hhx]\n", ((unsigned char*)buffer)[size - 1]);
 }
 
 long usec_timestamp(void) {

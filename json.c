@@ -359,7 +359,6 @@ static bool parse_object(JSON *const json, JSON_Token_List *const tokens) {
             goto cleanup;
         }
 
-        key = NULL;
         token = tokens->tokens + tokens->index;
 
         if(token->type == JSON_TOKEN_COMMA) {
