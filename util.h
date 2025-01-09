@@ -17,7 +17,7 @@ bool        is_whitespace          (const char c);
 bool        is_delimiter           (const char c);
 bool        is_digit               (const char c);
 uint16_t    parse_codepoint        (const char *const unicode, bool *const success);
-unsigned    codepoint_utf16_to_utf8(char *const destination, const uint16_t codepoint);
+unsigned int    codepoint_utf16_to_utf8(char *const destination, const uint16_t codepoint);
 void        surrogate_utf16_to_utf8(char *const destination, const uint16_t high, const uint16_t low);
 double      parse_float64          (const char *const str, bool *const success);
 long double parse_long_double      (const char *const str, bool *const success);

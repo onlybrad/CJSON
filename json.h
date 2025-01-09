@@ -44,13 +44,13 @@ typedef enum JSON_Error {
 
 struct JSON_Array {
     JSON *data;
-    unsigned length;
-    unsigned capacity;
+    unsigned int length;
+    unsigned int capacity;
 };
 
 struct JSON_Object {
     JSON_Key_Value *data;
-    unsigned capacity;
+    unsigned int capacity;
 };
 
 union JSON_Data {
@@ -95,20 +95,20 @@ bool         JSON_Object_get_bool   (const JSON_Object *const object, const char
 void  JSON_Array_init(JSON_Array *const array);
 void  JSON_Array_free(JSON_Array *const array);
 JSON *JSON_Array_next(JSON_Array *const array);
-JSON *JSON_Array_get (const JSON_Array *const array, const unsigned index);
-void JSON_Array_set  (JSON_Array *const array, const unsigned index, const JSON *const value);
+JSON *JSON_Array_get (const JSON_Array *const array, const unsigned int index);
+void JSON_Array_set  (JSON_Array *const array, const unsigned int index, const JSON *const value);
 void JSON_Array_push (JSON_Array *const array, const JSON *const value);
 
-char         *JSON_Array_get_string(const JSON_Array *const array, const unsigned index, bool *const success);
-double       JSON_Array_get_float64(const JSON_Array *const array, const unsigned index, bool *const success);
-int64_t      JSON_Array_get_int64  (const JSON_Array *const array, const unsigned index, bool *const success);
-uint64_t     JSON_Array_get_uint64 (const JSON_Array *const array, const unsigned index, bool *const success);
-JSON_Array   *JSON_Array_get_array (const JSON_Array *const array, const unsigned index, bool *const success);
-JSON_Object  *JSON_Array_get_object(const JSON_Array *const array, const unsigned index, bool *const success);
-void        *JSON_Array_get_null   (const JSON_Array *const array, const unsigned index, bool *const success);
-bool         JSON_Array_get_bool   (const JSON_Array *const array, const unsigned index, bool *const success);
+char         *JSON_Array_get_string(const JSON_Array *const array, const unsigned int index, bool *const success);
+double       JSON_Array_get_float64(const JSON_Array *const array, const unsigned int index, bool *const success);
+int64_t      JSON_Array_get_int64  (const JSON_Array *const array, const unsigned int index, bool *const success);
+uint64_t     JSON_Array_get_uint64 (const JSON_Array *const array, const unsigned int index, bool *const success);
+JSON_Array   *JSON_Array_get_array (const JSON_Array *const array, const unsigned int index, bool *const success);
+JSON_Object  *JSON_Array_get_object(const JSON_Array *const array, const unsigned int index, bool *const success);
+void        *JSON_Array_get_null   (const JSON_Array *const array, const unsigned int index, bool *const success);
+bool         JSON_Array_get_bool   (const JSON_Array *const array, const unsigned int index, bool *const success);
 
-JSON        *JSON_parse         (const char *const data, const unsigned length);
+JSON        *JSON_parse         (const char *const data, const unsigned int length);
 JSON        *JSON_parse_file    (const char *const path);
 void         JSON_free          (JSON *const json);
 const char  *JSON_get_error     (const JSON *const json);

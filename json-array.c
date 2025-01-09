@@ -10,7 +10,7 @@ static void JSON_Array_resize(JSON_Array *const array, const double multiplier) 
     assert(multiplier > 1.0); //multiplier must actually increase the size
     assert(multiplier <= UINT_MAX / array->capacity); //check overflow
 
-    const unsigned capacity = (unsigned)((double)array->capacity * multiplier);
+    const unsigned int capacity = (unsigned int)((double)array->capacity * multiplier);
     JSON *data = JSON_REALLOC(array->data, capacity * sizeof(JSON), array->capacity * sizeof(JSON));
     
     assert(data != NULL);
@@ -32,7 +32,7 @@ void JSON_Array_init(JSON_Array *const array) {
 }
 
 void JSON_Array_free(JSON_Array *const array) {
-    for(unsigned i = 0U; i < array->length; i++) {
+    for(unsigned int i = 0U; i < array->length; i++) {
         _JSON_free(array->data + i);
     }
     JSON_FREE(array->data);
@@ -52,13 +52,13 @@ JSON *JSON_Array_next(JSON_Array *const array) {
     return ret;
 }
 
-JSON *JSON_Array_get(const JSON_Array *const array, const unsigned index) {
+JSON *JSON_Array_get(const JSON_Array *const array, const unsigned int index) {
     assert(array != NULL);
 
     return index >= array->length ? NULL : array->data + index;
 }
 
-void JSON_Array_set(JSON_Array *const array, const unsigned index, const JSON *const value) {
+void JSON_Array_set(JSON_Array *const array, const unsigned int index, const JSON *const value) {
     assert(array != NULL);
     assert(value != NULL);
 
@@ -97,34 +97,34 @@ void JSON_Array_push(JSON_Array *const array, const JSON *const value) {
     JSON_ARRAY_GET(JSON_TYPE)\
     return &ret->value.MEMBER;
 
-char *JSON_Array_get_string(const JSON_Array *const array, const unsigned index, bool *const success) {
+char *JSON_Array_get_string(const JSON_Array *const array, const unsigned int index, bool *const success) {
     JSON_ARRAY_GET_VALUE(JSON_STRING, string)
 }
 
-double JSON_Array_get_float64(const JSON_Array *const array, const unsigned index, bool *const success) {
+double JSON_Array_get_float64(const JSON_Array *const array, const unsigned int index, bool *const success) {
     JSON_ARRAY_GET_VALUE(JSON_FLOAT64, float64)
 }
 
-int64_t JSON_Array_get_int64(const JSON_Array *const array, const unsigned index, bool *const success) {
+int64_t JSON_Array_get_int64(const JSON_Array *const array, const unsigned int index, bool *const success) {
     JSON_ARRAY_GET_VALUE(JSON_INT64, int64)    
 }
 
-uint64_t JSON_Array_get_uint64(const JSON_Array *const array, const unsigned index, bool *const success) {
+uint64_t JSON_Array_get_uint64(const JSON_Array *const array, const unsigned int index, bool *const success) {
     JSON_ARRAY_GET_VALUE(JSON_UINT64, uint64)
 }
 
-JSON_Array *JSON_Array_get_array(const JSON_Array *const array, const unsigned index, bool *const success) {
+JSON_Array *JSON_Array_get_array(const JSON_Array *const array, const unsigned int index, bool *const success) {
     JSON_ARRAY_GET_PTR(JSON_ARRAY, array)
 }
 
-JSON_Object *JSON_Array_get_object(const JSON_Array *const array, const unsigned index, bool *const success) {
+JSON_Object *JSON_Array_get_object(const JSON_Array *const array, const unsigned int index, bool *const success) {
     JSON_ARRAY_GET_PTR(JSON_OBJECT, object)    
 }
 
-void *JSON_Array_get_null(const JSON_Array *const array, const unsigned index, bool *const success) {
+void *JSON_Array_get_null(const JSON_Array *const array, const unsigned int index, bool *const success) {
     JSON_ARRAY_GET_VALUE(JSON_NULL, null)
 }
 
-bool JSON_Array_get_bool(const JSON_Array *const array, const unsigned index, bool *const success) {
+bool JSON_Array_get_bool(const JSON_Array *const array, const unsigned int index, bool *const success) {
     JSON_ARRAY_GET_VALUE(JSON_BOOL, boolean)
 }

@@ -21,7 +21,7 @@ typedef enum JSON_Token_Type {
 
 typedef struct JSON_Token {
     const char *value;
-    unsigned length;
+    unsigned int length;
     JSON_Token_Type type;
 } JSON_Token;
 

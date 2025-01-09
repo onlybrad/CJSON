@@ -9,9 +9,9 @@
 
 typedef struct JSON_Tokens {
     JSON_Token *data;
-    unsigned index;
-    unsigned length;
-    unsigned capacity;
+    unsigned int index;
+    unsigned int length;
+    unsigned int capacity;
 } JSON_Tokens;
 
 void JSON_Tokens_init(JSON_Tokens *const tokens);

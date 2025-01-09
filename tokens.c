@@ -8,7 +8,7 @@ static void JSON_Tokens_resize(JSON_Tokens *const tokens, const double multiplie
     assert(multiplier > 1.0); //multiplier must actually increase the size
     assert(multiplier <= UINT_MAX / tokens->capacity); //check overflow
 
-    const unsigned capacity = (unsigned)((double)tokens->capacity * multiplier);
+    const unsigned int capacity = (unsigned int)((double)tokens->capacity * multiplier);
     JSON_Token *data = JSON_REALLOC(tokens->data, (size_t)capacity * sizeof(JSON_Token), tokens->capacity * sizeof(JSON_Token));
     assert(tokens != NULL);
 

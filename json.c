@@ -34,9 +34,9 @@ static char *parse_utf8_string(const JSON_Token *const token) {
     char* string = JSON_MALLOC((token->length - 1) * sizeof(char));
     assert(string != NULL);
 
-    unsigned str_index = 0U;
-    unsigned tok_index = 1U;
-    const unsigned length = token->length - 1U;
+    unsigned int str_index = 0U;
+    unsigned int tok_index = 1U;
+    const unsigned int length = token->length - 1U;
     const char *const value = token->value;
     bool escaping = false;
 
@@ -557,7 +557,7 @@ static bool parse_tokens(JSON *const json, JSON_Tokens *const tokens) {
     return false;
 }
 
-JSON *JSON_parse(const char *const data, const unsigned length) {
+JSON *JSON_parse(const char *const data, const unsigned int length) {
     assert(data != NULL);
     assert(length > 0);
 
@@ -603,7 +603,7 @@ JSON *JSON_parse_file(const char *const path) {
         return ret;
     }
 
-    JSON *const json = JSON_parse(data, (unsigned)filesize);
+    JSON *const json = JSON_parse(data, (unsigned int)filesize);
 
     JSON_FREE(data);
 
@@ -694,16 +694,16 @@ JSON *JSON_get(JSON *json, const char *query) {
 
     char *key;
     bool is_object_key = query[0] != '[';
-    unsigned i = 0U;
+    unsigned int i = 0U;
 
     if(query[0] == '.' || query[0] == '[') {
         length--;
         query++;
     }
 
-    while(i < (unsigned)length) {
+    while(i < (unsigned int)length) {
         if(is_object_key && json->type == JSON_OBJECT) {
-            unsigned counter = 0U;
+            unsigned int counter = 0U;
             while(query[i] != '.' && query[i] != '[' && i < length) {
                 i++;
                 counter++;
@@ -719,7 +719,7 @@ JSON *JSON_get(JSON *json, const char *query) {
             key = NULL;
       
         } else if(!is_object_key && json->type == JSON_ARRAY) {
-            unsigned counter = 0U;
+            unsigned int counter = 0U;
             while(i < length && query[i] != ']') {
                 if(query[i] < '0' || query[i] > '9') {
                     return NULL;
@@ -744,7 +744,7 @@ JSON *JSON_get(JSON *json, const char *query) {
                 return NULL;
             }
 
-            json = JSON_Array_get(&json->value.array, (unsigned)index);
+            json = JSON_Array_get(&json->value.array, (unsigned int)index);
             JSON_FREE(key);
             key = NULL;
             i++;

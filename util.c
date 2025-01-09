@@ -71,7 +71,7 @@ uint16_t parse_codepoint(const char *const codepoint, bool *const success) {
     return ret;
 }
 
-unsigned codepoint_utf16_to_utf8(char *const destination, const uint16_t codepoint) {
+unsigned int codepoint_utf16_to_utf8(char *const destination, const uint16_t codepoint) {
     assert(destination != NULL);
 
     if(codepoint <= 0x7F) {
@@ -168,19 +168,15 @@ int64_t parse_int64(const char *const str, bool *const success) {
     return ret;
 }
 
-void print_bytes(void *const buffer, size_t size) {
+void print_bytes(const void *const buffer, size_t size) {
     assert(buffer != NULL);
-
-    if(size == 0) {
-        puts("[]");
-        return;
-    }
+    assert(size > 0);
 
     putchar('[');
     for(size_t i = 0; i < size - 1; i++) {
-        printf("0x%02hhx, ", ((unsigned char*)buffer)[i]);
+        printf("0x%02hhx, ", ((unsigned int char*)buffer)[i]);
     }
-    printf("0x%02hhx]\n", ((unsigned char*)buffer)[size - 1]);
+    printf("0x%02hhx]\n", ((unsigned int char*)buffer)[size - 1]);
 }
 
 long usec_timestamp(void) {

@@ -6,16 +6,16 @@
 
 #define INITIAL_JSON_OBJECT_CAPACITY (1 << 3)
 
-static unsigned hash(const char *const key) {
+static unsigned int hash(const char *const key) {
     assert(key != NULL);
 
     const size_t length = strlen(key);
     assert(length > 0 && length <= UINT_MAX);
-    unsigned i = 0u;
-    unsigned hash = 0u;
+    unsigned int i = 0u;
+    unsigned int hash = 0u;
 
-    while (i != (unsigned)length) {
-        hash += (unsigned)key[i++];
+    while (i != (unsigned int)length) {
+        hash += (unsigned int)key[i++];
         hash += hash << 10;
         hash ^= hash >> 6;
     }
@@ -31,16 +31,16 @@ static void JSON_Object_resize(JSON_Object *const object, const double multiplie
     assert(multiplier > 1.0); //multiplier must actually increase the size
     assert(multiplier <= UINT_MAX / object->capacity); //check overflow
 
-    const unsigned capacity = (unsigned)((double)object->capacity * multiplier);
+    const unsigned int capacity = (unsigned int)((double)object->capacity * multiplier);
     JSON_Key_Value *const old_data = object->data;
-    const unsigned old_capacity = object->capacity;
+    const unsigned int old_capacity = object->capacity;
     JSON_Key_Value *data = JSON_CALLOC((size_t)capacity, sizeof(JSON_Key_Value));
     assert(data != NULL);
 
     object->data = data;
     object->capacity = capacity;
 
-    for(unsigned i = 0U; i < old_capacity; i++) {
+    for(unsigned int i = 0U; i < old_capacity; i++) {
         if(old_data[i].key == NULL) {
             continue;
         }
@@ -66,8 +66,8 @@ JSON_Key_Value *JSON_Object_get_entry(JSON_Object *const object, const char *con
     assert(object != NULL);
     assert(key != NULL);
 
-    const unsigned start = hash(key) % object->capacity;
-    unsigned i = start; 
+    const unsigned int start = hash(key) % object->capacity;
+    unsigned int i = start; 
     while(object->data[i].key != NULL && strcmp(object->data[i].key, key) != 0) {
         i = (i + 1) % object->capacity;
         if(i == start) {
@@ -83,8 +83,8 @@ JSON_Key_Value *JSON_Object_find_entry(const JSON_Object *const object, const ch
     assert(object != NULL);
     assert(key != NULL);
 
-    const unsigned start = hash(key) % object->capacity;
-    unsigned i = start; 
+    const unsigned int start = hash(key) % object->capacity;
+    unsigned int i = start; 
     do {
         if(object->data[i].key == NULL) {
             return NULL;
@@ -135,7 +135,7 @@ void JSON_Object_delete(JSON_Object *const object, const char *const key) {
 void JSON_Object_free(JSON_Object *const object) {
     assert(object != NULL);
 
-    for(unsigned i = 0U; i < object->capacity; i++) {
+    for(unsigned int i = 0U; i < object->capacity; i++) {
         JSON_Key_Value *const data = object->data + i;
         if(data->key == NULL) {
             continue;

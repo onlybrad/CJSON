@@ -5,8 +5,8 @@
 #include "util.h"
 
 static void skip_whitespace(JSON_Lexer *const lexer) {
-    unsigned position = lexer->position; 
-    const unsigned length = lexer->length;
+    unsigned int position = lexer->position; 
+    const unsigned int length = lexer->length;
     const char *const data = lexer->data;
 
     while(position < length && is_whitespace(data[position])
@@ -18,12 +18,12 @@ static void skip_whitespace(JSON_Lexer *const lexer) {
 }
 
 static bool read_string(JSON_Lexer *const lexer, JSON_Token *const token) {
-    const unsigned position = lexer->position + 1; 
-    const unsigned length = lexer->length;
+    const unsigned int position = lexer->position + 1; 
+    const unsigned int length = lexer->length;
     const char *const data = lexer->data;
     bool escaping = false;
 
-    unsigned i;
+    unsigned int i;
     for(i = 0U; position + i < length; i++) {
         const char c = data[position + i];
         
@@ -44,8 +44,8 @@ static bool read_string(JSON_Lexer *const lexer, JSON_Token *const token) {
 }
 
 static bool read_number(JSON_Lexer *const lexer, JSON_Token *const token) {
-    unsigned position, i;
-    unsigned length = lexer->length;
+    unsigned int position, i;
+    unsigned int length = lexer->length;
     const char *data = lexer->data;
     bool success = true;
     bool read_dot = false;
@@ -144,9 +144,9 @@ static bool read_number(JSON_Lexer *const lexer, JSON_Token *const token) {
     return success;
 }
 
-static bool is_keyword(const JSON_Lexer *const lexer, const char *const keyword, const unsigned keyword_length) {
-    const unsigned position = lexer->position; 
-    const unsigned lexer_length = lexer->length;
+static bool is_keyword(const JSON_Lexer *const lexer, const char *const keyword, const unsigned int keyword_length) {
+    const unsigned int position = lexer->position; 
+    const unsigned int lexer_length = lexer->length;
     const char *const data = lexer->data;
 
     if(position + keyword_length - 1 < lexer_length 
@@ -172,19 +172,19 @@ static bool read_keyword(JSON_Lexer *const lexer, JSON_Token *const token) {
     
     if(is_keyword(lexer, null_string, static_strlen(null_string))) {
         token->type = JSON_TOKEN_NULL;
-        token->length = (unsigned)static_strlen(null_string);
+        token->length = (unsigned int)static_strlen(null_string);
         return true;
     }
     
     if(is_keyword(lexer, true_string, static_strlen(true_string))) {
         token->type = JSON_TOKEN_BOOL;
-        token->length = (unsigned)static_strlen(true_string);
+        token->length = (unsigned int)static_strlen(true_string);
         return true;
     }
     
     if(is_keyword(lexer, false_string, static_strlen(false_string))) {
         token->type = JSON_TOKEN_BOOL;
-        token->length = (unsigned)static_strlen(false_string);
+        token->length = (unsigned int)static_strlen(false_string);
         return true;
     }
 
@@ -192,11 +192,11 @@ static bool read_keyword(JSON_Lexer *const lexer, JSON_Token *const token) {
 }
 
 static void read_invalid_token(JSON_Lexer *const lexer, JSON_Token *const token) {
-    const unsigned position = lexer->position; 
-    const unsigned length = lexer->length;
+    const unsigned int position = lexer->position; 
+    const unsigned int length = lexer->length;
     const char *const data = lexer->data;
 
-    unsigned i;
+    unsigned int i;
     for(i = position; i < length; i++) {
         if(is_whitespace(data[i]) || is_delimiter(data[i])) {
             i++;
@@ -208,7 +208,7 @@ static void read_invalid_token(JSON_Lexer *const lexer, JSON_Token *const token)
     token->length = i - position - 1;
 }
 
-void JSON_Lexer_init(JSON_Lexer *const lexer, const char *const data, const unsigned length) {
+void JSON_Lexer_init(JSON_Lexer *const lexer, const char *const data, const unsigned int length) {
     assert(lexer != NULL);
     assert(data != NULL);
     assert(length > 0);

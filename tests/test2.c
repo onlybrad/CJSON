@@ -10,7 +10,7 @@ int main(void) {
     char *const data = file_get_contents("E:\\code\\c\\json\\tests\\really-big-json-file.json", &filesize);
 
     const long start = usec_timestamp();
-    JSON *const json = JSON_parse(data, (unsigned)filesize);
+    JSON *const json = JSON_parse(data, (unsigned int)filesize);
     const long end = usec_timestamp();
 
     free(data);
