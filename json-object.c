@@ -6,6 +6,8 @@
 
 #define INITIAL_JSON_OBJECT_CAPACITY (1 << 3)
 
+static char *const DELETED_ENTRY = {0};
+
 static unsigned int hash(const char *const key) {
     assert(key != NULL);
 
@@ -68,7 +70,7 @@ JSON_Key_Value *JSON_Object_get_entry(JSON_Object *const object, const char *con
 
     const unsigned int start = hash(key) % object->capacity;
     unsigned int i = start; 
-    while(object->data[i].key != NULL && strcmp(object->data[i].key, key) != 0) {
+    while(object->data[i].key != NULL && object->data[i].key != DELETED_ENTRY && strcmp(object->data[i].key, key) != 0) {
         i = (i + 1) % object->capacity;
         if(i == start) {
             JSON_Object_resize(object, 2.0);
@@ -90,7 +92,7 @@ JSON_Key_Value *JSON_Object_find_entry(const JSON_Object *const object, const ch
             return NULL;
         } 
 
-        if(strcmp(object->data[i].key, key) == 0) {
+        if(object->data[i].key != DELETED_ENTRY && strcmp(object->data[i].key, key) == 0) {
             return object->data + i;
         }
 
@@ -116,6 +118,8 @@ void JSON_Object_set(JSON_Object *const object, const char *const key, const JSO
     
     JSON_Key_Value *const entry = JSON_Object_get_entry(object, key);
 
+    _JSON_free(&entry->value);
+    entry->key = JSON_STRDUP(key);
     entry->value = *value;
 }
 
@@ -129,6 +133,7 @@ void JSON_Object_delete(JSON_Object *const object, const char *const key) {
         JSON_FREE(entry->key);
         entry->key = NULL;
         _JSON_free(&entry->value);
+        entry->key = DELETED_ENTRY;
     }
 }
 
@@ -137,7 +142,7 @@ void JSON_Object_free(JSON_Object *const object) {
 
     for(unsigned int i = 0U; i < object->capacity; i++) {
         JSON_Key_Value *const data = object->data + i;
-        if(data->key == NULL) {
+        if(data->key == NULL || data->key == DELETED_ENTRY) {
             continue;
         }
         JSON_FREE(data->key);
@@ -197,4 +202,79 @@ void *JSON_Object_get_null(const JSON_Object *const object, const char *const ke
 
 bool JSON_Object_get_bool(const JSON_Object *const object, const char *const key, bool *const success) {
     JSON_OBJECT_GET_VALUE(JSON_BOOL, boolean)
+}
+
+void JSON_Object_set_string(JSON_Object *const object, const char *const key, const char *const value) {
+    assert(object != NULL);
+
+    char *copy = value != NULL ? JSON_STRDUP(value) : NULL;
+    assert(value != NULL && copy != NULL);
+
+    JSON_Object_set(object, key, &(JSON){
+        .type = JSON_STRING,
+        .value = {.string = copy}
+    });
+}
+void JSON_Object_set_float64(JSON_Object *const object, const char *const key, const double value) {
+    assert(object != NULL);
+
+    JSON_Object_set(object, key, &(JSON){
+        .type = JSON_FLOAT64,
+        .value = {.float64 = value}
+    });
+}
+
+void JSON_Object_set_int64(JSON_Object *const object, const char *const key, const int64_t value) {
+    assert(object != NULL);
+
+    JSON_Object_set(object, key, &(JSON){
+        .type = JSON_INT64,
+        .value = {.int64 = value}
+    });
+}
+
+void JSON_Object_set_uint64(JSON_Object *const object, const char *const key, const uint64_t value) {
+    assert(object != NULL);
+
+    JSON_Object_set(object, key, &(JSON){
+        .type = JSON_UINT64,
+        .value = {.uint64 = value}
+    });
+}
+
+void JSON_Object_set_object(JSON_Object *const object, const char *const key, const JSON_Object *const value) {
+    assert(object != NULL);
+    assert(value != NULL);
+
+    JSON_Object_set(object, key, &(JSON){
+        .type = JSON_OBJECT,
+        .value = {.object = *value}
+    });
+}
+
+void JSON_Object_set_array(JSON_Object *const object, const char *const key, const JSON_Array *const value) {
+    assert(object != NULL);
+    assert(value != NULL);
+
+    JSON_Object_set(object, key, &(JSON){
+        .type = JSON_ARRAY,
+        .value = {.array = *value}
+    });
+}
+
+void JSON_Object_set_null(JSON_Object *const object, const char *const key) {
+    assert(object != NULL);
+
+    JSON_Object_set(object, key, &(JSON){
+        .type = JSON_NULL,
+    });
+}
+
+void JSON_Object_set_bool(JSON_Object *const object, const char *const key, const bool value) {
+    assert(object != NULL);
+
+    JSON_Object_set(object, key, &(JSON){
+        .type = JSON_BOOL,
+        .value = {.boolean = value}
+    });  
 }

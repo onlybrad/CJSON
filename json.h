@@ -91,6 +91,14 @@ JSON_Object *JSON_Object_get_object (const JSON_Object *const object, const char
 JSON_Array  *JSON_Object_get_array  (const JSON_Object *const object, const char *const key, bool *const success);
 void        *JSON_Object_get_null   (const JSON_Object *const object, const char *const key, bool *const success);
 bool         JSON_Object_get_bool   (const JSON_Object *const object, const char *const key, bool *const success);
+void        JSON_Object_set_string  (JSON_Object *const object, const char *const key, const char *const value);
+void        JSON_Object_set_float64 (JSON_Object *const object, const char *const key, const double value);
+void        JSON_Object_set_int64   (JSON_Object *const object, const char *const key, const int64_t value);
+void        JSON_Object_set_uint64  (JSON_Object *const object, const char *const key, const uint64_t value);
+void        JSON_Object_set_object  (JSON_Object *const object, const char *const key, const JSON_Object *const value);
+void        JSON_Object_set_array   (JSON_Object *const object, const char *const key, const JSON_Array *const value);
+void        JSON_Object_set_null    (JSON_Object *const object, const char *const key);
+void        JSON_Object_set_bool    (JSON_Object *const object, const char *const key, const bool value);
 
 void  JSON_Array_init(JSON_Array *const array);
 void  JSON_Array_free(JSON_Array *const array);
@@ -107,20 +115,39 @@ JSON_Array   *JSON_Array_get_array (const JSON_Array *const array, const unsigne
 JSON_Object  *JSON_Array_get_object(const JSON_Array *const array, const unsigned int index, bool *const success);
 void        *JSON_Array_get_null   (const JSON_Array *const array, const unsigned int index, bool *const success);
 bool         JSON_Array_get_bool   (const JSON_Array *const array, const unsigned int index, bool *const success);
+void         JSON_Array_set_string (JSON_Array *const array, const unsigned int index, const char *const value);
+void         JSON_Array_set_float64(JSON_Array *const array, const unsigned int index, const double value);
+void         JSON_Array_set_int64  (JSON_Array *const array, const unsigned int index, const int64_t value);
+void         JSON_Array_set_uint64 (JSON_Array *const array, const unsigned int index, const uint64_t value);
+void         JSON_Array_set_array  (JSON_Array *const array, const unsigned int index, const JSON_Array *const value);
+void         JSON_Array_set_object (JSON_Array *const array, const unsigned int index, const JSON_Object *const value);
+void         JSON_Array_set_null   (JSON_Array *const array, const unsigned int index);
+void         JSON_Array_set_bool   (JSON_Array *const array, const unsigned int index, const bool value);
 
-JSON        *JSON_parse         (const char *const data, const unsigned int length);
-JSON        *JSON_parse_file    (const char *const path);
-void         JSON_free          (JSON *const json);
-const char  *JSON_get_error     (const JSON *const json);
-JSON        *JSON_get           (JSON *json, const char *query);
-char        *JSON_get_string    (JSON *const json, const char *query, bool *const success);
-double       JSON_get_float64   (JSON *const json, const char *query, bool *const success);
-int64_t      JSON_get_int64     (JSON *const json, const char *query, bool *const success);
-uint64_t     JSON_get_uint64    (JSON *const json, const char *query, bool *const success);
-JSON_Object *JSON_get_object    (JSON *const json, const char *query, bool *const success);
-JSON_Array  *JSON_get_array     (JSON *const json, const char *query, bool *const success);
-void        *JSON_get_null      (JSON *const json, const char *query, bool *const success);
-bool         JSON_get_bool      (JSON *const json, const char *query, bool *const success);
+JSON        *JSON_init       (void);
+JSON_Array  *JSON_make_array (JSON *const json);
+JSON_Object *JSON_make_object(JSON *const json);
+JSON        *JSON_parse      (const char *const data, const unsigned int length);
+JSON        *JSON_parse_file (const char *const path);
+void         JSON_free       (JSON *const json);
+const char  *JSON_get_error  (const JSON *const json);
+JSON        *JSON_get        (JSON *json, const char *query);
+char        *JSON_get_string (JSON *const json, const char *query, bool *const success);
+double       JSON_get_float64(JSON *const json, const char *query, bool *const success);
+int64_t      JSON_get_int64  (JSON *const json, const char *query, bool *const success);
+uint64_t     JSON_get_uint64 (JSON *const json, const char *query, bool *const success);
+JSON_Object *JSON_get_object (JSON *const json, const char *query, bool *const success);
+JSON_Array  *JSON_get_array  (JSON *const json, const char *query, bool *const success);
+void        *JSON_get_null   (JSON *const json, const char *query, bool *const success);
+bool         JSON_get_bool   (JSON *const json, const char *query, bool *const success);
+void         JSON_set_string (JSON *const json, const char *const value);
+void         JSON_set_float64(JSON *const json, const double value);
+void         JSON_set_int64  (JSON *const json, const int64_t value);
+void         JSON_set_uint64 (JSON *const json, const uint64_t value);
+void         JSON_set_object (JSON *const json, const JSON_Object *const value);
+void         JSON_set_array  (JSON *const json, const JSON_Array *const value);
+void         JSON_set_null   (JSON *const json);
+void         JSON_set_bool   (JSON *const json, const bool value);
 
 void _JSON_free(JSON *const json);
 #endif

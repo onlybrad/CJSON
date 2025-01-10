@@ -398,6 +398,113 @@ static void test_duplicate_keys(void) {
     JSON_free(root);
 }
 
+static void test_create_string(void) {
+    const char *const value = "test";
+    JSON *const root = JSON_init();
+    JSON_set_string(root, value);
+    assert(root->type == JSON_STRING);
+    assert(strcmp(root->value.string, value) == 0);
+    assert(root->value.string != value);
+    JSON_free(root);
+}
+
+static void test_create_primitives(void) {
+    const int64_t value1 = -25000000000LL;
+    JSON *root = JSON_init();
+    JSON_set_int64(root, value1);
+    assert(root->type == JSON_INT64);
+    assert(root->value.int64 == value1);
+    JSON_free(root);
+
+    const uint64_t value2 = 25000000000ULL;
+    root = JSON_init();
+    JSON_set_uint64(root, value2);
+    assert(root->type == JSON_UINT64);
+    assert(root->value.uint64 == value2);
+    JSON_free(root);
+
+    const double value3 = 25000000000.50;
+    root = JSON_init();
+    JSON_set_float64(root, value3);
+    assert(root->type == JSON_FLOAT64);
+    assert(root->value.float64 == value3);
+    JSON_free(root);
+
+    const bool value4 = true;
+    root = JSON_init();
+    JSON_set_bool(root, value4);
+    assert(root->type == JSON_BOOL);
+    assert(root->value.boolean);
+    JSON_free(root);
+
+    root = JSON_init();
+    JSON_set_null(root);
+    assert(root->type == JSON_NULL);
+    assert(root->value.null == NULL);
+    JSON_free(root);
+}
+
+static void test_create_array(void) {
+    JSON *const root = JSON_init();
+    JSON_Array *const array1 = JSON_make_array(root);
+    assert(root->type == JSON_ARRAY);
+    assert(&root->value.array == array1);
+
+    const uint64_t value1 = 5ULL;
+    const bool value2 = true;
+    const int64_t value3 = -25000000000LL;
+
+    JSON_Array array2;
+    JSON_Array_init(&array2);
+    JSON_Array_set_uint64(&array2, 0, value1);
+    
+    JSON_Array_set_array(array1, 0, &array2);
+    JSON_Array_set_bool(array1, 1, value2);
+    JSON_Array_set_int64(array1, 2, value3);
+
+    assert(array2.data[0].type == JSON_UINT64);
+    assert(array2.data[0].value.uint64 == value1);
+    assert(array1->data[0].type == JSON_ARRAY);
+    assert(&array1->data[0].value.array != &array2);
+    assert(array1->data[1].type == JSON_BOOL);
+    assert(array1->data[1].value.boolean == value2);
+    assert(array1->data[2].type == JSON_INT64);
+    assert(array1->data[2].value.int64 == value3);
+
+    JSON_free(root);
+}
+
+static void test_create_object(void) {
+    JSON *const root = JSON_init();
+    JSON_Object *const object1 = JSON_make_object(root);
+    assert(root->type == JSON_OBJECT);
+    assert(&root->value.object == object1);
+
+    const uint64_t value1 = 5ULL;
+    const bool value2 = true;
+    const int64_t value3 = -25000000000LL;
+
+    JSON_Object object2;
+    JSON_Object_init(&object2);
+    JSON_Object_set_uint64(&object2, "key1", value1);
+    
+    JSON_Object_set_object(object1, "key1", &object2);
+    JSON_Object_set_bool(object1, "key2", value2);
+    JSON_Object_set_int64(object1, "key3", value3);
+
+    bool success;
+    assert(JSON_Object_get_uint64(&object2, "key1", &success) == value1);
+    assert(success);
+    assert(JSON_Object_get_object(object1, "key1", &success) != NULL);
+    assert(success);
+    assert(JSON_Object_get_bool(object1, "key2", &success) == value2);
+    assert(success);
+    assert(JSON_Object_get_int64(object1, "key3", &success) == value3);
+    assert(success);
+
+    JSON_free(root);
+}
+
 int main(void) {
     test_empty_object();
     test_empty_array();
@@ -416,6 +523,10 @@ int main(void) {
     test_no_quotes_key();
     test_nested_arrays();
     test_duplicate_keys();
+    test_create_string();
+    test_create_primitives();
+    test_create_array();
+    test_create_object();
 
     return 0;
 }

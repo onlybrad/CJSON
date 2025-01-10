@@ -1,16 +1,15 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <string.h>
 #include "json.h"
 
 #define INITIAL_JSON_ARRAY_CAPACITY (1 << 3)
 
-static void JSON_Array_resize(JSON_Array *const array, const double multiplier) {
+static void JSON_Array_resize(JSON_Array *const array, const unsigned int capacity) {
     assert(array != NULL);
-    assert(multiplier > 1.0); //multiplier must actually increase the size
-    assert(multiplier <= UINT_MAX / array->capacity); //check overflow
+    assert(capacity > array->capacity); //new size must be larger than current size
 
-    const unsigned int capacity = (unsigned int)((double)array->capacity * multiplier);
     JSON *data = JSON_REALLOC(array->data, capacity * sizeof(JSON), array->capacity * sizeof(JSON));
     
     assert(data != NULL);
@@ -43,7 +42,7 @@ JSON *JSON_Array_next(JSON_Array *const array) {
     assert(array != NULL);
 
     if(array->length == array->capacity) {
-        JSON_Array_resize(array, 2.0);
+        JSON_Array_resize(array, array->capacity * 2);
     }
 
     JSON *const ret = array->data + array->length;
@@ -62,10 +61,17 @@ void JSON_Array_set(JSON_Array *const array, const unsigned int index, const JSO
     assert(array != NULL);
     assert(value != NULL);
 
-    if(index >= array->length) {
-        return;
+    if(index >= array->capacity) {
+        unsigned int capacity = array->capacity;
+        do {
+            capacity *= 2;
+        } while(index >= capacity);
+        JSON_Array_resize(array, capacity);
+    } else if(index >= array->length) {
+        array->length = index + 1;
     }
 
+    _JSON_free(array->data + index);
     array->data[index] = *value;
 }
 
@@ -127,4 +133,78 @@ void *JSON_Array_get_null(const JSON_Array *const array, const unsigned int inde
 
 bool JSON_Array_get_bool(const JSON_Array *const array, const unsigned int index, bool *const success) {
     JSON_ARRAY_GET_VALUE(JSON_BOOL, boolean)
+}
+
+void JSON_Array_set_string (JSON_Array *const array, const unsigned int index, const char *const value) {
+    assert(array != NULL);
+
+    char *copy = value != NULL ? JSON_STRDUP(value) : NULL;
+    assert(value != NULL && copy != NULL);
+
+    JSON_Array_set(array, index, &(JSON){
+        .type = JSON_STRING,
+        .value = {.string = copy}
+    });
+}
+
+void JSON_Array_set_float64(JSON_Array *const array, const unsigned int index, const double value) {
+    assert(array != NULL);
+
+    JSON_Array_set(array, index, &(JSON){
+        .type = JSON_FLOAT64,
+        .value = {.float64 = value}
+    });
+}
+
+void JSON_Array_set_int64  (JSON_Array *const array, const unsigned int index, const int64_t value) {
+    assert(array != NULL);
+
+    JSON_Array_set(array, index, &(JSON){
+        .type = JSON_INT64,
+        .value = {.int64 = value}
+    });
+}
+
+void JSON_Array_set_uint64 (JSON_Array *const array, const unsigned int index, const uint64_t value) {
+    assert(array != NULL);
+
+    JSON_Array_set(array, index, &(JSON){
+        .type = JSON_UINT64,
+        .value = {.uint64 = value}
+    });
+}
+void JSON_Array_set_array(JSON_Array *const array, const unsigned int index, const JSON_Array *const value) {
+    assert(array != NULL);
+    assert(value != NULL);
+
+    JSON_Array_set(array, index, &(JSON){
+        .type = JSON_ARRAY,
+        .value = {.array = *value}
+    });
+}
+void JSON_Array_set_object(JSON_Array *const array, const unsigned int index, const JSON_Object *const value) {
+    assert(array != NULL);
+    assert(value != NULL);
+
+    JSON_Array_set(array, index, &(JSON){
+        .type = JSON_OBJECT,
+        .value = {.object = *value}
+    });
+}
+
+void JSON_Array_set_null(JSON_Array *const array, const unsigned int index) {
+    assert(array != NULL);
+
+    array->data[index] = (JSON){
+        .type = JSON_NULL
+    };
+}
+
+void JSON_Array_set_bool(JSON_Array *const array, const unsigned int index, const bool value) {
+    assert(array != NULL);
+
+    JSON_Array_set(array, index, &(JSON){
+        .type = JSON_BOOL,
+        .value = {.boolean = value}
+    });
 }

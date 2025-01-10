@@ -5,6 +5,7 @@
 #include "lexer.h"
 #include "tokens.h"
 #include "util.h"
+#include "allocator.h"
 
 //this is the same thing as JSON but contains the tokens. This is the actual type JSON_parse returns. For convienance, JSON_parse returns a JSON*.
 typedef struct JSON_Root {
@@ -557,6 +558,33 @@ static bool parse_tokens(JSON *const json, JSON_Tokens *const tokens) {
     return false;
 }
 
+JSON *JSON_init(void) {
+    JSON_Root *root = JSON_MALLOC(sizeof(JSON_Root));
+    assert(root != NULL);
+
+    root->json.type = JSON_NULL;
+    root->json.value.null = NULL;
+    root->tokens = (JSON_Tokens){0};
+
+    return (JSON*)root;
+}
+
+JSON_Array *JSON_make_array(JSON *const json) {
+    _JSON_free(json);
+    JSON_Array_init(&json->value.array);
+    json->type = JSON_ARRAY;
+
+    return &json->value.array;
+}
+
+JSON_Object *JSON_make_object(JSON *const json) {
+    _JSON_free(json);
+    JSON_Object_init(&json->value.object);
+    json->type = JSON_OBJECT;
+
+    return &json->value.object;
+}
+
 JSON *JSON_parse(const char *const data, const unsigned int length) {
     assert(data != NULL);
     assert(length > 0);
@@ -614,8 +642,9 @@ void JSON_free(JSON *const json) {
     assert(json != NULL);
 
     JSON_Root *root = (JSON_Root*)json;
-
-    JSON_Tokens_free(&root->tokens);
+    if(root->tokens.data != NULL) {
+        JSON_Tokens_free(&root->tokens);
+    }
     _JSON_free(json);
     *root = (JSON_Root){0};
     JSON_FREE(root);
@@ -813,4 +842,77 @@ void *JSON_get_null(JSON *const json, const char *query, bool *const success) {
 
 bool JSON_get_bool(JSON *const json, const char *query, bool *const success) {
     JSON_GET_VALUE(JSON_BOOL, boolean)
+}
+
+void JSON_set_string(JSON *const json, const char *const value) {
+    assert(json != NULL);
+
+    char *copy = value != NULL ? JSON_STRDUP(value) : NULL;
+    assert(value != NULL && copy != NULL);
+
+    *json = (JSON) {
+        .type = JSON_STRING,
+        .value = {.string = copy} 
+    };
+}
+void JSON_set_float64(JSON *const json, const double value) {
+    assert(json != NULL);
+
+    *json = (JSON) {
+        .type = JSON_FLOAT64,
+        .value = {.float64 = value}
+    };
+}
+
+void JSON_set_int64(JSON *const json, const int64_t value) {
+    assert(json != NULL);
+
+    *json = (JSON) {
+        .type = JSON_INT64,
+        .value = {.int64 = value}
+    };
+}
+
+void JSON_set_uint64(JSON *const json, const uint64_t value) {
+    assert(json != NULL);
+
+    *json = (JSON) {
+        .type = JSON_UINT64,
+        .value = {.uint64 = value}
+    }; 
+}
+
+void JSON_set_object(JSON *const json, const JSON_Object *const value) {
+    assert(json != NULL);
+    assert(value != NULL);
+
+    *json = (JSON) {
+        .type = JSON_OBJECT,
+        .value = {.object = *value}
+    }; 
+}
+void JSON_set_array(JSON *const json, const JSON_Array *const value) {
+    assert(json != NULL);
+    assert(value != NULL);
+    
+    *json = (JSON) {
+        .type = JSON_ARRAY,
+        .value = {.array = *value}
+    }; 
+}
+
+void JSON_set_null(JSON *const json) {
+    assert(json != NULL);
+
+    *json = (JSON) {
+        .type = JSON_NULL,
+    }; 
+}
+void JSON_set_bool(JSON *const json, const bool value) {
+    assert(json != NULL);
+
+    *json = (JSON) {
+        .type = JSON_BOOL,
+        .value = {.boolean = value}
+    };
 }

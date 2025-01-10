@@ -168,15 +168,15 @@ int64_t parse_int64(const char *const str, bool *const success) {
     return ret;
 }
 
-void print_bytes(const void *const buffer, size_t size) {
+void print_bytes(const void *const buffer, const size_t size) {
     assert(buffer != NULL);
     assert(size > 0);
 
     putchar('[');
     for(size_t i = 0; i < size - 1; i++) {
-        printf("0x%02hhx, ", ((unsigned int char*)buffer)[i]);
+        printf("0x%02hhx, ", ((const unsigned char*)buffer)[i]);
     }
-    printf("0x%02hhx]\n", ((unsigned int char*)buffer)[size - 1]);
+    printf("0x%02hhx]\n", ((const unsigned char*)buffer)[size - 1]);
 }
 
 long usec_timestamp(void) {
