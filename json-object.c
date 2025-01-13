@@ -88,11 +88,15 @@ JSON_Key_Value *JSON_Object_find_entry(const JSON_Object *const object, const ch
     const unsigned int start = hash(key) % object->capacity;
     unsigned int i = start; 
     do {
+        if(object->data[i].key != DELETED_ENTRY) {
+            continue;
+        }
+
         if(object->data[i].key == NULL) {
             return NULL;
         } 
 
-        if(object->data[i].key != DELETED_ENTRY && strcmp(object->data[i].key, key) == 0) {
+        if(strcmp(object->data[i].key, key) == 0) {
             return object->data + i;
         }
 
@@ -131,7 +135,6 @@ void JSON_Object_delete(JSON_Object *const object, const char *const key) {
 
     if(entry != NULL) {
         JSON_FREE(entry->key);
-        entry->key = NULL;
         _JSON_free(&entry->value);
         entry->key = DELETED_ENTRY;
     }
