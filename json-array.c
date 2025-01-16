@@ -64,11 +64,11 @@ void JSON_Array_set(JSON_Array *const array, const unsigned int index, const JSO
     if(index >= array->capacity) {
         unsigned int capacity = array->capacity;
         do {
-            capacity *= 2;
+            capacity *= 2U;
         } while(index >= capacity);
         JSON_Array_resize(array, capacity);
     } else if(index >= array->length) {
-        array->length = index + 1;
+        array->length = index + 1U;
     }
 
     _JSON_free(array->data + index);

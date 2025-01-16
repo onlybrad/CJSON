@@ -71,7 +71,7 @@ JSON_Key_Value *JSON_Object_get_entry(JSON_Object *const object, const char *con
     const unsigned int start = hash(key) % object->capacity;
     unsigned int i = start; 
     while(object->data[i].key != NULL && object->data[i].key != DELETED_ENTRY && strcmp(object->data[i].key, key) != 0) {
-        i = (i + 1) % object->capacity;
+        i = (i + 1U) % object->capacity;
         if(i == start) {
             JSON_Object_resize(object, 2.0);
             return JSON_Object_get_entry(object, key);
@@ -88,7 +88,8 @@ JSON_Key_Value *JSON_Object_find_entry(const JSON_Object *const object, const ch
     const unsigned int start = hash(key) % object->capacity;
     unsigned int i = start; 
     do {
-        if(object->data[i].key != DELETED_ENTRY) {
+        if(object->data[i].key == DELETED_ENTRY) {
+            i = (i + 1U) % object->capacity;
             continue;
         }
 
@@ -100,7 +101,7 @@ JSON_Key_Value *JSON_Object_find_entry(const JSON_Object *const object, const ch
             return object->data + i;
         }
 
-        i = (i + 1) % object->capacity;
+        i = (i + 1U) % object->capacity;
     } while(i != start);
 
     return NULL;

@@ -18,7 +18,7 @@ static void skip_whitespace(JSON_Lexer *const lexer) {
 }
 
 static bool read_string(JSON_Lexer *const lexer, JSON_Token *const token) {
-    const unsigned int position = lexer->position + 1; 
+    const unsigned int position = lexer->position + 1U; 
     const unsigned int length = lexer->length;
     const char *const data = lexer->data;
     bool escaping = false;
@@ -53,8 +53,8 @@ static bool read_number(JSON_Lexer *const lexer, JSON_Token *const token) {
     bool read_sign = false;
 
     if(data[lexer->position] == '-') {
-        position = lexer->position + 1;
-        token->length = 1;
+        position = lexer->position + 1U;
+        token->length = 1U;
     } else {
         position = lexer->position;
         token->length = 0;
@@ -233,27 +233,27 @@ bool JSON_Lexer_tokenize(JSON_Lexer *const lexer, JSON_Token *const token) {
     
     switch(*token->value) {
     case '{':
-        token->length = 1;
+        token->length = 1U;
         token->type = JSON_TOKEN_LCURLY;
         break;
     case '}':
-        token->length = 1;
+        token->length = 1U;
         token->type = JSON_TOKEN_RCURLY;
         break;
     case '[':
-        token->length = 1;
+        token->length = 1U;
         token->type = JSON_TOKEN_LBRACKET;
         break;
     case ']':
-        token->length = 1;
+        token->length = 1U;
         token->type = JSON_TOKEN_RBRACKET;
         break;
     case ':':
-        token->length = 1;
+        token->length = 1U;
         token->type = JSON_TOKEN_COLON;
         break;
     case ',':
-        token->length = 1;
+        token->length = 1U;
         token->type = JSON_TOKEN_COMMA;
         break;
     case '"': {

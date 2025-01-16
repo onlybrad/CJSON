@@ -343,7 +343,7 @@ static bool parse_object(JSON *const json, JSON_Tokens *const tokens) {
             goto cleanup;
         }
 
-        tokens->index += 2;
+        tokens->index += 2U;
 
         JSON_Key_Value *const entry = JSON_Object_get_entry(object, key);
         if(entry->key != NULL) {
@@ -850,13 +850,18 @@ void JSON_set_string(JSON *const json, const char *const value) {
     char *copy = value != NULL ? JSON_STRDUP(value) : NULL;
     assert(value != NULL && copy != NULL);
 
+    _JSON_free(json);
+
     *json = (JSON) {
         .type = JSON_STRING,
         .value = {.string = copy} 
     };
 }
+
 void JSON_set_float64(JSON *const json, const double value) {
     assert(json != NULL);
+
+    _JSON_free(json);
 
     *json = (JSON) {
         .type = JSON_FLOAT64,
@@ -867,6 +872,8 @@ void JSON_set_float64(JSON *const json, const double value) {
 void JSON_set_int64(JSON *const json, const int64_t value) {
     assert(json != NULL);
 
+    _JSON_free(json);
+
     *json = (JSON) {
         .type = JSON_INT64,
         .value = {.int64 = value}
@@ -875,6 +882,8 @@ void JSON_set_int64(JSON *const json, const int64_t value) {
 
 void JSON_set_uint64(JSON *const json, const uint64_t value) {
     assert(json != NULL);
+
+    _JSON_free(json);
 
     *json = (JSON) {
         .type = JSON_UINT64,
@@ -886,14 +895,19 @@ void JSON_set_object(JSON *const json, const JSON_Object *const value) {
     assert(json != NULL);
     assert(value != NULL);
 
+    _JSON_free(json);
+
     *json = (JSON) {
         .type = JSON_OBJECT,
         .value = {.object = *value}
     }; 
 }
+
 void JSON_set_array(JSON *const json, const JSON_Array *const value) {
     assert(json != NULL);
     assert(value != NULL);
+
+    _JSON_free(json);
     
     *json = (JSON) {
         .type = JSON_ARRAY,
@@ -904,13 +918,18 @@ void JSON_set_array(JSON *const json, const JSON_Array *const value) {
 void JSON_set_null(JSON *const json) {
     assert(json != NULL);
 
+    _JSON_free(json);
+
     *json = (JSON) {
         .type = JSON_NULL,
     }; 
 }
+
 void JSON_set_bool(JSON *const json, const bool value) {
     assert(json != NULL);
 
+    _JSON_free(json);
+    
     *json = (JSON) {
         .type = JSON_BOOL,
         .value = {.boolean = value}
