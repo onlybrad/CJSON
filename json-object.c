@@ -28,12 +28,10 @@ static unsigned int hash(const char *const key) {
     return hash;
 }
 
-static void JSON_Object_resize(JSON_Object *const object, const double multiplier) {
+static void JSON_Object_resize(JSON_Object *const object, const unsigned int capacity) {
     assert(object != NULL);
-    assert(multiplier > 1.0); //multiplier must actually increase the size
-    assert(multiplier <= UINT_MAX / object->capacity); //check overflow
+    assert(capacity > object->capacity); //new size must be larger than current size
 
-    const unsigned int capacity = (unsigned int)((double)object->capacity * multiplier);
     JSON_Key_Value *const old_data = object->data;
     const unsigned int old_capacity = object->capacity;
     JSON_Key_Value *data = CJSON_CALLOC((size_t)capacity, sizeof(JSON_Key_Value));
@@ -75,7 +73,7 @@ JSON_Key_Value *JSON_Object_get_entry(JSON_Object *const object, const char *con
     while(object->data[i].key != NULL && object->data[i].key != DELETED_ENTRY && strcmp(object->data[i].key, key) != 0) {
         i = (i + 1U) % object->capacity;
         if(i == start) {
-            JSON_Object_resize(object, 2.0);
+            JSON_Object_resize(object, object->capacity * 2);
             return JSON_Object_get_entry(object, key);
         }
     }
