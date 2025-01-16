@@ -46,7 +46,9 @@ static void JSON_Object_resize(JSON_Object *const object, const double multiplie
         if(old_data[i].key == NULL) {
             continue;
         }
-        JSON_Object_set(object, old_data[i].key, &old_data[i].value);
+        JSON_Key_Value *const entry = JSON_Object_get_entry(object, old_data[i].key);
+        entry->key = old_data[i].key;
+        entry->value = old_data[i].value;
     }
 
     CJSON_FREE(old_data);
@@ -124,7 +126,7 @@ void JSON_Object_set(JSON_Object *const object, const char *const key, const JSO
     JSON_Key_Value *const entry = JSON_Object_get_entry(object, key);
 
     _JSON_free(&entry->value);
-    if(entry->key != NULL && entry->key != DELETED_ENTRY) {
+    if(entry->key == NULL || entry->key == DELETED_ENTRY) {
         entry->key = CJSON_STRDUP(key);
     }
     entry->value = *value;
