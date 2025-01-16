@@ -646,7 +646,6 @@ void JSON_free(JSON *const json) {
         JSON_Tokens_free(&root->tokens);
     }
     _JSON_free(json);
-    *root = (JSON_Root){0};
     CJSON_FREE(root);
 }
 
