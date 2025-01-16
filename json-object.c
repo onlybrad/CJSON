@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <string.h>
-#include "json.h"
+#include "parser.h"
 
 #define INITIAL_JSON_OBJECT_CAPACITY (1 << 3)
 
@@ -41,7 +41,7 @@ static void JSON_Object_resize(JSON_Object *const object, const unsigned int cap
     object->capacity = capacity;
 
     for(unsigned int i = 0U; i < old_capacity; i++) {
-        if(old_data[i].key == NULL) {
+        if(old_data[i].key == NULL || old_data[i].key == DELETED_ENTRY) {
             continue;
         }
         JSON_Key_Value *const entry = JSON_Object_get_entry(object, old_data[i].key);

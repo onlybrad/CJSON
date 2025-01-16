@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "../json.h"
+#include "../parser.h"
 
 static void test_empty_object(void) {
     const char empty_object[] = "{}";

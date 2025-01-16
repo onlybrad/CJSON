@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "../json.h"
+#include "../parser.h"
 #include "../util.h"
 
 int main(void) {

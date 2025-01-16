@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "json.h"
+#include "parser.h"
 #include "lexer.h"
 #include "tokens.h"
 #include "util.h"
