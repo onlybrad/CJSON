@@ -623,7 +623,7 @@ JSON *JSON_parse_file(const char *const path) {
     size_t filesize;
     char *const data = file_get_contents(path, &filesize);
     if(data == NULL) {
-        JSON *const ret = malloc(sizeof(JSON));
+        JSON *const ret = CJSON_MALLOC(sizeof(JSON));
         *ret = (JSON) {
             .type = JSON_ERROR,
             .value.error = JSON_FAILED_TO_OPEN_FILE
