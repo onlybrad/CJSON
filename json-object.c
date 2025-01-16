@@ -36,7 +36,7 @@ static void JSON_Object_resize(JSON_Object *const object, const double multiplie
     const unsigned int capacity = (unsigned int)((double)object->capacity * multiplier);
     JSON_Key_Value *const old_data = object->data;
     const unsigned int old_capacity = object->capacity;
-    JSON_Key_Value *data = JSON_CALLOC((size_t)capacity, sizeof(JSON_Key_Value));
+    JSON_Key_Value *data = CJSON_CALLOC((size_t)capacity, sizeof(JSON_Key_Value));
     assert(data != NULL);
 
     object->data = data;
@@ -49,13 +49,13 @@ static void JSON_Object_resize(JSON_Object *const object, const double multiplie
         JSON_Object_set(object, old_data[i].key, &old_data[i].value);
     }
 
-    JSON_FREE(old_data);
+    CJSON_FREE(old_data);
 }
 
 void JSON_Object_init(JSON_Object *const object) {
     assert(object != NULL);
     
-    JSON_Key_Value *data = JSON_CALLOC(INITIAL_JSON_OBJECT_CAPACITY, sizeof(JSON_Key_Value));
+    JSON_Key_Value *data = CJSON_CALLOC(INITIAL_JSON_OBJECT_CAPACITY, sizeof(JSON_Key_Value));
     assert(data != NULL);
 
     *object = (JSON_Object) {
@@ -124,7 +124,9 @@ void JSON_Object_set(JSON_Object *const object, const char *const key, const JSO
     JSON_Key_Value *const entry = JSON_Object_get_entry(object, key);
 
     _JSON_free(&entry->value);
-    entry->key = JSON_STRDUP(key);
+    if(entry->key != NULL && entry->key != DELETED_ENTRY) {
+        entry->key = CJSON_STRDUP(key);
+    }
     entry->value = *value;
 }
 
@@ -135,7 +137,7 @@ void JSON_Object_delete(JSON_Object *const object, const char *const key) {
     JSON_Key_Value *const entry = JSON_Object_find_entry(object, key);
 
     if(entry != NULL) {
-        JSON_FREE(entry->key);
+        CJSON_FREE(entry->key);
         _JSON_free(&entry->value);
         entry->key = DELETED_ENTRY;
     }
@@ -149,10 +151,10 @@ void JSON_Object_free(JSON_Object *const object) {
         if(data->key == NULL || data->key == DELETED_ENTRY) {
             continue;
         }
-        JSON_FREE(data->key);
+        CJSON_FREE(data->key);
         _JSON_free(&data->value);
     }
-    JSON_FREE(object->data);
+    CJSON_FREE(object->data);
     *object = (JSON_Object){0};
 }
 
@@ -211,7 +213,7 @@ bool JSON_Object_get_bool(const JSON_Object *const object, const char *const key
 void JSON_Object_set_string(JSON_Object *const object, const char *const key, const char *const value) {
     assert(object != NULL);
 
-    char *copy = value != NULL ? JSON_STRDUP(value) : NULL;
+    char *copy = value != NULL ? CJSON_STRDUP(value) : NULL;
     assert(value != NULL && copy != NULL);
 
     JSON_Object_set(object, key, &(JSON){

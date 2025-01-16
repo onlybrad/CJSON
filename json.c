@@ -32,7 +32,7 @@ static bool parse_tokens(JSON *const json, JSON_Tokens *const tokens);
 static char *parse_utf8_string(const JSON_Token *const token) {
     assert(token != NULL);
 
-    char* string = JSON_MALLOC((token->length - 1) * sizeof(char));
+    char* string = CJSON_MALLOC((token->length - 1) * sizeof(char));
     assert(string != NULL);
 
     unsigned int str_index = 0U;
@@ -154,7 +154,7 @@ static char *parse_utf8_string(const JSON_Token *const token) {
     return string;
 
 cleanup:
-    JSON_FREE(string);
+    CJSON_FREE(string);
     return NULL;
 }
 
@@ -347,7 +347,7 @@ static bool parse_object(JSON *const json, JSON_Tokens *const tokens) {
 
         JSON_Key_Value *const entry = JSON_Object_get_entry(object, key);
         if(entry->key != NULL) {
-            JSON_FREE(key);
+            CJSON_FREE(key);
             _JSON_free(&entry->value);
         } else {
             entry->key = key;
@@ -380,7 +380,7 @@ static bool parse_object(JSON *const json, JSON_Tokens *const tokens) {
     error = ObjectIncompleteError;
 
 cleanup:
-    JSON_FREE(key);
+    CJSON_FREE(key);
     JSON_Object_free(object);
 
     switch(error) {
@@ -559,7 +559,7 @@ static bool parse_tokens(JSON *const json, JSON_Tokens *const tokens) {
 }
 
 JSON *JSON_init(void) {
-    JSON_Root *root = JSON_MALLOC(sizeof(JSON_Root));
+    JSON_Root *root = CJSON_MALLOC(sizeof(JSON_Root));
     assert(root != NULL);
 
     root->json.type = JSON_NULL;
@@ -592,7 +592,7 @@ JSON *JSON_parse(const char *const data, const unsigned int length) {
     JSON_Lexer lexer;
     JSON_Lexer_init(&lexer, data, length);
 
-    JSON_Root *root = JSON_MALLOC(sizeof(JSON_Root));
+    JSON_Root *root = CJSON_MALLOC(sizeof(JSON_Root));
     assert(root != NULL);
 
     JSON_Tokens *tokens = &root->tokens;
@@ -633,7 +633,7 @@ JSON *JSON_parse_file(const char *const path) {
 
     JSON *const json = JSON_parse(data, (unsigned int)filesize);
 
-    JSON_FREE(data);
+    CJSON_FREE(data);
 
     return json;
 }
@@ -647,7 +647,7 @@ void JSON_free(JSON *const json) {
     }
     _JSON_free(json);
     *root = (JSON_Root){0};
-    JSON_FREE(root);
+    CJSON_FREE(root);
 }
 
 void _JSON_free(JSON *const json) {
@@ -661,7 +661,7 @@ void _JSON_free(JSON *const json) {
         JSON_Array_free(&json->value.array);
         break;
     case JSON_STRING:
-        JSON_FREE(json->value.string);
+        CJSON_FREE(json->value.string);
         break;
     default:;
     }
@@ -738,13 +738,13 @@ JSON *JSON_get(JSON *json, const char *query) {
                 counter++;
             }
 
-            key = JSON_MALLOC((size_t)(counter + 1U) * sizeof(char));
+            key = CJSON_MALLOC((size_t)(counter + 1U) * sizeof(char));
             assert(key != NULL);
             memcpy(key, query + i - counter, counter);
             key[counter] = '\0';
 
             json = JSON_Object_get(&json->value.object, key);
-            JSON_FREE(key);
+            CJSON_FREE(key);
             key = NULL;
       
         } else if(!is_object_key && json->type == JSON_ARRAY) {
@@ -761,7 +761,7 @@ JSON *JSON_get(JSON *json, const char *query) {
                 return NULL;
             }
 
-            key = JSON_MALLOC((size_t)(counter + 1U) * sizeof(char));
+            key = CJSON_MALLOC((size_t)(counter + 1U) * sizeof(char));
             assert(key != NULL);
             memcpy(key, query + i - counter, counter);
             key[counter] = '\0';
@@ -769,12 +769,12 @@ JSON *JSON_get(JSON *json, const char *query) {
             bool success;
             uint64_t index = parse_uint64(key, &success);
             if(!success) {
-                JSON_FREE(key);
+                CJSON_FREE(key);
                 return NULL;
             }
 
             json = JSON_Array_get(&json->value.array, (unsigned int)index);
-            JSON_FREE(key);
+            CJSON_FREE(key);
             key = NULL;
             i++;
         } else {
@@ -847,7 +847,7 @@ bool JSON_get_bool(JSON *const json, const char *query, bool *const success) {
 void JSON_set_string(JSON *const json, const char *const value) {
     assert(json != NULL);
 
-    char *copy = value != NULL ? JSON_STRDUP(value) : NULL;
+    char *copy = value != NULL ? CJSON_STRDUP(value) : NULL;
     assert(value != NULL && copy != NULL);
 
     _JSON_free(json);
@@ -929,7 +929,7 @@ void JSON_set_bool(JSON *const json, const bool value) {
     assert(json != NULL);
 
     _JSON_free(json);
-    
+
     *json = (JSON) {
         .type = JSON_BOOL,
         .value = {.boolean = value}

@@ -9,7 +9,7 @@ static void JSON_Tokens_resize(JSON_Tokens *const tokens, const double multiplie
     assert(multiplier <= UINT_MAX / tokens->capacity); //check overflow
 
     const unsigned int capacity = (unsigned int)((double)tokens->capacity * multiplier);
-    JSON_Token *data = JSON_REALLOC(tokens->data, (size_t)capacity * sizeof(JSON_Token), tokens->capacity * sizeof(JSON_Token));
+    JSON_Token *data = CJSON_REALLOC(tokens->data, (size_t)capacity * sizeof(JSON_Token), tokens->capacity * sizeof(JSON_Token));
     assert(tokens != NULL);
 
     tokens->data = data;
@@ -19,7 +19,7 @@ static void JSON_Tokens_resize(JSON_Tokens *const tokens, const double multiplie
 void JSON_Tokens_init(JSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
-    JSON_Token *data = JSON_MALLOC(INITIAL_TOKENS_CAPACITY * sizeof(JSON_Token));
+    JSON_Token *data = CJSON_MALLOC(INITIAL_TOKENS_CAPACITY * sizeof(JSON_Token));
     assert(data != NULL);
 
     *tokens = (JSON_Tokens) {
@@ -31,7 +31,7 @@ void JSON_Tokens_init(JSON_Tokens *const tokens) {
 inline void JSON_Tokens_free(JSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
-    JSON_FREE(tokens->data);
+    CJSON_FREE(tokens->data);
     *tokens = (JSON_Tokens){0};
 }
 

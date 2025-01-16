@@ -10,7 +10,7 @@ static void JSON_Array_resize(JSON_Array *const array, const unsigned int capaci
     assert(array != NULL);
     assert(capacity > array->capacity); //new size must be larger than current size
 
-    JSON *data = JSON_REALLOC(array->data, capacity * sizeof(JSON), array->capacity * sizeof(JSON));
+    JSON *data = CJSON_REALLOC(array->data, capacity * sizeof(JSON), array->capacity * sizeof(JSON));
     
     assert(data != NULL);
 
@@ -21,7 +21,7 @@ static void JSON_Array_resize(JSON_Array *const array, const unsigned int capaci
 void JSON_Array_init(JSON_Array *const array) {
     assert(array != NULL);
 
-    JSON *data = JSON_MALLOC(INITIAL_JSON_ARRAY_CAPACITY * sizeof(JSON));
+    JSON *data = CJSON_MALLOC(INITIAL_JSON_ARRAY_CAPACITY * sizeof(JSON));
     assert(data != NULL);
 
     *array = (JSON_Array) {
@@ -34,7 +34,7 @@ void JSON_Array_free(JSON_Array *const array) {
     for(unsigned int i = 0U; i < array->length; i++) {
         _JSON_free(array->data + i);
     }
-    JSON_FREE(array->data);
+    CJSON_FREE(array->data);
     *array = (JSON_Array){0};
 }
 
@@ -138,7 +138,7 @@ bool JSON_Array_get_bool(const JSON_Array *const array, const unsigned int index
 void JSON_Array_set_string (JSON_Array *const array, const unsigned int index, const char *const value) {
     assert(array != NULL);
 
-    char *copy = value != NULL ? JSON_STRDUP(value) : NULL;
+    char *copy = value != NULL ? CJSON_STRDUP(value) : NULL;
     assert(value != NULL && copy != NULL);
 
     JSON_Array_set(array, index, &(JSON){
