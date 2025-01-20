@@ -5,18 +5,31 @@
 #include "../parser.h"
 #include "../util.h"
 
+#define BENCHMARK
+#include "../benchmark.h"
+
+#ifdef COUNT_ALLOCATIONS
+int malloced = 0;
+int freed = 0;
+#endif
+
 int main(void) {
     size_t filesize;
     char *const data = file_get_contents("E:\\code\\c\\json\\tests\\really-big-json-file.json", &filesize);
 
-    const long start = usec_timestamp();
+    BENCHMARK_START();
     JSON *const json = JSON_parse(data, (unsigned int)filesize);
-    const long end = usec_timestamp();
+    BENCHMARK_END();
 
     free(data);
     JSON_free(json);
 
-    printf("Parsing time: %li microseconds\n", end - start);
+    Benchmark_print_all();
+
+    #ifdef COUNT_ALLOCATIONS
+    printf("malloced = %i\n", malloced);
+    printf("freed = %i\n", freed);
+    #endif
 
     return 0;
 }

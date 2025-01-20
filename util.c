@@ -8,7 +8,7 @@
 #include <sys/time.h>
 #include "util.h"
 
-bool is_whitespace(const char c) {
+inline bool is_whitespace(const char c) {
     switch(c) {
     case ' ':
     case '\t':
@@ -20,7 +20,7 @@ bool is_whitespace(const char c) {
     }
 }
 
-bool is_delimiter(const char c) {
+inline bool is_delimiter(const char c) {
     switch(c) {
     case '[':
     case ']':
@@ -34,7 +34,7 @@ bool is_delimiter(const char c) {
     }
 }
 
-bool is_digit(const char c) {
+inline bool is_digit(const char c) {
     switch(c) {
     case '0':
     case '1':

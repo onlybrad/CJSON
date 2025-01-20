@@ -13,8 +13,8 @@ static unsigned int hash(const char *const key) {
 
     const size_t length = strlen(key);
     assert(length > 0 && length <= UINT_MAX);
-    unsigned int i = 0u;
-    unsigned int hash = 0u;
+    unsigned int i = 0U;
+    unsigned int hash = 0U;
 
     while (i != (unsigned int)length) {
         hash += (unsigned int)key[i++];
