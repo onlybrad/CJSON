@@ -3,6 +3,7 @@
 #include "lexer.h"
 #include "token.h"
 #include "util.h"
+#include "benchmark.h"
 
 static void skip_whitespace(JSON_Lexer *const lexer) {
     unsigned int position = lexer->position; 
@@ -223,9 +224,12 @@ bool JSON_Lexer_tokenize(JSON_Lexer *const lexer, JSON_Token *const token) {
     assert(lexer != NULL);
     assert(token != NULL);
 
+    BENCHMARK_START();
+
     skip_whitespace(lexer);
 
     if(lexer->position == lexer->length) {
+        BENCHMARK_END();
         return false;
     }
     
@@ -258,6 +262,7 @@ bool JSON_Lexer_tokenize(JSON_Lexer *const lexer, JSON_Token *const token) {
         break;
     case '"': {
         if(!read_string(lexer, token)) {
+            BENCHMARK_END();
             return false;
         }
         break;
@@ -274,6 +279,7 @@ bool JSON_Lexer_tokenize(JSON_Lexer *const lexer, JSON_Token *const token) {
     case '8':
     case '9': {
         if(!read_number(lexer, token)) {
+            BENCHMARK_END();
             return false;
         }
         break;
@@ -281,6 +287,7 @@ bool JSON_Lexer_tokenize(JSON_Lexer *const lexer, JSON_Token *const token) {
     default: {
         if(!read_keyword(lexer, token)) {
             read_invalid_token(lexer, token);
+            BENCHMARK_END();
             return false;
         }
         break;
@@ -289,5 +296,7 @@ bool JSON_Lexer_tokenize(JSON_Lexer *const lexer, JSON_Token *const token) {
     
     lexer->position += token->length;
     
+    BENCHMARK_END();
+
     return true;
 }

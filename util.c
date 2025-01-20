@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include "util.h"
+#include "benchmark.h"
 
 inline bool is_whitespace(const char c) {
     switch(c) {
@@ -56,6 +57,8 @@ uint16_t parse_codepoint(const char *const codepoint, bool *const success) {
     assert(codepoint != NULL);
     assert(success != NULL);
 
+    BENCHMARK_START();
+
     char hex[7] = "0x";
     memcpy(hex + 2, codepoint, 4);
     char *end_ptr;
@@ -64,27 +67,36 @@ uint16_t parse_codepoint(const char *const codepoint, bool *const success) {
     const uint16_t ret = (uint16_t)strtoul(hex, &end_ptr, 16);
     if(end_ptr == hex || *end_ptr != '\0' || errno == ERANGE) {
         *success = false;
+        BENCHMARK_END();
+
         return (uint16_t)0;
     }
 
     *success = true;
+    BENCHMARK_END();
+
     return ret;
 }
 
 unsigned int codepoint_utf16_to_utf8(char *const destination, const uint16_t codepoint) {
     assert(destination != NULL);
 
+    BENCHMARK_START();
+
     if(codepoint <= 0x7F) {
         destination[0] = (char)(codepoint & 0x7f);
+        BENCHMARK_END();
         return 1U;
     } else if(codepoint <= 0x7FF) {
         destination[0] = (char)((codepoint  >> 6)         | 0xC0);
         destination[1] = (char)(((codepoint >> 0) & 0x3F) | 0x80);
+        BENCHMARK_END();
         return 2U;
     } else {
         destination[0] = (char)((codepoint  >> 12)        | 0xE0);
         destination[1] = (char)(((codepoint >> 6) & 0x3F) | 0x80);
         destination[2] = (char)(((codepoint >> 0) & 0x3F) | 0x80);
+        BENCHMARK_END();
         return 3U;
     }
 }
@@ -92,17 +104,23 @@ unsigned int codepoint_utf16_to_utf8(char *const destination, const uint16_t cod
 void surrogate_utf16_to_utf8(char *const destination, const uint16_t high, const uint16_t low) {
     assert(destination != NULL);
 
+    BENCHMARK_START();
+
     const uint32_t codepoint = (uint32_t)(((high - 0xD800) << 10) | (low - 0xDC00)) + 0x10000;
 
     destination[0] = (char)((codepoint  >> 18)         | 0xF0);
     destination[1] = (char)(((codepoint >> 12) & 0x3F) | 0x80);
     destination[2] = (char)(((codepoint >> 6)  & 0x3F) | 0x80);
     destination[3] = (char)(((codepoint >> 0)  & 0x3F) | 0x80);
+
+    BENCHMARK_END();
 }
 
 double parse_float64(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
+    
+    BENCHMARK_START();
 
     char *end_ptr;
     errno = 0;
@@ -110,10 +128,14 @@ double parse_float64(const char *const str, bool *const success) {
     const double ret = strtod(str, &end_ptr);
     if(end_ptr == str || *end_ptr != '\0' || errno == ERANGE) {
         *success = false;
+        BENCHMARK_END();
+
         return 0.0;
     }
 
     *success = true;
+    BENCHMARK_END();
+
     return ret;
 }
 
@@ -121,33 +143,45 @@ long double parse_long_double(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
 
+    BENCHMARK_START();
+
     char *end_ptr;
     errno = 0;
     
     const long double ret = strtold(str, &end_ptr);
     if(end_ptr == str || *end_ptr != '\0' || errno == ERANGE) {
         *success = false;
+        BENCHMARK_END();
+
         return 0.0L;
     }
 
     *success = true;
+    BENCHMARK_END();
+
     return ret;
 }
 
 uint64_t parse_uint64(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
+    
+    BENCHMARK_START();
 
     char *end_ptr;
     errno = 0;
-    
+
     const uint64_t ret = strtoull(str, &end_ptr, 10);
     if(end_ptr == str || *end_ptr != '\0' || errno == ERANGE) {
         *success = false;
+        BENCHMARK_END();
+
         return 0ULL;
     }
 
     *success = true;
+    BENCHMARK_END();
+
     return ret;
 }
 
@@ -155,16 +189,22 @@ int64_t parse_int64(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
 
+    BENCHMARK_START();
+
     char *end_ptr;
     errno = 0;
     
     const int64_t ret = strtoll(str, &end_ptr, 10);
     if(end_ptr == str || *end_ptr != '\0' || errno == ERANGE) {
         *success = false;
+        BENCHMARK_END();
+
         return 0LL;
     }
 
     *success = true;
+    BENCHMARK_END();
+    
     return ret;
 }
 

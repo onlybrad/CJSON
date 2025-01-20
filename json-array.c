@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include "parser.h"
+#include "benchmark.h"
 
 #define INITIAL_JSON_ARRAY_CAPACITY (1 << 3)
 
@@ -10,12 +11,16 @@ static void JSON_Array_resize(JSON_Array *const array, const unsigned int capaci
     assert(array != NULL);
     assert(capacity > array->capacity); //new size must be larger than current size
 
+    BENCHMARK_START();
+
     JSON *data = CJSON_REALLOC(array->data, capacity * sizeof(JSON), array->capacity * sizeof(JSON));
     
     assert(data != NULL);
 
     array->data = data;
     array->capacity = capacity;
+
+    BENCHMARK_END();
 }
 
 void JSON_Array_init(JSON_Array *const array) {
@@ -41,12 +46,16 @@ void JSON_Array_free(JSON_Array *const array) {
 JSON *JSON_Array_next(JSON_Array *const array) {
     assert(array != NULL);
 
+    BENCHMARK_START();
+
     if(array->length == array->capacity) {
         JSON_Array_resize(array, array->capacity * 2);
     }
 
     JSON *const ret = array->data + array->length;
     array->length++;
+
+    BENCHMARK_END();
 
     return ret;
 }
@@ -61,6 +70,8 @@ void JSON_Array_set(JSON_Array *const array, const unsigned int index, const JSO
     assert(array != NULL);
     assert(value != NULL);
 
+    BENCHMARK_START();
+
     if(index >= array->capacity) {
         unsigned int capacity = array->capacity;
         do {
@@ -73,34 +84,44 @@ void JSON_Array_set(JSON_Array *const array, const unsigned int index, const JSO
 
     _JSON_free(array->data + index);
     array->data[index] = *value;
+
+    BENCHMARK_END();
 }
 
 void JSON_Array_push(JSON_Array *const array, const JSON *const value) {
     assert(array != NULL);
     assert(value != NULL);
 
+    BENCHMARK_START();
+
     JSON *const next = JSON_Array_next(array);
 
     *next = *value;
+
+    BENCHMARK_END();
 }
 
 #define JSON_ARRAY_GET(JSON_TYPE)\
     assert(array != NULL);\
     assert(success != NULL);\
                             \
+    BENCHMARK_START();\
     JSON *const ret = JSON_Array_get(array, index);\
     if(ret == NULL || ret->type != JSON_TYPE) {\
         *success = false;\
+        BENCHMARK_END();\
         return 0;\
     }\
     *success = true;\
 
 #define JSON_ARRAY_GET_VALUE(JSON_TYPE, MEMBER)\
     JSON_ARRAY_GET(JSON_TYPE)\
+    BENCHMARK_END();\
     return ret->value.MEMBER;
 
 #define JSON_ARRAY_GET_PTR(JSON_TYPE, MEMBER)\
     JSON_ARRAY_GET(JSON_TYPE)\
+    BENCHMARK_END();\
     return &ret->value.MEMBER;
 
 char *JSON_Array_get_string(const JSON_Array *const array, const unsigned int index, bool *const success) {
@@ -138,6 +159,8 @@ bool JSON_Array_get_bool(const JSON_Array *const array, const unsigned int index
 void JSON_Array_set_string (JSON_Array *const array, const unsigned int index, const char *const value) {
     assert(array != NULL);
 
+    BENCHMARK_START();
+
     char *copy = value != NULL ? CJSON_STRDUP(value) : NULL;
     assert(value != NULL && copy != NULL);
 
@@ -145,66 +168,96 @@ void JSON_Array_set_string (JSON_Array *const array, const unsigned int index, c
         .type = JSON_STRING,
         .value = {.string = copy}
     });
+
+    BENCHMARK_END();
 }
 
 void JSON_Array_set_float64(JSON_Array *const array, const unsigned int index, const double value) {
     assert(array != NULL);
+    
+    BENCHMARK_START();
 
     JSON_Array_set(array, index, &(JSON){
         .type = JSON_FLOAT64,
         .value = {.float64 = value}
     });
+
+    BENCHMARK_END();
 }
 
 void JSON_Array_set_int64  (JSON_Array *const array, const unsigned int index, const int64_t value) {
     assert(array != NULL);
 
+    BENCHMARK_START();
+
     JSON_Array_set(array, index, &(JSON){
         .type = JSON_INT64,
         .value = {.int64 = value}
     });
+
+    BENCHMARK_END();
 }
 
 void JSON_Array_set_uint64 (JSON_Array *const array, const unsigned int index, const uint64_t value) {
     assert(array != NULL);
 
+    BENCHMARK_START();
+
     JSON_Array_set(array, index, &(JSON){
         .type = JSON_UINT64,
         .value = {.uint64 = value}
     });
+
+    BENCHMARK_END();
 }
 void JSON_Array_set_array(JSON_Array *const array, const unsigned int index, const JSON_Array *const value) {
     assert(array != NULL);
     assert(value != NULL);
 
+    BENCHMARK_START();
+
     JSON_Array_set(array, index, &(JSON){
         .type = JSON_ARRAY,
         .value = {.array = *value}
     });
+
+    BENCHMARK_END();
 }
 void JSON_Array_set_object(JSON_Array *const array, const unsigned int index, const JSON_Object *const value) {
     assert(array != NULL);
     assert(value != NULL);
 
+    BENCHMARK_START();
+
     JSON_Array_set(array, index, &(JSON){
         .type = JSON_OBJECT,
         .value = {.object = *value}
     });
+
+    BENCHMARK_END();
 }
 
 void JSON_Array_set_null(JSON_Array *const array, const unsigned int index) {
     assert(array != NULL);
 
+    BENCHMARK_START();
+
     array->data[index] = (JSON){
         .type = JSON_NULL
     };
+
+    BENCHMARK_END();
 }
 
 void JSON_Array_set_bool(JSON_Array *const array, const unsigned int index, const bool value) {
     assert(array != NULL);
 
+    BENCHMARK_START();
+
     JSON_Array_set(array, index, &(JSON){
         .type = JSON_BOOL,
         .value = {.boolean = value}
     });
+
+    BENCHMARK_END();
 }

@@ -5,7 +5,6 @@
 #include "../parser.h"
 #include "../util.h"
 
-#define BENCHMARK
 #include "../benchmark.h"
 
 #ifdef COUNT_ALLOCATIONS
@@ -14,12 +13,12 @@ int freed = 0;
 #endif
 
 int main(void) {
+    Benchmark_init();
+
     size_t filesize;
     char *const data = file_get_contents("E:\\code\\c\\json\\tests\\really-big-json-file.json", &filesize);
 
-    BENCHMARK_START();
     JSON *const json = JSON_parse(data, (unsigned int)filesize);
-    BENCHMARK_END();
 
     free(data);
     JSON_free(json);
@@ -31,5 +30,6 @@ int main(void) {
     printf("freed = %i\n", freed);
     #endif
 
+    Benchmark_free();
     return 0;
 }

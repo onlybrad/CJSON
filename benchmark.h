@@ -7,6 +7,8 @@ typedef struct Benchmark {
     long us_end;
 } Benchmark;
 
+void Benchmark_init(void);
+void Benchmark_free(void);
 unsigned int Benchmark_start    (const char *const function_name);
 void         Benchmark_end      (const unsigned int index);
 Benchmark   *Benchmark_get      (const unsigned int index);
@@ -19,7 +21,7 @@ void         Benchmark_print_all(void);
 
 #else
 #define BENCHMARK_START()
-#define BENCHMARK_END(INDEX)
+#define BENCHMARK_END()
 #endif
 
 #endif
