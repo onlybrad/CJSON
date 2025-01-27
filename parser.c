@@ -643,11 +643,11 @@ CJSON *CJSON_parse(const char *const data, const unsigned int length) {
 
     CJSON_Tokens *tokens = &root->tokens;
     CJSON_Tokens_init(tokens);
-
-    CJSON_Token *token = CJSON_Tokens_next(tokens);
-    while(CJSON_Lexer_tokenize(&lexer, token)) {
+    
+    CJSON_Token *token;
+    do {
         token = CJSON_Tokens_next(tokens);
-    }
+    } while(CJSON_Lexer_tokenize(&lexer, token));
 
     if(token->type == CJSON_TOKEN_INVALID) {
         root->node = (CJSON_Node) {
