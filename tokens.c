@@ -4,15 +4,14 @@
 #include "tokens.h"
 #include "benchmark.h"
 
-static void JSON_Tokens_resize(JSON_Tokens *const tokens, const double multiplier) {
+static void JSON_Tokens_resize(JSON_Tokens *const tokens, const unsigned int capacity) {
     assert(tokens != NULL);
-    assert(multiplier > 1.0); //multiplier must actually increase the size
-    assert(multiplier <= UINT_MAX / tokens->capacity); //check overflow
+    assert(capacity > tokens->capacity); //new size must be larger than current size
 
     BENCHMARK_START();
 
-    const unsigned int capacity = (unsigned int)((double)tokens->capacity * multiplier);
-    JSON_Token *data = CJSON_REALLOC(tokens->data, (size_t)capacity * sizeof(JSON_Token), tokens->capacity * sizeof(JSON_Token));
+    JSON_Token *data = CJSON_REALLOC(tokens->data, (size_t)capacity * sizeof(JSON_Token), (size_t)tokens->capacity * sizeof(JSON_Token));
+    
     assert(data != NULL);
 
     tokens->data = data;
@@ -46,7 +45,7 @@ JSON_Token *JSON_Tokens_next(JSON_Tokens *const tokens) {
     BENCHMARK_START();
 
     if(tokens->length == tokens->capacity) {
-        JSON_Tokens_resize(tokens, 2.0);
+        JSON_Tokens_resize(tokens, tokens->capacity * 2);
     }
 
     JSON_Token *const token = tokens->data + tokens->length;

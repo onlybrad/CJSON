@@ -5,15 +5,22 @@
 #include <string.h>
 #include "benchmark.h"
 
-static Benchmark *benchmarks = NULL;
-static unsigned int length = 0;
-static unsigned int capacity = 0;
-
-typedef struct BenchmarkTime{
+typedef struct Benchmark {
+    const char *function_name;
+    long us_start;
+    long us_end;
+} Benchmark;
+typedef struct BenchmarkStats {
     const char *function_name;
     unsigned int count;
-    long time;
-} BenchmarkTime;
+    long total_time;
+    long max_time;
+    long min_time;
+} BenchmarkStats;
+
+static Benchmark *benchmark_timestamps = NULL;
+static unsigned int length = 0;
+static unsigned int capacity = 0;
 
 static long usec_timestamp(void) {
     struct timeval current_time;
@@ -24,20 +31,20 @@ static long usec_timestamp(void) {
 
 void Benchmark_init(void) {
     capacity = 1 << 12;
-    benchmarks = malloc(capacity * sizeof(Benchmark));
-    assert(benchmarks != NULL);
+    benchmark_timestamps = malloc((size_t)capacity * sizeof(Benchmark));
+    assert(benchmark_timestamps != NULL);
 }
 
 void Benchmark_free(void) {
-    free(benchmarks);
+    free(benchmark_timestamps);
     length = 0;
     capacity = 0;
 }
 
 static void Benchmark_resize(const unsigned int new_capacity) {
-    Benchmark *new_benchmarks = realloc(benchmarks, (size_t)new_capacity * sizeof(Benchmark));
-    assert(new_benchmarks);
-    benchmarks = new_benchmarks;
+    Benchmark *new_benchmark_timestamps = realloc(benchmark_timestamps, (size_t)new_capacity * sizeof(Benchmark));
+    assert(new_benchmark_timestamps);
+    benchmark_timestamps = new_benchmark_timestamps;
     capacity = new_capacity;
 }
 
@@ -46,7 +53,7 @@ unsigned int Benchmark_start(const char *const function_name) {
         Benchmark_resize(capacity * 2);
     }
 
-    benchmarks[length] = (Benchmark) {
+    benchmark_timestamps[length] = (Benchmark) {
         .function_name = function_name,
         .us_start = usec_timestamp()
     };
@@ -55,56 +62,74 @@ unsigned int Benchmark_start(const char *const function_name) {
 }
 
 void Benchmark_end(const unsigned int index) {
-    benchmarks[index].us_end = usec_timestamp();
-}
-
-Benchmark *Benchmark_get(const unsigned int index) {
-    return benchmarks + index;
+    benchmark_timestamps[index].us_end = usec_timestamp();
 }
 
 void Benchmark_print(const unsigned int index) {
-    printf("Function %s took %li microseconds.\n", benchmarks[index].function_name, benchmarks[index].us_end - benchmarks[index].us_start);
+    printf("Function %s took %li microseconds.\n", benchmark_timestamps[index].function_name, benchmark_timestamps[index].us_end - benchmark_timestamps[index].us_start);
 }
 
-static int compareBenchmarkTimes(const void *a, const void *b) {
-    const BenchmarkTime *const benchmark_time_a = a;
-    const BenchmarkTime *const benchmark_time_b = b;
+static int compare_benchmark_times(const void *a, const void *b) {
+    const BenchmarkStats *const benchmark_time_a = a;
+    const BenchmarkStats *const benchmark_time_b = b;
 
-    return benchmark_time_b->time - benchmark_time_a->time;
+    return benchmark_time_b->max_time - benchmark_time_a->max_time;
 }
 
 void Benchmark_print_all(void) {
     Benchmark *benchmarks_copy = malloc(length * sizeof(Benchmark));
-    memcpy(benchmarks_copy, benchmarks, length * sizeof(Benchmark));
+    memcpy(benchmarks_copy, benchmark_timestamps, length * sizeof(Benchmark));
     unsigned int length_copy = length;
-    BenchmarkTime *benchmark_times = malloc(length_copy * sizeof(BenchmarkTime));
+    BenchmarkStats *stats = malloc(length_copy * sizeof(BenchmarkStats));
     
     unsigned int i;
     for(i = 0U; i < length_copy; i++) {
-        benchmark_times[i] = (BenchmarkTime) {
+        stats[i] = (BenchmarkStats) {
             .function_name = benchmarks_copy[i].function_name,
-            .time = benchmarks_copy[i].us_end - benchmarks_copy[i].us_start,
+            .total_time = benchmarks_copy[i].us_end - benchmarks_copy[i].us_start,
             .count = 1
         };
+        stats[i].max_time = stats[i].min_time = stats[i].total_time;
 
         for(unsigned int j = i + 1U; j < length_copy; j++) {
-            if(strcmp(benchmarks_copy[j].function_name, benchmark_times[i].function_name) == 0) {
-                benchmark_times[i].time += benchmarks_copy[j].us_end - benchmarks_copy[j].us_start;
-                benchmark_times[i].count++;
+            if(strcmp(benchmarks_copy[j].function_name, stats[i].function_name) == 0) {
+                const long current_time = benchmarks_copy[j].us_end - benchmarks_copy[j].us_start;
+
+                stats[i].total_time += current_time;
+                stats[i].count++;
+
+                if(current_time > stats[i].max_time) {
+                    stats[i].max_time = current_time;
+                } else if(current_time < stats[i].min_time) {
+                    stats[i].min_time = current_time;
+                }
 
                 benchmarks_copy[j] = benchmarks_copy[--length_copy];
+                j--;
             }
         }
 
     }
 
-    qsort(benchmark_times, i + 1, sizeof(BenchmarkTime), compareBenchmarkTimes);
+    qsort(stats, i, sizeof(BenchmarkStats), compare_benchmark_times);
 
     for(unsigned int j = 0U; j < i; j++) {
-        printf("Function %s \n\tCalled %u times\n\tTotal Time (microseconds) %li \n\n", benchmark_times[j].function_name, benchmark_times[j].count, benchmark_times[j].time);
+        printf("Function %s \n" 
+                "\tCall count: %u\n"
+                "\tTotal time: %lius\n"
+                "\tMinimum time: %lius \n"
+                "\tMaximum time: %lius \n"
+                "\tAverage time: %.2fus \n\n",
+            stats[j].function_name,
+            stats[j].count,
+            stats[j].total_time,
+            stats[j].min_time,
+            stats[j].max_time,
+            (double)stats[j].total_time / (double)stats[j].count
+        );
     }
 
-    free(benchmark_times);
+    free(stats);
     free(benchmarks_copy);
 }
 

@@ -9,7 +9,7 @@
 
 static char *const DELETED_ENTRY = {0};
 
-static unsigned int hash(const char *const key) {
+static unsigned int CJSON_hash(const char *const key) {
     assert(key != NULL);
 
     BENCHMARK_START();
@@ -33,15 +33,15 @@ static unsigned int hash(const char *const key) {
     return hash;
 }
 
-static void JSON_Object_resize(JSON_Object *const object, const unsigned int capacity) {
+static void CJSON_Object_resize(CJSON_Object *const object, const unsigned int capacity) {
     assert(object != NULL);
     assert(capacity > object->capacity); //new size must be larger than current size
 
     BENCHMARK_START();
 
-    JSON_Key_Value *const old_data = object->data;
+    CJSON_Key_Value *const old_data = object->data;
     const unsigned int old_capacity = object->capacity;
-    JSON_Key_Value *data = CJSON_CALLOC((size_t)capacity, sizeof(JSON_Key_Value));
+    CJSON_Key_Value *data = CJSON_CALLOC((size_t)capacity, sizeof(CJSON_Key_Value));
     assert(data != NULL);
 
     object->data = data;
@@ -51,7 +51,7 @@ static void JSON_Object_resize(JSON_Object *const object, const unsigned int cap
         if(old_data[i].key == NULL || old_data[i].key == DELETED_ENTRY) {
             continue;
         }
-        JSON_Key_Value *const entry = JSON_Object_get_entry(object, old_data[i].key);
+        CJSON_Key_Value *const entry = CJSON_Object_get_entry(object, old_data[i].key);
         entry->key = old_data[i].key;
         entry->value = old_data[i].value;
     }
@@ -61,48 +61,48 @@ static void JSON_Object_resize(JSON_Object *const object, const unsigned int cap
     BENCHMARK_END();
 }
 
-void JSON_Object_init(JSON_Object *const object) {
+void CJSON_Object_init(CJSON_Object *const object) {
     assert(object != NULL);
     
-    JSON_Key_Value *data = CJSON_CALLOC(INITIAL_JSON_OBJECT_CAPACITY, sizeof(JSON_Key_Value));
+    CJSON_Key_Value *data = CJSON_CALLOC(INITIAL_JSON_OBJECT_CAPACITY, sizeof(CJSON_Key_Value));
     assert(data != NULL);
 
-    *object = (JSON_Object) {
+    *object = (CJSON_Object) {
         .data = data,
         .capacity = INITIAL_JSON_OBJECT_CAPACITY
     };
 }
 
-JSON_Key_Value *JSON_Object_get_entry(JSON_Object *const object, const char *const key) {
+CJSON_Key_Value *CJSON_Object_get_entry(CJSON_Object *const object, const char *const key) {
     assert(object != NULL);
     assert(key != NULL);
 
     BENCHMARK_START();
 
-    const unsigned int start = hash(key) % object->capacity;
+    const unsigned int start = CJSON_hash(key) % object->capacity;
     unsigned int i = start; 
     while(object->data[i].key != NULL && object->data[i].key != DELETED_ENTRY && strcmp(object->data[i].key, key) != 0) {
         i = (i + 1U) % object->capacity;
         if(i == start) {
-            JSON_Object_resize(object, object->capacity * 2);
-            JSON_Key_Value *const ret = JSON_Object_get_entry(object, key);
+            CJSON_Object_resize(object, object->capacity * 2);
+            CJSON_Key_Value *const ret = CJSON_Object_get_entry(object, key);
             BENCHMARK_END();
             return ret;
         }
     }
 
-    JSON_Key_Value *const ret = object->data + i;
+    CJSON_Key_Value *const ret = object->data + i;
     BENCHMARK_END();
     return ret;
 }
 
-JSON_Key_Value *JSON_Object_find_entry(const JSON_Object *const object, const char *const key) {
+CJSON_Key_Value *CJSON_Object_find_entry(const CJSON_Object *const object, const char *const key) {
     assert(object != NULL);
     assert(key != NULL);
 
     BENCHMARK_START();
 
-    const unsigned int start = hash(key) % object->capacity;
+    const unsigned int start = CJSON_hash(key) % object->capacity;
     unsigned int i = start; 
     do {
         if(object->data[i].key == DELETED_ENTRY) {
@@ -117,7 +117,7 @@ JSON_Key_Value *JSON_Object_find_entry(const JSON_Object *const object, const ch
         } 
 
         if(strcmp(object->data[i].key, key) == 0) {
-            JSON_Key_Value *const ret = object->data + i;
+            CJSON_Key_Value *const ret = object->data + i;
             BENCHMARK_END();
             
             return ret;
@@ -131,29 +131,29 @@ JSON_Key_Value *JSON_Object_find_entry(const JSON_Object *const object, const ch
     return NULL;
 }
 
-JSON *JSON_Object_get(const JSON_Object *const object, const char *const key) {
+CJSON_Node *CJSON_Object_get(const CJSON_Object *const object, const char *const key) {
     assert(object != NULL);
     assert(key != NULL);
 
     BENCHMARK_START();
 
-    JSON_Key_Value *const entry = JSON_Object_find_entry(object, key);
+    CJSON_Key_Value *const entry = CJSON_Object_find_entry(object, key);
 
     BENCHMARK_END();
 
     return entry == NULL ? NULL : &entry->value;
 }
 
-void JSON_Object_set(JSON_Object *const object, const char *const key, const JSON *const value) {
+void CJSON_Object_set(CJSON_Object *const object, const char *const key, const CJSON_Node *const value) {
     assert(object != NULL);
     assert(key != NULL);
     assert(value != NULL);
 
     BENCHMARK_START();
     
-    JSON_Key_Value *const entry = JSON_Object_get_entry(object, key);
+    CJSON_Key_Value *const entry = CJSON_Object_get_entry(object, key);
 
-    _JSON_free(&entry->value);
+    CJSON_Node_free(&entry->value);
     if(entry->key == NULL || entry->key == DELETED_ENTRY) {
         entry->key = CJSON_STRDUP(key);
     }
@@ -162,49 +162,49 @@ void JSON_Object_set(JSON_Object *const object, const char *const key, const JSO
     BENCHMARK_END();
 }
 
-void JSON_Object_delete(JSON_Object *const object, const char *const key) {
+void CJSON_Object_delete(CJSON_Object *const object, const char *const key) {
     assert(object != NULL);
     assert(key != NULL);
 
     BENCHMARK_START();
 
-    JSON_Key_Value *const entry = JSON_Object_find_entry(object, key);
+    CJSON_Key_Value *const entry = CJSON_Object_find_entry(object, key);
 
     if(entry != NULL) {
         CJSON_FREE(entry->key);
-        _JSON_free(&entry->value);
+        CJSON_Node_free(&entry->value);
         entry->key = DELETED_ENTRY;
     }
 
     BENCHMARK_END();
 }
 
-void JSON_Object_free(JSON_Object *const object) {
+void CJSON_Object_free(CJSON_Object *const object) {
     assert(object != NULL);
 
     BENCHMARK_START();
 
     for(unsigned int i = 0U; i < object->capacity; i++) {
-        JSON_Key_Value *const data = object->data + i;
+        CJSON_Key_Value *const data = object->data + i;
         if(data->key == NULL || data->key == DELETED_ENTRY) {
             continue;
         }
         CJSON_FREE(data->key);
-        _JSON_free(&data->value);
+        CJSON_Node_free(&data->value);
     }
     CJSON_FREE(object->data);
-    *object = (JSON_Object){0};
+    *object = (CJSON_Object){0};
 
     BENCHMARK_END();
 }
 
-#define JSON_OBJECT_GET(JSON_TYPE)\
+#define CJSON_OBJECT_GET(JSON_TYPE)\
     assert(object != NULL);\
     assert(key != NULL);\
     assert(success != NULL);\
                             \
     BENCHMARK_START();\
-    JSON *const ret = JSON_Object_get(object, key);\
+    CJSON_Node *const ret = CJSON_Object_get(object, key);\
     if(ret == NULL || ret->type != JSON_TYPE) {\
         *success = false;\
         BENCHMARK_END();\
@@ -212,49 +212,49 @@ void JSON_Object_free(JSON_Object *const object) {
     }\
     *success = true;\
 
-#define JSON_OBJECT_GET_VALUE(JSON_TYPE, MEMBER)\
-    JSON_OBJECT_GET(JSON_TYPE)\
+#define CJSON_OBJECT_GET_VALUE(JSON_TYPE, MEMBER)\
+    CJSON_OBJECT_GET(JSON_TYPE)\
     BENCHMARK_END();\
     return ret->value.MEMBER;
 
-#define JSON_OBJECT_GET_PTR(JSON_TYPE, MEMBER)\
-    JSON_OBJECT_GET(JSON_TYPE)\
+#define CJSON_OBJECT_GET_PTR(JSON_TYPE, MEMBER)\
+    CJSON_OBJECT_GET(JSON_TYPE)\
     BENCHMARK_END();\
     return &ret->value.MEMBER;
 
-char *JSON_Object_get_string(const JSON_Object *const object, const char *const key, bool *const success) {
-    JSON_OBJECT_GET_VALUE(JSON_STRING, string)
+char *CJSON_Object_get_string(const CJSON_Object *const object, const char *const key, bool *const success) {
+    CJSON_OBJECT_GET_VALUE(CJSON_STRING, string)
 }
 
-double JSON_Object_get_float64(const JSON_Object *const object, const char *const key, bool *const success) {
-    JSON_OBJECT_GET_VALUE(JSON_FLOAT64, float64)
+double CJSON_Object_get_float64(const CJSON_Object *const object, const char *const key, bool *const success) {
+    CJSON_OBJECT_GET_VALUE(CJSON_FLOAT64, float64)
 }
 
-int64_t JSON_Object_get_int64(const JSON_Object *const object, const char *const key, bool *const success) {
-    JSON_OBJECT_GET_VALUE(JSON_INT64, int64)    
+int64_t CJSON_Object_get_int64(const CJSON_Object *const object, const char *const key, bool *const success) {
+    CJSON_OBJECT_GET_VALUE(CJSON_INT64, int64)    
 }
 
-uint64_t JSON_Object_get_uint64(const JSON_Object *const object, const char *const key, bool *const success) {
-    JSON_OBJECT_GET_VALUE(JSON_UINT64, uint64)
+uint64_t CJSON_Object_get_uint64(const CJSON_Object *const object, const char *const key, bool *const success) {
+    CJSON_OBJECT_GET_VALUE(CJSON_UINT64, uint64)
 }
 
-JSON_Object *JSON_Object_get_object(const JSON_Object *const object, const char *const key, bool *const success) {
-    JSON_OBJECT_GET_PTR(JSON_OBJECT, object)
+CJSON_Object *CJSON_Object_get_object(const CJSON_Object *const object, const char *const key, bool *const success) {
+    CJSON_OBJECT_GET_PTR(CJSON_OBJECT, object)
 }
 
-JSON_Array *JSON_Object_get_array(const JSON_Object *const object, const char *const key, bool *const success) {
-    JSON_OBJECT_GET_PTR(JSON_ARRAY, array)    
+CJSON_Array *CJSON_Object_get_array(const CJSON_Object *const object, const char *const key, bool *const success) {
+    CJSON_OBJECT_GET_PTR(CJSON_ARRAY, array)    
 }
 
-void *JSON_Object_get_null(const JSON_Object *const object, const char *const key, bool *const success) {
-    JSON_OBJECT_GET_VALUE(JSON_NULL, null)
+void *CJSON_Object_get_null(const CJSON_Object *const object, const char *const key, bool *const success) {
+    CJSON_OBJECT_GET_VALUE(CJSON_NULL, null)
 }
 
-bool JSON_Object_get_bool(const JSON_Object *const object, const char *const key, bool *const success) {
-    JSON_OBJECT_GET_VALUE(JSON_BOOL, boolean)
+bool CJSON_Object_get_bool(const CJSON_Object *const object, const char *const key, bool *const success) {
+    CJSON_OBJECT_GET_VALUE(CJSON_BOOL, boolean)
 }
 
-void JSON_Object_set_string(JSON_Object *const object, const char *const key, const char *const value) {
+void CJSON_Object_set_string(CJSON_Object *const object, const char *const key, const char *const value) {
     assert(object != NULL);
 
     BENCHMARK_START();
@@ -262,99 +262,99 @@ void JSON_Object_set_string(JSON_Object *const object, const char *const key, co
     char *copy = value != NULL ? CJSON_STRDUP(value) : NULL;
     assert(value != NULL && copy != NULL);
 
-    JSON_Object_set(object, key, &(JSON){
-        .type = JSON_STRING,
+    CJSON_Object_set(object, key, &(CJSON_Node){
+        .type = CJSON_STRING,
         .value = {.string = copy}
     });
 
     BENCHMARK_END();
 }
-void JSON_Object_set_float64(JSON_Object *const object, const char *const key, const double value) {
+void CJSON_Object_set_float64(CJSON_Object *const object, const char *const key, const double value) {
     assert(object != NULL);
 
     BENCHMARK_START();
 
-    JSON_Object_set(object, key, &(JSON){
-        .type = JSON_FLOAT64,
+    CJSON_Object_set(object, key, &(CJSON_Node){
+        .type = CJSON_FLOAT64,
         .value = {.float64 = value}
     });
 
     BENCHMARK_END();
 }
 
-void JSON_Object_set_int64(JSON_Object *const object, const char *const key, const int64_t value) {
+void CJSON_Object_set_int64(CJSON_Object *const object, const char *const key, const int64_t value) {
     assert(object != NULL);
 
     BENCHMARK_START();
 
-    JSON_Object_set(object, key, &(JSON){
-        .type = JSON_INT64,
+    CJSON_Object_set(object, key, &(CJSON_Node){
+        .type = CJSON_INT64,
         .value = {.int64 = value}
     });
 
     BENCHMARK_END();
 }
 
-void JSON_Object_set_uint64(JSON_Object *const object, const char *const key, const uint64_t value) {
+void CJSON_Object_set_uint64(CJSON_Object *const object, const char *const key, const uint64_t value) {
     assert(object != NULL);
 
     BENCHMARK_START();
 
-    JSON_Object_set(object, key, &(JSON){
-        .type = JSON_UINT64,
+    CJSON_Object_set(object, key, &(CJSON_Node){
+        .type = CJSON_UINT64,
         .value = {.uint64 = value}
     });
 
     BENCHMARK_END();
 }
 
-void JSON_Object_set_object(JSON_Object *const object, const char *const key, const JSON_Object *const value) {
+void CJSON_Object_set_object(CJSON_Object *const object, const char *const key, const CJSON_Object *const value) {
     assert(object != NULL);
     assert(value != NULL);
 
     BENCHMARK_START();
 
-    JSON_Object_set(object, key, &(JSON){
-        .type = JSON_OBJECT,
+    CJSON_Object_set(object, key, &(CJSON_Node){
+        .type = CJSON_OBJECT,
         .value = {.object = *value}
     });
 
     BENCHMARK_END();
 }
 
-void JSON_Object_set_array(JSON_Object *const object, const char *const key, const JSON_Array *const value) {
+void CJSON_Object_set_array(CJSON_Object *const object, const char *const key, const CJSON_Array *const value) {
     assert(object != NULL);
     assert(value != NULL);
 
     BENCHMARK_START();
 
-    JSON_Object_set(object, key, &(JSON){
-        .type = JSON_ARRAY,
+    CJSON_Object_set(object, key, &(CJSON_Node){
+        .type = CJSON_ARRAY,
         .value = {.array = *value}
     });
 
     BENCHMARK_END();
 }
 
-void JSON_Object_set_null(JSON_Object *const object, const char *const key) {
+void CJSON_Object_set_null(CJSON_Object *const object, const char *const key) {
     assert(object != NULL);
 
     BENCHMARK_START();
 
-    JSON_Object_set(object, key, &(JSON){
-        .type = JSON_NULL,
+    CJSON_Object_set(object, key, &(CJSON_Node){
+        .type = CJSON_NULL,
     });
 
     BENCHMARK_END();
 }
 
-void JSON_Object_set_bool(JSON_Object *const object, const char *const key, const bool value) {
+void CJSON_Object_set_bool(CJSON_Object *const object, const char *const key, const bool value) {
     assert(object != NULL);
 
     BENCHMARK_START();
 
-    JSON_Object_set(object, key, &(JSON){
-        .type = JSON_BOOL,
+    CJSON_Object_set(object, key, &(CJSON_Node){
+        .type = CJSON_BOOL,
         .value = {.boolean = value}
     });
 

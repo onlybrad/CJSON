@@ -5,7 +5,7 @@
 #include "util.h"
 #include "benchmark.h"
 
-static void skip_whitespace(JSON_Lexer *const lexer) {
+static void skip_whitespace(CJSON_Lexer *const lexer) {
     unsigned int position = lexer->position; 
     const unsigned int length = lexer->length;
     const char *const data = lexer->data;
@@ -18,7 +18,7 @@ static void skip_whitespace(JSON_Lexer *const lexer) {
     lexer->position = position;
 }
 
-static bool read_string(JSON_Lexer *const lexer, JSON_Token *const token) {
+static bool read_string(CJSON_Lexer *const lexer, JSON_Token *const token) {
     const unsigned int position = lexer->position + 1U; 
     const unsigned int length = lexer->length;
     const char *const data = lexer->data;
@@ -44,9 +44,9 @@ static bool read_string(JSON_Lexer *const lexer, JSON_Token *const token) {
     return false;
 }
 
-static bool read_number(JSON_Lexer *const lexer, JSON_Token *const token) {
-    unsigned int position, i;
-    unsigned int length = lexer->length;
+static bool read_number(CJSON_Lexer *const lexer, JSON_Token *const token) {
+    unsigned int position, i, length;
+    length = lexer->length;
     const char *data = lexer->data;
     bool success = true;
     bool read_dot = false;
@@ -58,7 +58,7 @@ static bool read_number(JSON_Lexer *const lexer, JSON_Token *const token) {
         token->length = 1U;
     } else {
         position = lexer->position;
-        token->length = 0;
+        token->length = 0U;
     }
 
     data += position;
@@ -145,7 +145,7 @@ static bool read_number(JSON_Lexer *const lexer, JSON_Token *const token) {
     return success;
 }
 
-static bool is_keyword(const JSON_Lexer *const lexer, const char *const keyword, const unsigned int keyword_length) {
+static bool is_keyword(const CJSON_Lexer *const lexer, const char *const keyword, const unsigned int keyword_length) {
     const unsigned int position = lexer->position; 
     const unsigned int lexer_length = lexer->length;
     const char *const data = lexer->data;
@@ -165,25 +165,25 @@ static bool is_keyword(const JSON_Lexer *const lexer, const char *const keyword,
     return false;
 }
 
-static bool read_keyword(JSON_Lexer *const lexer, JSON_Token *const token) {
+static bool read_keyword(CJSON_Lexer *const lexer, JSON_Token *const token) {
     static const char null_string[] = "null";
     static const char true_string[] = "true";
     static const char false_string[] = "false";
 
     
-    if(is_keyword(lexer, null_string, static_strlen(null_string))) {
+    if(is_keyword(lexer, null_string, (unsigned int)static_strlen(null_string))) {
         token->type = JSON_TOKEN_NULL;
         token->length = (unsigned int)static_strlen(null_string);
         return true;
     }
     
-    if(is_keyword(lexer, true_string, static_strlen(true_string))) {
+    if(is_keyword(lexer, true_string, (unsigned int)static_strlen(true_string))) {
         token->type = JSON_TOKEN_BOOL;
         token->length = (unsigned int)static_strlen(true_string);
         return true;
     }
     
-    if(is_keyword(lexer, false_string, static_strlen(false_string))) {
+    if(is_keyword(lexer, false_string, (unsigned int)static_strlen(false_string))) {
         token->type = JSON_TOKEN_BOOL;
         token->length = (unsigned int)static_strlen(false_string);
         return true;
@@ -192,7 +192,7 @@ static bool read_keyword(JSON_Lexer *const lexer, JSON_Token *const token) {
     return false;
 }
 
-static void read_invalid_token(JSON_Lexer *const lexer, JSON_Token *const token) {
+static void read_invalid_token(CJSON_Lexer *const lexer, JSON_Token *const token) {
     const unsigned int position = lexer->position; 
     const unsigned int length = lexer->length;
     const char *const data = lexer->data;
@@ -209,18 +209,18 @@ static void read_invalid_token(JSON_Lexer *const lexer, JSON_Token *const token)
     token->length = i - position - 1;
 }
 
-void JSON_Lexer_init(JSON_Lexer *const lexer, const char *const data, const unsigned int length) {
+void CJSON_Lexer_init(CJSON_Lexer *const lexer, const char *const data, const unsigned int length) {
     assert(lexer != NULL);
     assert(data != NULL);
     assert(length > 0);
 
-    *lexer = (JSON_Lexer) {
+    *lexer = (CJSON_Lexer) {
         .data = data,
         .length = length
     };
 }
 
-bool JSON_Lexer_tokenize(JSON_Lexer *const lexer, JSON_Token *const token) {
+bool CJSON_Lexer_tokenize(CJSON_Lexer *const lexer, JSON_Token *const token) {
     assert(lexer != NULL);
     assert(token != NULL);
 

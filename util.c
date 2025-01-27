@@ -176,7 +176,7 @@ uint64_t parse_uint64(const char *const str, bool *const success) {
         *success = false;
         BENCHMARK_END();
 
-        return 0ULL;
+        return (uint64_t)0;
     }
 
     *success = true;
@@ -199,7 +199,7 @@ int64_t parse_int64(const char *const str, bool *const success) {
         *success = false;
         BENCHMARK_END();
 
-        return 0LL;
+        return (int64_t)0;
     }
 
     *success = true;

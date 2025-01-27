@@ -25,6 +25,6 @@ uint64_t    parse_uint64           (const char *const str, bool *const success);
 int64_t     parse_int64            (const char *const str, bool *const success);
 void        print_bytes            (const void *const buffer, const size_t size);
 char       *file_get_contents      (const char *const path, size_t *const filesize);
-long        usec_timestamp         (void);     
+long        usec_timestamp         (void);
 
 #endif

@@ -13,23 +13,36 @@ int freed = 0;
 #endif
 
 int main(void) {
+#ifdef BENCHMARK
     Benchmark_init();
+#endif
 
     size_t filesize;
     char *const data = file_get_contents("E:\\code\\c\\json\\tests\\really-big-json-file.json", &filesize);
 
+#ifdef BENCHMARK
+    BENCHMARK_START();
     JSON *const json = JSON_parse(data, (unsigned int)filesize);
+    BENCHMARK_END();
+#else
+    const long start = usec_timestamp();
+    CJSON_Node *const json = CJSON_parse(data, (unsigned int)filesize);
+    const long end = usec_timestamp();
+    printf("Execution time: %li", end - start);
+#endif
 
     free(data);
-    JSON_free(json);
+    CJSON_free(json);
 
-    Benchmark_print_all();
-
-    #ifdef COUNT_ALLOCATIONS
+#ifdef COUNT_ALLOCATIONS
     printf("malloced = %i\n", malloced);
     printf("freed = %i\n", freed);
-    #endif
+#endif
 
+#ifdef BENCHMARK
+    Benchmark_print_all();
     Benchmark_free();
+#endif
+
     return 0;
 }
