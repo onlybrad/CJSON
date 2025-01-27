@@ -1,5 +1,5 @@
-#ifndef JSON_Tokens_H
-#define JSON_Tokens_H
+#ifndef CJSON_Tokens_H
+#define CJSON_Tokens_H
 
 #define INITIAL_TOKENS_CAPACITY (1 << 10)
 
@@ -7,15 +7,15 @@
 #include "token.h"
 #include "allocator.h"
 
-typedef struct JSON_Tokens {
-    JSON_Token *data;
+typedef struct CJSON_Tokens {
+    CJSON_Token *data;
     unsigned int index;
     unsigned int length;
     unsigned int capacity;
-} JSON_Tokens;
+} CJSON_Tokens;
 
-void JSON_Tokens_init(JSON_Tokens *const tokens);
-void JSON_Tokens_free(JSON_Tokens *const tokens);
-JSON_Token *JSON_Tokens_next(JSON_Tokens *const tokens);
+void CJSON_Tokens_init(CJSON_Tokens *const tokens);
+void CJSON_Tokens_free(CJSON_Tokens *const tokens);
+CJSON_Token *CJSON_Tokens_next(CJSON_Tokens *const tokens);
 
 #endif

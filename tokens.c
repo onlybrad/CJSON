@@ -4,13 +4,13 @@
 #include "tokens.h"
 #include "benchmark.h"
 
-static void JSON_Tokens_resize(JSON_Tokens *const tokens, const unsigned int capacity) {
+static void JSON_Tokens_resize(CJSON_Tokens *const tokens, const unsigned int capacity) {
     assert(tokens != NULL);
     assert(capacity > tokens->capacity); //new size must be larger than current size
 
     BENCHMARK_START();
 
-    JSON_Token *data = CJSON_REALLOC(tokens->data, (size_t)capacity * sizeof(JSON_Token), (size_t)tokens->capacity * sizeof(JSON_Token));
+    CJSON_Token *data = CJSON_REALLOC(tokens->data, (size_t)capacity * sizeof(CJSON_Token), (size_t)tokens->capacity * sizeof(CJSON_Token));
     
     assert(data != NULL);
 
@@ -20,26 +20,26 @@ static void JSON_Tokens_resize(JSON_Tokens *const tokens, const unsigned int cap
     BENCHMARK_END();
 }
 
-void JSON_Tokens_init(JSON_Tokens *const tokens) {
+void CJSON_Tokens_init(CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
-    JSON_Token *data = CJSON_MALLOC(INITIAL_TOKENS_CAPACITY * sizeof(JSON_Token));
+    CJSON_Token *data = CJSON_MALLOC(INITIAL_TOKENS_CAPACITY * sizeof(CJSON_Token));
     assert(data != NULL);
 
-    *tokens = (JSON_Tokens) {
+    *tokens = (CJSON_Tokens) {
         .data = data,
         .capacity = INITIAL_TOKENS_CAPACITY,
     };
 }
 
-inline void JSON_Tokens_free(JSON_Tokens *const tokens) {
+inline void CJSON_Tokens_free(CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
     CJSON_FREE(tokens->data);
-    *tokens = (JSON_Tokens){0};
+    *tokens = (CJSON_Tokens){0};
 }
 
-JSON_Token *JSON_Tokens_next(JSON_Tokens *const tokens) {
+CJSON_Token *CJSON_Tokens_next(CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
     BENCHMARK_START();
@@ -48,7 +48,7 @@ JSON_Token *JSON_Tokens_next(JSON_Tokens *const tokens) {
         JSON_Tokens_resize(tokens, tokens->capacity * 2);
     }
 
-    JSON_Token *const token = tokens->data + tokens->length;
+    CJSON_Token *const token = tokens->data + tokens->length;
     tokens->length++;
 
     BENCHMARK_END();

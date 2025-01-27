@@ -18,7 +18,7 @@ static void skip_whitespace(CJSON_Lexer *const lexer) {
     lexer->position = position;
 }
 
-static bool read_string(CJSON_Lexer *const lexer, JSON_Token *const token) {
+static bool read_string(CJSON_Lexer *const lexer, CJSON_Token *const token) {
     const unsigned int position = lexer->position + 1U; 
     const unsigned int length = lexer->length;
     const char *const data = lexer->data;
@@ -33,18 +33,18 @@ static bool read_string(CJSON_Lexer *const lexer, JSON_Token *const token) {
         } else if(escaping) {
             escaping = false;
         } else if(c == '"') {
-            token->type = JSON_TOKEN_STRING;
+            token->type = CJSON_TOKEN_STRING;
             token->length = i + 2U;
             return true;
         }
     }
     
-    token->type = JSON_TOKEN_INVALID;
+    token->type = CJSON_TOKEN_INVALID;
     token->length = i + 1U;
     return false;
 }
 
-static bool read_number(CJSON_Lexer *const lexer, JSON_Token *const token) {
+static bool read_number(CJSON_Lexer *const lexer, CJSON_Token *const token) {
     unsigned int position, i, length;
     length = lexer->length;
     const char *data = lexer->data;
@@ -63,12 +63,12 @@ static bool read_number(CJSON_Lexer *const lexer, JSON_Token *const token) {
 
     data += position;
     length -= position;
-    token->type = JSON_TOKEN_INT;
+    token->type = CJSON_TOKEN_INT;
 
     //0 as the first character is only allowed if it's followed by a dot or by an non-digit character
     if(data[0] == '0' && length > 1 && data[1] != '.' && is_digit(data[1])) {
         success = false;
-        token->type = JSON_TOKEN_INVALID;
+        token->type = CJSON_TOKEN_INVALID;
 
         for(i = 0U; i < length; i++) {
             const char c = data[i];
@@ -88,11 +88,11 @@ static bool read_number(CJSON_Lexer *const lexer, JSON_Token *const token) {
         
         switch(c) {
         case '.': {
-            token->type = JSON_TOKEN_FLOAT;
+            token->type = CJSON_TOKEN_FLOAT;
             if(!read_dot) {
                 read_dot = true;
             } else {
-                token->type = JSON_TOKEN_INVALID;
+                token->type = CJSON_TOKEN_INVALID;
                 success = false;
             }
             break;
@@ -102,9 +102,9 @@ static bool read_number(CJSON_Lexer *const lexer, JSON_Token *const token) {
         case 'E': {
             if(!read_e) {
                 read_e = true;
-                token->type = JSON_TOKEN_SCIENTIFIC_INT;
+                token->type = CJSON_TOKEN_SCIENTIFIC_INT;
             } else {
-                token->type = JSON_TOKEN_INVALID;
+                token->type = CJSON_TOKEN_INVALID;
                 success = false;
             }
             break;
@@ -115,7 +115,7 @@ static bool read_number(CJSON_Lexer *const lexer, JSON_Token *const token) {
             if(read_e && !read_sign) {
                 read_sign = true;
             } else {
-                token->type = JSON_TOKEN_INVALID;
+                token->type = CJSON_TOKEN_INVALID;
                 success = false;                
             }
             break;
@@ -134,7 +134,7 @@ static bool read_number(CJSON_Lexer *const lexer, JSON_Token *const token) {
             continue;
 
         default: {
-            token->type = JSON_TOKEN_INVALID;
+            token->type = CJSON_TOKEN_INVALID;
             success = false;
         }
         }
@@ -165,26 +165,26 @@ static bool is_keyword(const CJSON_Lexer *const lexer, const char *const keyword
     return false;
 }
 
-static bool read_keyword(CJSON_Lexer *const lexer, JSON_Token *const token) {
+static bool read_keyword(CJSON_Lexer *const lexer, CJSON_Token *const token) {
     static const char null_string[] = "null";
     static const char true_string[] = "true";
     static const char false_string[] = "false";
 
     
     if(is_keyword(lexer, null_string, (unsigned int)static_strlen(null_string))) {
-        token->type = JSON_TOKEN_NULL;
+        token->type = CJSON_TOKEN_NULL;
         token->length = (unsigned int)static_strlen(null_string);
         return true;
     }
     
     if(is_keyword(lexer, true_string, (unsigned int)static_strlen(true_string))) {
-        token->type = JSON_TOKEN_BOOL;
+        token->type = CJSON_TOKEN_BOOL;
         token->length = (unsigned int)static_strlen(true_string);
         return true;
     }
     
     if(is_keyword(lexer, false_string, (unsigned int)static_strlen(false_string))) {
-        token->type = JSON_TOKEN_BOOL;
+        token->type = CJSON_TOKEN_BOOL;
         token->length = (unsigned int)static_strlen(false_string);
         return true;
     }
@@ -192,7 +192,7 @@ static bool read_keyword(CJSON_Lexer *const lexer, JSON_Token *const token) {
     return false;
 }
 
-static void read_invalid_token(CJSON_Lexer *const lexer, JSON_Token *const token) {
+static void read_invalid_token(CJSON_Lexer *const lexer, CJSON_Token *const token) {
     const unsigned int position = lexer->position; 
     const unsigned int length = lexer->length;
     const char *const data = lexer->data;
@@ -205,7 +205,7 @@ static void read_invalid_token(CJSON_Lexer *const lexer, JSON_Token *const token
         };
     }
     
-    token->type = JSON_TOKEN_INVALID;
+    token->type = CJSON_TOKEN_INVALID;
     token->length = i - position - 1;
 }
 
@@ -220,7 +220,7 @@ void CJSON_Lexer_init(CJSON_Lexer *const lexer, const char *const data, const un
     };
 }
 
-bool CJSON_Lexer_tokenize(CJSON_Lexer *const lexer, JSON_Token *const token) {
+bool CJSON_Lexer_tokenize(CJSON_Lexer *const lexer, CJSON_Token *const token) {
     assert(lexer != NULL);
     assert(token != NULL);
 
@@ -238,27 +238,27 @@ bool CJSON_Lexer_tokenize(CJSON_Lexer *const lexer, JSON_Token *const token) {
     switch(*token->value) {
     case '{':
         token->length = 1U;
-        token->type = JSON_TOKEN_LCURLY;
+        token->type = CJSON_TOKEN_LCURLY;
         break;
     case '}':
         token->length = 1U;
-        token->type = JSON_TOKEN_RCURLY;
+        token->type = CJSON_TOKEN_RCURLY;
         break;
     case '[':
         token->length = 1U;
-        token->type = JSON_TOKEN_LBRACKET;
+        token->type = CJSON_TOKEN_LBRACKET;
         break;
     case ']':
         token->length = 1U;
-        token->type = JSON_TOKEN_RBRACKET;
+        token->type = CJSON_TOKEN_RBRACKET;
         break;
     case ':':
         token->length = 1U;
-        token->type = JSON_TOKEN_COLON;
+        token->type = CJSON_TOKEN_COLON;
         break;
     case ',':
         token->length = 1U;
-        token->type = JSON_TOKEN_COMMA;
+        token->type = CJSON_TOKEN_COMMA;
         break;
     case '"': {
         if(!read_string(lexer, token)) {

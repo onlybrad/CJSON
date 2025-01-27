@@ -1,4 +1,5 @@
-#ifndef JSON_ALLOCATOR
+#ifndef CJSON_ALLOCATOR
+#define CJSON_ALLOCATOR
 
 #ifdef COUNT_ALLOCATIONS
 extern int malloced;

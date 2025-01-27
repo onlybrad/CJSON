@@ -1,5 +1,5 @@
-#ifndef JSON_JSON_H
-#define JSON_JSON_H
+#ifndef CJSON_JSON_H
+#define CJSON_JSON_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -73,7 +73,7 @@ struct CJSON_Node {
 
 struct CJSON {
     CJSON_Node node;
-    JSON_Tokens tokens;
+    CJSON_Tokens tokens;
 };
 
 struct CJSON_Key_Value {

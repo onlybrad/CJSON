@@ -8,23 +8,23 @@
 #include "allocator.h"
 #include "benchmark.h"
 
-typedef enum ObjectParsingError {
-    ObjectKeyError,
-    ObjectColonError,
-    ObjectValueError,
-    ObjectCommaError,
-    ObjectIncompleteError,
-} ObjectParsingError;
+typedef enum CJSON_ObjectParsingError {
+    CJSON_ObjectKeyError,
+    CJSON_ObjectColonError,
+    CSJON_ObjectValueError,
+    CJSON_ObjectCommaError,
+    CJSON_ObjectIncompleteError,
+} CJSON_ObjectParsingError;
 
-typedef enum ArrayParsingError {
-    ArrayValueError,
-    ArrayCommaError,
-    ArrayIncompleteError
-} ArrayParsingError;
+typedef enum CJSON_ArrayParsingError {
+    CJSON_ArrayValueError,
+    CJSON_ArrayCommaError,
+    CJSON_ArrayIncompleteError
+} CJSON_ArrayParsingError;
  
-static bool CJSON_parse_tokens(CJSON_Node *const node, JSON_Tokens *const tokens);
+static bool CJSON_parse_tokens(CJSON_Node *const node, CJSON_Tokens *const tokens);
 
-static char *CJSON_parse_utf8_string(const JSON_Token *const token) {
+static char *CJSON_parse_utf8_string(const CJSON_Token *const token) {
     assert(token != NULL);
 
     char* string = CJSON_MALLOC((token->length - 1) * sizeof(char));
@@ -152,13 +152,13 @@ cleanup:
     return NULL;
 }
 
-static bool CJSON_parse_string(CJSON_Node *const node, JSON_Tokens *const tokens) {
+static bool CJSON_parse_string(CJSON_Node *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
     BENCHMARK_START();
     
-    const JSON_Token *const token = tokens->data + tokens->index; 
+    const CJSON_Token *const token = tokens->data + tokens->index; 
 
     char *string = CJSON_parse_utf8_string(token);
     if(string == NULL) {
@@ -183,7 +183,7 @@ static bool CJSON_parse_string(CJSON_Node *const node, JSON_Tokens *const tokens
     return true;
 }
 
-static bool CJSON_parse_number(CJSON_Node *const node, JSON_Tokens *const tokens) {
+static bool CJSON_parse_number(CJSON_Node *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
@@ -192,11 +192,11 @@ static bool CJSON_parse_number(CJSON_Node *const node, JSON_Tokens *const tokens
     char str[1 << 9] = {0};
 
     bool success;
-    const JSON_Token *const token = tokens->data + tokens->index; 
+    const CJSON_Token *const token = tokens->data + tokens->index; 
 
     memcpy(str, token->value, MIN(sizeof(str) - 1, token->length));
 
-    if(token->type == JSON_TOKEN_FLOAT) {
+    if(token->type == CJSON_TOKEN_FLOAT) {
         const double float64 = parse_float64(str, &success);
         if(!success) {
             *node = (CJSON_Node) {
@@ -213,7 +213,7 @@ static bool CJSON_parse_number(CJSON_Node *const node, JSON_Tokens *const tokens
             .value.float64 = float64
         };
     } else if(str[0] == '-') {
-        if(token->type == JSON_TOKEN_SCIENTIFIC_INT) {
+        if(token->type == CJSON_TOKEN_SCIENTIFIC_INT) {
             const long double long_double = parse_long_double(str, &success);
             if(!success || long_double < INT64_MIN || long_double > INT64_MAX) {
                 *node = (CJSON_Node) {
@@ -246,7 +246,7 @@ static bool CJSON_parse_number(CJSON_Node *const node, JSON_Tokens *const tokens
                 .value.int64 = int64,
             };
         }
-    } else if(token->type == JSON_TOKEN_SCIENTIFIC_INT) {
+    } else if(token->type == CJSON_TOKEN_SCIENTIFIC_INT) {
         const long double long_double = parse_long_double(str, &success);
         if(!success || long_double > UINT64_MAX) {
             *node = (CJSON_Node) {
@@ -287,13 +287,13 @@ static bool CJSON_parse_number(CJSON_Node *const node, JSON_Tokens *const tokens
     return true;
 }
 
-static void CJSON_parse_bool(CJSON_Node *const node, JSON_Tokens *const tokens) {
+static void CJSON_parse_bool(CJSON_Node *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
     BENCHMARK_START();
 
-    const JSON_Token *const token = tokens->data + tokens->index; 
+    const CJSON_Token *const token = tokens->data + tokens->index; 
 
     node->type = CJSON_BOOL;
     node->value.boolean = token->value[0] == 't';
@@ -303,7 +303,7 @@ static void CJSON_parse_bool(CJSON_Node *const node, JSON_Tokens *const tokens) 
     BENCHMARK_END();
 }
 
-static void CJSON_parse_null(CJSON_Node *const node, JSON_Tokens *const tokens) {
+static void CJSON_parse_null(CJSON_Node *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
@@ -317,7 +317,7 @@ static void CJSON_parse_null(CJSON_Node *const node, JSON_Tokens *const tokens) 
     BENCHMARK_END();
 }
 
-static bool CJSON_parse_object(CJSON_Node *const node, JSON_Tokens *const tokens) {
+static bool CJSON_parse_object(CJSON_Node *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
@@ -340,12 +340,12 @@ static bool CJSON_parse_object(CJSON_Node *const node, JSON_Tokens *const tokens
     node->type = CJSON_OBJECT;
     CJSON_Object_init(object);
 
-    ObjectParsingError error;
-    CJSON_Node json_copy;
-    const JSON_Token *token = tokens->data + tokens->index;
+    CJSON_Error next_error;
+    CJSON_ObjectParsingError error;
+    const CJSON_Token *token = tokens->data + tokens->index;
     char *key = NULL;
 
-    if(token->type == JSON_TOKEN_RCURLY) {
+    if(token->type == CJSON_TOKEN_RCURLY) {
         tokens->index++;
         BENCHMARK_END();
 
@@ -353,21 +353,21 @@ static bool CJSON_parse_object(CJSON_Node *const node, JSON_Tokens *const tokens
     }
 
     while(tokens->index + 4U < tokens->length) {
-        if(token->type != JSON_TOKEN_STRING) {
-            error = ObjectKeyError;
+        if(token->type != CJSON_TOKEN_STRING) {
+            error = CJSON_ObjectKeyError;
             goto cleanup;
         }
 
         key = CJSON_parse_utf8_string(token);
         if(key == NULL) {
-            error = ObjectKeyError;
+            error = CJSON_ObjectKeyError;
             goto cleanup;
         }
 
         token++;
     
-        if(token->type != JSON_TOKEN_COLON) {
-            error = ObjectColonError;
+        if(token->type != CJSON_TOKEN_COLON) {
+            error = CJSON_ObjectColonError;
             tokens->index++;
             goto cleanup;
         }
@@ -384,77 +384,63 @@ static bool CJSON_parse_object(CJSON_Node *const node, JSON_Tokens *const tokens
         key = NULL;
 
         if(!CJSON_parse_tokens(&entry->value, tokens)) {
-            error = ObjectValueError;
-            json_copy = entry->value;
+            error = CSJON_ObjectValueError;
+            next_error = entry->value.value.error;
             goto cleanup;
         }
 
         token = tokens->data + tokens->index;
 
-        if(token->type == JSON_TOKEN_COMMA) {
+        if(token->type == CJSON_TOKEN_COMMA) {
             tokens->index++;
             token++;
             continue;
         }
 
-        if(token->type == JSON_TOKEN_RCURLY) {
+        if(token->type == CJSON_TOKEN_RCURLY) {
             tokens->index++;
             BENCHMARK_END();
 
             return true;
         }
 
-        error = ObjectCommaError;
+        error = CJSON_ObjectCommaError;
         goto cleanup;
     }
     
-    error = ObjectIncompleteError;
+    error = CJSON_ObjectIncompleteError;
 
 cleanup:
     CJSON_FREE(key);
     CJSON_Object_free(object);
+    node->type = CJSON_ERROR;
 
     switch(error) {
-    case ObjectIncompleteError: {
-        *node = (CJSON_Node) {
-            .type = CJSON_ERROR,
-            .value.error = CJSON_OBJECT_FAILED_TO_PARSE
-        };
+    case CJSON_ObjectIncompleteError: {
+        node->value.error = CJSON_OBJECT_FAILED_TO_PARSE;
         break;
     }
-    case ObjectKeyError: {
-        *node = (CJSON_Node) {
-            .type = CJSON_ERROR,
-            .value.error = CJSON_OBJECT_INVALID_KEY
-        };
+    case CJSON_ObjectKeyError: {
+        node->value.error = CJSON_OBJECT_INVALID_KEY;
         break;
     }
 
-    case ObjectColonError: {
-        *node = (CJSON_Node) {
-            .type = CJSON_ERROR,
-            .value.error = CJSON_OBJECT_MISSING_COLON
-        };
+    case CJSON_ObjectColonError: {
+        node->value.error = CJSON_OBJECT_MISSING_COLON;
         break;
     }
 
-    case ObjectValueError: {
-        if(json_copy.value.error == CJSON_TOKEN_ERROR) {
-            *node = (CJSON_Node) {
-                .type = CJSON_ERROR,
-                .value.error = CJSON_OBJECT_INVALID_VALUE
-            };
+    case CSJON_ObjectValueError: {
+        if(next_error == CJSON_TOKEN_ERROR) {
+            node->value.error = CJSON_OBJECT_INVALID_VALUE;
         } else {
-            *node = json_copy;
+            node->value.error = next_error;
         }
         break;
     }
 
-    case ObjectCommaError: {
-        *node = (CJSON_Node) {
-            .type = CJSON_ERROR,
-            .value.error = CJSON_OBJECT_MISSING_COMMA_OR_RCURLY
-        };
+    case CJSON_ObjectCommaError: {
+        node->value.error = CJSON_OBJECT_MISSING_COMMA_OR_RCURLY;
         break;
     }
     }
@@ -464,7 +450,7 @@ cleanup:
     return false;
 }
 
-static bool CJSON_parse_array(CJSON_Node *const node, JSON_Tokens *const tokens) {
+static bool CJSON_parse_array(CJSON_Node *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
@@ -483,14 +469,14 @@ static bool CJSON_parse_array(CJSON_Node *const node, JSON_Tokens *const tokens)
     }
 
     CJSON_Error next_error;
-    ArrayParsingError error;
+    CJSON_ArrayParsingError error;
     CJSON_Array *const array = &node->value.array;
     node->type = CJSON_ARRAY;
     CJSON_Array_init(array);
 
-    const JSON_Token *token = tokens->data + tokens->index;
+    const CJSON_Token *token = tokens->data + tokens->index;
 
-    if(token->type == JSON_TOKEN_RBRACKET) {
+    if(token->type == CJSON_TOKEN_RBRACKET) {
         tokens->index++;
         BENCHMARK_END();
 
@@ -500,38 +486,38 @@ static bool CJSON_parse_array(CJSON_Node *const node, JSON_Tokens *const tokens)
     while(tokens->index + 2U < tokens->length) {
         CJSON_Node *const next_json = CJSON_Array_next(array);
         if(!CJSON_parse_tokens(next_json, tokens)) {
-            error = ArrayValueError;
+            error = CJSON_ArrayValueError;
             next_error = next_json->value.error;
             goto cleanup;
         }
 
         token = tokens->data + tokens->index;
  
-        if(token->type == JSON_TOKEN_COMMA) {
+        if(token->type == CJSON_TOKEN_COMMA) {
             tokens->index++;
             token++;
             continue;
         }
 
-        if(token->type == JSON_TOKEN_RBRACKET) {
+        if(token->type == CJSON_TOKEN_RBRACKET) {
             tokens->index++;
             BENCHMARK_END();
 
             return true;
         }
 
-        error = ArrayCommaError;
+        error = CJSON_ArrayCommaError;
         goto cleanup;
     }
 
-    error = ArrayIncompleteError;
+    error = CJSON_ArrayIncompleteError;
 
 cleanup:
     node->type = CJSON_ERROR;
     CJSON_Array_free(array);
     
     switch(error) {
-    case ArrayIncompleteError: {
+    case CJSON_ArrayIncompleteError: {
         *node = (CJSON_Node) {
             .type = CJSON_ERROR,
             .value.error = CJSON_ARRAY_FAILED_TO_PARSE
@@ -539,7 +525,7 @@ cleanup:
         break;
     }
 
-    case ArrayValueError: {
+    case CJSON_ArrayValueError: {
         if(next_error == CJSON_TOKEN_ERROR) {
             node->value.error = CJSON_ARRAY_INVALID_VALUE;
         } else {
@@ -548,7 +534,7 @@ cleanup:
         break;
     }
 
-    case ArrayCommaError: {
+    case CJSON_ArrayCommaError: {
         node->value.error = CJSON_ARRAY_MISSING_COMMA_OR_RBRACKET;
         break;
     }
@@ -559,52 +545,52 @@ cleanup:
     return false;
 }
 
-static bool CJSON_parse_tokens(CJSON_Node *const node, JSON_Tokens *const tokens) {
+static bool CJSON_parse_tokens(CJSON_Node *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
     BENCHMARK_START();
 
-    const JSON_Token *const token = tokens->data + tokens->index; 
+    const CJSON_Token *const token = tokens->data + tokens->index; 
 
     switch(token->type) {
-    case JSON_TOKEN_STRING: {
+    case CJSON_TOKEN_STRING: {
         const bool success = CJSON_parse_string(node, tokens);
         BENCHMARK_END();
         return success;
     }
-    case JSON_TOKEN_INT:
-    case JSON_TOKEN_FLOAT:
-    case JSON_TOKEN_SCIENTIFIC_INT: {
+    case CJSON_TOKEN_INT:
+    case CJSON_TOKEN_FLOAT:
+    case CJSON_TOKEN_SCIENTIFIC_INT: {
         const bool success = CJSON_parse_number(node, tokens);
         BENCHMARK_END();
         return success;
     }
-    case JSON_TOKEN_BOOL: {
+    case CJSON_TOKEN_BOOL: {
         CJSON_parse_bool(node, tokens);
         BENCHMARK_END();
         return true;
     }
-    case JSON_TOKEN_NULL: {
+    case CJSON_TOKEN_NULL: {
         CJSON_parse_null(node, tokens);
         BENCHMARK_END();
         return true;
     }
-    case JSON_TOKEN_LBRACKET: {
+    case CJSON_TOKEN_LBRACKET: {
         const bool success = CJSON_parse_array(node, tokens);
         BENCHMARK_END();
         return success;
     }
-    case JSON_TOKEN_LCURLY: {
+    case CJSON_TOKEN_LCURLY: {
         const bool success = CJSON_parse_object(node, tokens);
         BENCHMARK_END();
         return success;
     }
-    case JSON_TOKEN_COLON:
-    case JSON_TOKEN_COMMA:
-    case JSON_TOKEN_RBRACKET:
-    case JSON_TOKEN_RCURLY:
-    case JSON_TOKEN_INVALID:
+    case CJSON_TOKEN_COLON:
+    case CJSON_TOKEN_COMMA:
+    case CJSON_TOKEN_RBRACKET:
+    case CJSON_TOKEN_RCURLY:
+    case CJSON_TOKEN_INVALID:
         *node = (CJSON_Node) {
             .type = CJSON_ERROR,
             .value.error = CJSON_TOKEN_ERROR
@@ -622,7 +608,7 @@ CJSON *CJSON_init(void) {
 
     root->node.type = CJSON_NULL;
     root->node.value.null = NULL;
-    root->tokens = (JSON_Tokens){0};
+    root->tokens = (CJSON_Tokens){0};
 
     return root;
 }
@@ -655,15 +641,15 @@ CJSON *CJSON_parse(const char *const data, const unsigned int length) {
     CJSON *root = CJSON_MALLOC(sizeof(CJSON));
     assert(root != NULL);
 
-    JSON_Tokens *tokens = &root->tokens;
-    JSON_Tokens_init(tokens);
+    CJSON_Tokens *tokens = &root->tokens;
+    CJSON_Tokens_init(tokens);
 
-    JSON_Token *token = JSON_Tokens_next(tokens);
+    CJSON_Token *token = CJSON_Tokens_next(tokens);
     while(CJSON_Lexer_tokenize(&lexer, token)) {
-        token = JSON_Tokens_next(tokens);
+        token = CJSON_Tokens_next(tokens);
     }
 
-    if(token->type == JSON_TOKEN_INVALID) {
+    if(token->type == CJSON_TOKEN_INVALID) {
         root->node = (CJSON_Node) {
             .type = CJSON_ERROR,
             .value.error = CJSON_TOKEN_ERROR
@@ -709,7 +695,7 @@ void CJSON_free(CJSON *const root) {
     BENCHMARK_START();
 
     if(root->tokens.data != NULL) {
-        JSON_Tokens_free(&root->tokens);
+        CJSON_Tokens_free(&root->tokens);
     }
     CJSON_Node_free(&root->node);
     CJSON_FREE(root);
@@ -873,7 +859,7 @@ CJSON_Node *CJSON_get(CJSON_Node *node, const char *query) {
     return node;
 }
 
-#define JSON_GET(JSON_TYPE)\
+#define CJSON_GET(JSON_TYPE)\
     assert(node != NULL);\
     assert(node->type != CJSON_ERROR);\
     assert(query != NULL);\
@@ -888,46 +874,46 @@ CJSON_Node *CJSON_get(CJSON_Node *node, const char *query) {
     }\
     *success = true;\
 
-#define JSON_GET_VALUE(JSON_TYPE, MEMBER)\
-    JSON_GET(JSON_TYPE)\
+#define CJSON_GET_VALUE(JSON_TYPE, MEMBER)\
+    CJSON_GET(JSON_TYPE)\
     BENCHMARK_END();\
     return ret->value.MEMBER;
-
-#define JSON_GET_PTR(JSON_TYPE, MEMBER)\
-    JSON_GET(JSON_TYPE)\
+ 
+#define CJSON_GET_PTR(JSON_TYPE, MEMBER)\
+    CJSON_GET(JSON_TYPE)\
     BENCHMARK_END();\
     return &ret->value.MEMBER;
 
 char *CJSON_get_string(CJSON_Node *const node, const char *query, bool *const success) {
-    JSON_GET_VALUE(CJSON_STRING, string)
+    CJSON_GET_VALUE(CJSON_STRING, string)
 }
 
 double CJSON_get_float64(CJSON_Node *const node, const char *query, bool *const success) {
-    JSON_GET_VALUE(CJSON_FLOAT64, float64)
+    CJSON_GET_VALUE(CJSON_FLOAT64, float64)
 }
 
 int64_t CJSON_get_int64(CJSON_Node *const node, const char *query, bool *const success) {
-    JSON_GET_VALUE(CJSON_INT64, int64)
+    CJSON_GET_VALUE(CJSON_INT64, int64)
 }
 
 uint64_t CJSON_get_uint64(CJSON_Node *const node, const char *query, bool *const success) {
-    JSON_GET_VALUE(CJSON_UINT64, uint64)
+    CJSON_GET_VALUE(CJSON_UINT64, uint64)
 }
 
 CJSON_Object *CJSON_get_object(CJSON_Node *const node, const char *query, bool *const success) {
-    JSON_GET_PTR(CJSON_OBJECT, object)
+    CJSON_GET_PTR(CJSON_OBJECT, object)
 }
 
 CJSON_Array *CJSON_get_array(CJSON_Node *const node, const char *query, bool *const success) {
-    JSON_GET_PTR(CJSON_ARRAY, array)
+    CJSON_GET_PTR(CJSON_ARRAY, array)
 }
 
 void *CJSON_get_null(CJSON_Node *const node, const char *query, bool *const success) {
-    JSON_GET_VALUE(CJSON_NULL, null)
+    CJSON_GET_VALUE(CJSON_NULL, null)
 }
 
 bool CJSON_get_bool(CJSON_Node *const node, const char *query, bool *const success) {
-    JSON_GET_VALUE(CJSON_BOOL, boolean)
+    CJSON_GET_VALUE(CJSON_BOOL, boolean)
 }
 
 void CJSON_set_string(CJSON_Node *const node, const char *const value) {

@@ -12,4 +12,4 @@ test2_debug.exe: ./tests/test2.c $(SOURCE)
 	$(CC) $(INCLUDES) $(FLAGS) $(STD) -D COUNT_ALLOCATIONS -D BENCHMARK -g -Og -o test2_debug ./tests/test2.c $(SOURCE)
 
 test2_release.exe: ./tests/test2.c $(SOURCE)
-	$(CC) $(INCLUDES) $(FLAGS) $(STD) -D NDEBUG -D BENCHMARK -O3 -o test2_release ./tests/test2.c $(SOURCE)
+	$(CC) $(INCLUDES) $(FLAGS) $(STD) -D NDEBUG -O3 -o test2_release ./tests/test2.c $(SOURCE)
