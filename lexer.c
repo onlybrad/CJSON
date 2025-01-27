@@ -230,6 +230,8 @@ bool CJSON_Lexer_tokenize(CJSON_Lexer *const lexer, CJSON_Token *const token) {
 
     if(lexer->position == lexer->length) {
         BENCHMARK_END();
+        token->type = CJSON_TOKEN_NULL;
+        token->length = 0;
         return false;
     }
     
