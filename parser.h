@@ -44,13 +44,13 @@ typedef enum CJSON_Error {
 } CJSON_Error;
 
 struct CJSON_Array {
-    CJSON_Node *data;
+    CJSON_Node *nodes;
     unsigned int length;
     unsigned int capacity;
 };
 
 struct CJSON_Object {
-    CJSON_Key_Value *data;
+    CJSON_Key_Value *nodes;
     unsigned int capacity;
 };
 
@@ -59,11 +59,11 @@ union CJSON_Data {
     double       float64;
     int64_t      int64;
     uint64_t     uint64;
-    CJSON_Array   array;
-    CJSON_Object  object;
-    void        *null;
+    CJSON_Array  array;
+    CJSON_Object object;
+    void         *null;
     bool         boolean;
-    CJSON_Error   error;
+    CJSON_Error  error;
 };
 
 struct CJSON_Node {

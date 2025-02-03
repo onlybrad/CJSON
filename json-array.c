@@ -13,11 +13,11 @@ static void CJSON_Array_resize(CJSON_Array *const array, const unsigned int capa
 
     BENCHMARK_START();
 
-    CJSON_Node *data = CJSON_REALLOC(array->data, (size_t)capacity * sizeof(CJSON_Node), (size_t)array->capacity * sizeof(CJSON_Node));
+    CJSON_Node *data = CJSON_REALLOC(array->nodes, (size_t)capacity * sizeof(CJSON_Node), (size_t)array->capacity * sizeof(CJSON_Node));
     
     assert(data != NULL);
 
-    array->data = data;
+    array->nodes = data;
     array->capacity = capacity;
 
     BENCHMARK_END();
@@ -30,16 +30,16 @@ void CJSON_Array_init(CJSON_Array *const array) {
     assert(data != NULL);
 
     *array = (CJSON_Array) {
-        .data = data,
+        .nodes = data,
         .capacity = INITIAL_JSON_ARRAY_CAPACITY
     };
 }
 
 void CJSON_Array_free(CJSON_Array *const array) {
     for(unsigned int i = 0U; i < array->length; i++) {
-        CJSON_Node_free(array->data + i);
+        CJSON_Node_free(array->nodes + i);
     }
-    CJSON_FREE(array->data);
+    CJSON_FREE(array->nodes);
     *array = (CJSON_Array){0};
 }
 
@@ -52,7 +52,7 @@ CJSON_Node *CJSON_Array_next(CJSON_Array *const array) {
         CJSON_Array_resize(array, array->capacity * 2);
     }
 
-    CJSON_Node *const ret = array->data + array->length;
+    CJSON_Node *const ret = array->nodes + array->length;
     array->length++;
 
     BENCHMARK_END();
@@ -63,7 +63,7 @@ CJSON_Node *CJSON_Array_next(CJSON_Array *const array) {
 CJSON_Node *CJSON_Array_get(const CJSON_Array *const array, const unsigned int index) {
     assert(array != NULL);
 
-    return index >= array->length ? NULL : array->data + index;
+    return index >= array->length ? NULL : array->nodes + index;
 }
 
 void CJSON_Array_set(CJSON_Array *const array, const unsigned int index, const CJSON_Node *const value) {
@@ -82,8 +82,8 @@ void CJSON_Array_set(CJSON_Array *const array, const unsigned int index, const C
         array->length = index + 1U;
     }
 
-    CJSON_Node_free(array->data + index);
-    array->data[index] = *value;
+    CJSON_Node_free(array->nodes + index);
+    array->nodes[index] = *value;
 
     BENCHMARK_END();
 }
@@ -242,7 +242,7 @@ void CJSON_Array_set_null(CJSON_Array *const array, const unsigned int index) {
 
     BENCHMARK_START();
 
-    array->data[index] = (CJSON_Node){
+    array->nodes[index] = (CJSON_Node){
         .type = CJSON_NULL
     };
 

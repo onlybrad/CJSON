@@ -39,12 +39,12 @@ static void CJSON_Object_resize(CJSON_Object *const object, const unsigned int c
 
     BENCHMARK_START();
 
-    CJSON_Key_Value *const old_data = object->data;
+    CJSON_Key_Value *const old_data = object->nodes;
     const unsigned int old_capacity = object->capacity;
     CJSON_Key_Value *data = CJSON_CALLOC((size_t)capacity, sizeof(CJSON_Key_Value));
     assert(data != NULL);
 
-    object->data = data;
+    object->nodes = data;
     object->capacity = capacity;
 
     for(unsigned int i = 0U; i < old_capacity; i++) {
@@ -68,7 +68,7 @@ void CJSON_Object_init(CJSON_Object *const object) {
     assert(data != NULL);
 
     *object = (CJSON_Object) {
-        .data = data,
+        .nodes = data,
         .capacity = INITIAL_JSON_OBJECT_CAPACITY
     };
 }
@@ -81,7 +81,7 @@ CJSON_Key_Value *CJSON_Object_get_entry(CJSON_Object *const object, const char *
 
     const unsigned int start = CJSON_hash(key) % object->capacity;
     unsigned int i = start; 
-    while(object->data[i].key != NULL && object->data[i].key != DELETED_ENTRY && strcmp(object->data[i].key, key) != 0) {
+    while(object->nodes[i].key != NULL && object->nodes[i].key != DELETED_ENTRY && strcmp(object->nodes[i].key, key) != 0) {
         i = (i + 1U) % object->capacity;
         if(i == start) {
             CJSON_Object_resize(object, object->capacity * 2);
@@ -91,7 +91,7 @@ CJSON_Key_Value *CJSON_Object_get_entry(CJSON_Object *const object, const char *
         }
     }
 
-    CJSON_Key_Value *const ret = object->data + i;
+    CJSON_Key_Value *const ret = object->nodes + i;
     BENCHMARK_END();
     return ret;
 }
@@ -105,19 +105,19 @@ CJSON_Key_Value *CJSON_Object_find_entry(const CJSON_Object *const object, const
     const unsigned int start = CJSON_hash(key) % object->capacity;
     unsigned int i = start; 
     do {
-        if(object->data[i].key == DELETED_ENTRY) {
+        if(object->nodes[i].key == DELETED_ENTRY) {
             i = (i + 1U) % object->capacity;
             continue;
         }
 
-        if(object->data[i].key == NULL) {
+        if(object->nodes[i].key == NULL) {
             BENCHMARK_END();
 
             return NULL;
         } 
 
-        if(strcmp(object->data[i].key, key) == 0) {
-            CJSON_Key_Value *const ret = object->data + i;
+        if(strcmp(object->nodes[i].key, key) == 0) {
+            CJSON_Key_Value *const ret = object->nodes + i;
             BENCHMARK_END();
             
             return ret;
@@ -185,14 +185,14 @@ void CJSON_Object_free(CJSON_Object *const object) {
     BENCHMARK_START();
 
     for(unsigned int i = 0U; i < object->capacity; i++) {
-        CJSON_Key_Value *const data = object->data + i;
+        CJSON_Key_Value *const data = object->nodes + i;
         if(data->key == NULL || data->key == DELETED_ENTRY) {
             continue;
         }
         CJSON_FREE(data->key);
         CJSON_Node_free(&data->value);
     }
-    CJSON_FREE(object->data);
+    CJSON_FREE(object->nodes);
     *object = (CJSON_Object){0};
 
     BENCHMARK_END();

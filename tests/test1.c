@@ -462,14 +462,14 @@ static void test_create_array(void) {
     CJSON_Array_set_bool(array1, 1, value2);
     CJSON_Array_set_int64(array1, 2, value3);
 
-    assert(array2.data[0].type == CJSON_UINT64);
-    assert(array2.data[0].value.uint64 == value1);
-    assert(array1->data[0].type == CJSON_ARRAY);
-    assert(&array1->data[0].value.array != &array2);
-    assert(array1->data[1].type == CJSON_BOOL);
-    assert(array1->data[1].value.boolean == value2);
-    assert(array1->data[2].type == CJSON_INT64);
-    assert(array1->data[2].value.int64 == value3);
+    assert(array2.nodes[0].type == CJSON_UINT64);
+    assert(array2.nodes[0].value.uint64 == value1);
+    assert(array1->nodes[0].type == CJSON_ARRAY);
+    assert(&array1->nodes[0].value.array != &array2);
+    assert(array1->nodes[1].type == CJSON_BOOL);
+    assert(array1->nodes[1].value.boolean == value2);
+    assert(array1->nodes[2].type == CJSON_INT64);
+    assert(array1->nodes[2].value.int64 == value3);
 
     CJSON_free(root);
 }
