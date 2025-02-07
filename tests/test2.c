@@ -18,7 +18,7 @@ int main(void) {
 #endif
 
     size_t filesize;
-    char *const data = file_get_contents("E:\\code\\c\\json\\tests\\really-big-json-file.json", &filesize);
+    char *const data = file_get_contents("tests\\really-big-json-file.json", &filesize);
 
 #ifdef BENCHMARK
     BENCHMARK_START();
