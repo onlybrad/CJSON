@@ -94,6 +94,10 @@ void CJSON_Array_push(CJSON_Array *const array, const CJSON_Node *const value) {
 
     BENCHMARK_START();
 
+    if(array->length == UINT_MAX) {
+        return;
+    }
+
     CJSON_Node *const next = CJSON_Array_next(array);
 
     *next = *value;
