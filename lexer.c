@@ -66,7 +66,7 @@ static bool read_number(CJSON_Lexer *const lexer, CJSON_Token *const token) {
     token->type = CJSON_TOKEN_INT;
 
     //0 as the first character is only allowed if it's followed by a dot or by an non-digit character
-    if(data[0] == '0' && length > 1 && data[1] != '.' && is_digit(data[1])) {
+    if(data[0] == '0' && length > 1U && data[1] != '.' && is_digit(data[1])) {
         success = false;
         token->type = CJSON_TOKEN_INVALID;
 
@@ -150,7 +150,7 @@ static bool is_keyword(const CJSON_Lexer *const lexer, const char *const keyword
     const unsigned int lexer_length = lexer->length;
     const char *const data = lexer->data;
 
-    if(position + keyword_length - 1 < lexer_length 
+    if(position + keyword_length - 1U < lexer_length 
     && strncmp(data + position, keyword, keyword_length) == 0
     ){
         if(position + keyword_length >= lexer_length) {
@@ -231,7 +231,7 @@ bool CJSON_Lexer_tokenize(CJSON_Lexer *const lexer, CJSON_Token *const token) {
     if(lexer->position == lexer->length) {
         BENCHMARK_END();
         token->type = CJSON_TOKEN_NULL;
-        token->length = 0;
+        token->length = 0U;
         return false;
     }
     
