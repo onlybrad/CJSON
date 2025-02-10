@@ -206,13 +206,13 @@ static void read_invalid_token(CJSON_Lexer *const lexer, CJSON_Token *const toke
     }
     
     token->type = CJSON_TOKEN_INVALID;
-    token->length = i - position - 1;
+    token->length = i - position - 1U;
 }
 
 void CJSON_Lexer_init(CJSON_Lexer *const lexer, const char *const data, const unsigned int length) {
     assert(lexer != NULL);
     assert(data != NULL);
-    assert(length > 0);
+    assert(length > 0U);
 
     *lexer = (CJSON_Lexer) {
         .data = data,
