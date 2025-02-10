@@ -273,7 +273,7 @@ long usec_timestamp(void) {
     return (long)tt;
 #else
     struct timeval current_time;
-    gettimeofday(&current_time, nullptr);
+    gettimeofday(&current_time, NULL);
 
     return current_time.tv_sec * 1000000L + current_time.tv_usec;
 #endif
