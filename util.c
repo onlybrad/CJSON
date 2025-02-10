@@ -1,11 +1,12 @@
 #ifdef _WIN32
-#include <windows.h>
+    #include <windows.h>
+#else
+    #include <sys/time.h>
 #endif
 #include <stdlib.h>
 #include <errno.h>
 #include <assert.h>
 #include <string.h>
-#include <sys/time.h>
 #include "util.h"
 #include "benchmark.h"
 
@@ -219,13 +220,6 @@ void print_bytes(const void *const buffer, const size_t size) {
     printf("0x%02hhx]\n", ((const unsigned char*)buffer)[size - 1]);
 }
 
-long usec_timestamp(void) {
-    struct timeval current_time;
-    gettimeofday(&current_time, NULL);
-
-    return current_time.tv_sec * 1000000L + current_time.tv_usec;
-}
-
 char *file_get_contents(const char *const path, size_t *const filesize) {
     assert(path != NULL);
     assert(strlen(path) > 0);
@@ -265,4 +259,22 @@ char *file_get_contents(const char *const path, size_t *const filesize) {
 
     *filesize = (size_t)length;
     return data;
+}
+
+long usec_timestamp(void) {
+    #ifdef _WIN32
+    FILETIME ft;
+    GetSystemTimeAsFileTime(&ft);
+    unsigned long long tt = ft.dwHighDateTime;
+    tt <<= 32ULL;
+    tt |= ft.dwLowDateTime;
+    tt /= 10ULL;
+    tt -= 11644473600000000ULL;
+    return (long)tt;
+#else
+    struct timeval current_time;
+    gettimeofday(&current_time, nullptr);
+
+    return current_time.tv_sec * 1000000L + current_time.tv_usec;
+#endif
 }
