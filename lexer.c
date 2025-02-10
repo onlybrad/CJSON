@@ -145,7 +145,7 @@ static bool read_number(CJSON_Lexer *const lexer, CJSON_Token *const token) {
     return success;
 }
 
-static bool is_keyword(const CJSON_Lexer *const lexer, const char *const keyword, const unsigned int keyword_length) {
+static bool next_token_is_keyword(const CJSON_Lexer *const lexer, const char *const keyword, const unsigned int keyword_length) {
     const unsigned int position = lexer->position; 
     const unsigned int lexer_length = lexer->length;
     const char *const data = lexer->data;
@@ -171,19 +171,19 @@ static bool read_keyword(CJSON_Lexer *const lexer, CJSON_Token *const token) {
     static const char false_string[] = "false";
 
     
-    if(is_keyword(lexer, null_string, (unsigned int)static_strlen(null_string))) {
+    if(next_token_is_keyword(lexer, null_string, (unsigned int)static_strlen(null_string))) {
         token->type = CJSON_TOKEN_NULL;
         token->length = (unsigned int)static_strlen(null_string);
         return true;
     }
     
-    if(is_keyword(lexer, true_string, (unsigned int)static_strlen(true_string))) {
+    if(next_token_is_keyword(lexer, true_string, (unsigned int)static_strlen(true_string))) {
         token->type = CJSON_TOKEN_BOOL;
         token->length = (unsigned int)static_strlen(true_string);
         return true;
     }
     
-    if(is_keyword(lexer, false_string, (unsigned int)static_strlen(false_string))) {
+    if(next_token_is_keyword(lexer, false_string, (unsigned int)static_strlen(false_string))) {
         token->type = CJSON_TOKEN_BOOL;
         token->length = (unsigned int)static_strlen(false_string);
         return true;
