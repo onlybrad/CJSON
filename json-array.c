@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <string.h>
-#include "parser.h"
+#include "cjson.h"
 #include "benchmark.h"
 
 #define INITIAL_JSON_ARRAY_CAPACITY (1 << 3)

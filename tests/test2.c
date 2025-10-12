@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "../parser.h"
+#include "../cjson.h"
 #include "../util.h"
 
 #include "../benchmark.h"
