@@ -131,7 +131,7 @@ CJSON_Key_Value *CJSON_Object_find_entry(const CJSON_Object *const object, const
     return NULL;
 }
 
-CJSON_JSON *CJSON_Object_get(const CJSON_Object *const object, const char *const key) {
+CJSON *CJSON_Object_get(const CJSON_Object *const object, const char *const key) {
     assert(object != NULL);
     assert(key != NULL);
 
@@ -144,7 +144,7 @@ CJSON_JSON *CJSON_Object_get(const CJSON_Object *const object, const char *const
     return entry == NULL ? NULL : &entry->value;
 }
 
-void CJSON_Object_set(CJSON_Object *const object, const char *const key, const CJSON_JSON *const value) {
+void CJSON_Object_set(CJSON_Object *const object, const char *const key, const CJSON *const value) {
     assert(object != NULL);
     assert(key != NULL);
     assert(value != NULL);
@@ -204,7 +204,7 @@ void CJSON_Object_free(CJSON_Object *const object) {
     assert(success != NULL);\
                             \
     BENCHMARK_START();\
-    CJSON_JSON *const ret = CJSON_Object_get(object, key);\
+    CJSON *const ret = CJSON_Object_get(object, key);\
     if(ret == NULL || ret->type != JSON_TYPE) {\
         *success = false;\
         BENCHMARK_END();\
@@ -262,7 +262,7 @@ void CJSON_Object_set_string(CJSON_Object *const object, const char *const key, 
     char *copy = value != NULL ? CJSON_STRDUP(value) : NULL;
     assert(value != NULL && copy != NULL);
 
-    CJSON_Object_set(object, key, &(CJSON_JSON){
+    CJSON_Object_set(object, key, &(CJSON){
         .type = CJSON_STRING,
         .value = {.string = copy}
     });
@@ -274,7 +274,7 @@ void CJSON_Object_set_float64(CJSON_Object *const object, const char *const key,
 
     BENCHMARK_START();
 
-    CJSON_Object_set(object, key, &(CJSON_JSON){
+    CJSON_Object_set(object, key, &(CJSON){
         .type = CJSON_FLOAT64,
         .value = {.float64 = value}
     });
@@ -287,7 +287,7 @@ void CJSON_Object_set_int64(CJSON_Object *const object, const char *const key, c
 
     BENCHMARK_START();
 
-    CJSON_Object_set(object, key, &(CJSON_JSON){
+    CJSON_Object_set(object, key, &(CJSON){
         .type = CJSON_INT64,
         .value = {.int64 = value}
     });
@@ -300,7 +300,7 @@ void CJSON_Object_set_uint64(CJSON_Object *const object, const char *const key, 
 
     BENCHMARK_START();
 
-    CJSON_Object_set(object, key, &(CJSON_JSON){
+    CJSON_Object_set(object, key, &(CJSON){
         .type = CJSON_UINT64,
         .value = {.uint64 = value}
     });
@@ -314,7 +314,7 @@ void CJSON_Object_set_object(CJSON_Object *const object, const char *const key, 
 
     BENCHMARK_START();
 
-    CJSON_Object_set(object, key, &(CJSON_JSON){
+    CJSON_Object_set(object, key, &(CJSON){
         .type = CJSON_OBJECT,
         .value = {.object = *value}
     });
@@ -328,7 +328,7 @@ void CJSON_Object_set_array(CJSON_Object *const object, const char *const key, c
 
     BENCHMARK_START();
 
-    CJSON_Object_set(object, key, &(CJSON_JSON){
+    CJSON_Object_set(object, key, &(CJSON){
         .type = CJSON_ARRAY,
         .value = {.array = *value}
     });
@@ -341,7 +341,7 @@ void CJSON_Object_set_null(CJSON_Object *const object, const char *const key) {
 
     BENCHMARK_START();
 
-    CJSON_Object_set(object, key, &(CJSON_JSON){
+    CJSON_Object_set(object, key, &(CJSON){
         .type = CJSON_NULL,
     });
 
@@ -353,7 +353,7 @@ void CJSON_Object_set_bool(CJSON_Object *const object, const char *const key, co
 
     BENCHMARK_START();
 
-    CJSON_Object_set(object, key, &(CJSON_JSON){
+    CJSON_Object_set(object, key, &(CJSON){
         .type = CJSON_BOOL,
         .value = {.boolean = value}
     });

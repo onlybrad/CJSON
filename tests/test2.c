@@ -26,7 +26,7 @@ int main(void) {
     BENCHMARK_END();
 #else
     const long start = usec_timestamp();
-    CJSON_JSON *const json = CJSON_parse(data, (unsigned int)filesize);
+    CJSON *const json = CJSON_parse(data, (unsigned int)filesize);
     const long end = usec_timestamp();
     printf("Execution time: %li", end - start);
 #endif

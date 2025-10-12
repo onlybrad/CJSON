@@ -13,7 +13,7 @@ static void CJSON_Array_resize(CJSON_Array *const array, const unsigned int capa
 
     BENCHMARK_START();
 
-    CJSON_JSON *data = CJSON_REALLOC(array->nodes, (size_t)capacity * sizeof(CJSON_JSON), (size_t)array->capacity * sizeof(CJSON_JSON));
+    CJSON *data = CJSON_REALLOC(array->nodes, (size_t)capacity * sizeof(CJSON), (size_t)array->capacity * sizeof(CJSON));
     
     assert(data != NULL);
 
@@ -26,7 +26,7 @@ static void CJSON_Array_resize(CJSON_Array *const array, const unsigned int capa
 void CJSON_Array_init(CJSON_Array *const array) {
     assert(array != NULL);
 
-    CJSON_JSON *data = CJSON_MALLOC(INITIAL_JSON_ARRAY_CAPACITY * sizeof(CJSON_JSON));
+    CJSON *data = CJSON_MALLOC(INITIAL_JSON_ARRAY_CAPACITY * sizeof(CJSON));
     assert(data != NULL);
 
     *array = (CJSON_Array) {
@@ -43,7 +43,7 @@ void CJSON_Array_free(CJSON_Array *const array) {
     *array = (CJSON_Array){0};
 }
 
-CJSON_JSON *CJSON_Array_next(CJSON_Array *const array) {
+CJSON *CJSON_Array_next(CJSON_Array *const array) {
     assert(array != NULL);
 
     BENCHMARK_START();
@@ -52,7 +52,7 @@ CJSON_JSON *CJSON_Array_next(CJSON_Array *const array) {
         CJSON_Array_resize(array, array->capacity * 2);
     }
 
-    CJSON_JSON *const ret = array->nodes + array->length;
+    CJSON *const ret = array->nodes + array->length;
     array->length++;
 
     BENCHMARK_END();
@@ -60,13 +60,13 @@ CJSON_JSON *CJSON_Array_next(CJSON_Array *const array) {
     return ret;
 }
 
-CJSON_JSON *CJSON_Array_get(const CJSON_Array *const array, const unsigned int index) {
+CJSON *CJSON_Array_get(const CJSON_Array *const array, const unsigned int index) {
     assert(array != NULL);
 
     return index >= array->length ? NULL : array->nodes + index;
 }
 
-void CJSON_Array_set(CJSON_Array *const array, const unsigned int index, const CJSON_JSON *const value) {
+void CJSON_Array_set(CJSON_Array *const array, const unsigned int index, const CJSON *const value) {
     assert(array != NULL);
     assert(value != NULL);
 
@@ -88,7 +88,7 @@ void CJSON_Array_set(CJSON_Array *const array, const unsigned int index, const C
     BENCHMARK_END();
 }
 
-void CJSON_Array_push(CJSON_Array *const array, const CJSON_JSON *const value) {
+void CJSON_Array_push(CJSON_Array *const array, const CJSON *const value) {
     assert(array != NULL);
     assert(value != NULL);
 
@@ -98,7 +98,7 @@ void CJSON_Array_push(CJSON_Array *const array, const CJSON_JSON *const value) {
         return;
     }
 
-    CJSON_JSON *const next = CJSON_Array_next(array);
+    CJSON *const next = CJSON_Array_next(array);
 
     *next = *value;
 
@@ -110,7 +110,7 @@ void CJSON_Array_push(CJSON_Array *const array, const CJSON_JSON *const value) {
     assert(success != NULL);\
                             \
     BENCHMARK_START();\
-    CJSON_JSON *const ret = CJSON_Array_get(array, index);\
+    CJSON *const ret = CJSON_Array_get(array, index);\
     if(ret == NULL || ret->type != JSON_TYPE) {\
         *success = false;\
         BENCHMARK_END();\
@@ -168,7 +168,7 @@ void CJSON_Array_set_string (CJSON_Array *const array, const unsigned int index,
     char *copy = value != NULL ? CJSON_STRDUP(value) : NULL;
     assert(value != NULL && copy != NULL);
 
-    CJSON_Array_set(array, index, &(CJSON_JSON){
+    CJSON_Array_set(array, index, &(CJSON){
         .type = CJSON_STRING,
         .value = {.string = copy}
     });
@@ -181,7 +181,7 @@ void CJSON_Array_set_float64(CJSON_Array *const array, const unsigned int index,
     
     BENCHMARK_START();
 
-    CJSON_Array_set(array, index, &(CJSON_JSON){
+    CJSON_Array_set(array, index, &(CJSON){
         .type = CJSON_FLOAT64,
         .value = {.float64 = value}
     });
@@ -194,7 +194,7 @@ void CJSON_Array_set_int64(CJSON_Array *const array, const unsigned int index, c
 
     BENCHMARK_START();
 
-    CJSON_Array_set(array, index, &(CJSON_JSON){
+    CJSON_Array_set(array, index, &(CJSON){
         .type = CJSON_INT64,
         .value = {.int64 = value}
     });
@@ -207,7 +207,7 @@ void CJSON_Array_set_uint64(CJSON_Array *const array, const unsigned int index, 
 
     BENCHMARK_START();
 
-    CJSON_Array_set(array, index, &(CJSON_JSON){
+    CJSON_Array_set(array, index, &(CJSON){
         .type = CJSON_UINT64,
         .value = {.uint64 = value}
     });
@@ -220,7 +220,7 @@ void CJSON_Array_set_array(CJSON_Array *const array, const unsigned int index, c
 
     BENCHMARK_START();
 
-    CJSON_Array_set(array, index, &(CJSON_JSON){
+    CJSON_Array_set(array, index, &(CJSON){
         .type = CJSON_ARRAY,
         .value = {.array = *value}
     });
@@ -233,7 +233,7 @@ void CJSON_Array_set_object(CJSON_Array *const array, const unsigned int index, 
 
     BENCHMARK_START();
 
-    CJSON_Array_set(array, index, &(CJSON_JSON){
+    CJSON_Array_set(array, index, &(CJSON){
         .type = CJSON_OBJECT,
         .value = {.object = *value}
     });
@@ -246,7 +246,7 @@ void CJSON_Array_set_null(CJSON_Array *const array, const unsigned int index) {
 
     BENCHMARK_START();
 
-    array->nodes[index] = (CJSON_JSON){
+    array->nodes[index] = (CJSON){
         .type = CJSON_NULL
     };
 
@@ -258,7 +258,7 @@ void CJSON_Array_set_bool(CJSON_Array *const array, const unsigned int index, co
 
     BENCHMARK_START();
 
-    CJSON_Array_set(array, index, &(CJSON_JSON){
+    CJSON_Array_set(array, index, &(CJSON){
         .type = CJSON_BOOL,
         .value = {.boolean = value}
     });

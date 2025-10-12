@@ -5,21 +5,21 @@
 
 static void test_empty_object(void) {
     const char empty_object[] = "{}";
-    CJSON_JSON *const root = CJSON_parse(empty_object, sizeof(empty_object) - 1);
+    CJSON *const root = CJSON_parse(empty_object, sizeof(empty_object) - 1);
     assert(root->type == CJSON_OBJECT);
     CJSON_free(root);
 }
 
 static void test_empty_array(void) {
     const char empty_array[] = "[]";
-    CJSON_JSON *const root = CJSON_parse(empty_array, sizeof(empty_array) - 1);
+    CJSON *const root = CJSON_parse(empty_array, sizeof(empty_array) - 1);
     assert(root->type == CJSON_ARRAY);
     CJSON_free(root);
 }
 
 static void test_primitive_values(void) {
     const char string[] = "\"\"";
-    CJSON_JSON *root = CJSON_parse(string, sizeof(string) - 1);
+    CJSON *root = CJSON_parse(string, sizeof(string) - 1);
     assert(root->type == CJSON_STRING);
     assert(strcmp(root->value.string, "") == 0);
     CJSON_free(root);
@@ -57,12 +57,12 @@ static void test_primitive_values(void) {
 
 static void test_key_value(void) {
     const char key_value[] = "{\"key\": \"value\"}";
-    CJSON_JSON *const root = CJSON_parse(key_value, sizeof(key_value) - 1);
+    CJSON *const root = CJSON_parse(key_value, sizeof(key_value) - 1);
     assert(root->type == CJSON_OBJECT);
 
     bool success;
     const char *value;
-    const CJSON_JSON *json;
+    const CJSON *json;
 
     value = CJSON_get_string(root, "key", &success);
     assert(success);
@@ -95,7 +95,7 @@ static void test_nested_objects(void) {
         "\"key2\": \"value\""
     "}";
 
-    CJSON_JSON *const root = CJSON_parse(nested_objects, sizeof(nested_objects) - 1);
+    CJSON *const root = CJSON_parse(nested_objects, sizeof(nested_objects) - 1);
     assert(root->type == CJSON_OBJECT);
 
     bool success;
@@ -124,12 +124,12 @@ static void test_struct_array(void) {
         "{\"key2\": \"value2\"}"
     "]";
 
-    CJSON_JSON *const root = CJSON_parse(struct_array, sizeof(struct_array) - 1);
+    CJSON *const root = CJSON_parse(struct_array, sizeof(struct_array) - 1);
     assert(root->type == CJSON_ARRAY);
     assert(root->value.array.length == 2U);
 
     bool success;
-    const CJSON_JSON *json;
+    const CJSON *json;
     const CJSON_Object *object;
     const char *value;
 
@@ -173,7 +173,7 @@ static void test_struct_array(void) {
 static void test_escaped_characters(void) {
     const char escaped_characters[] = "{\"key\": \"Line 1\\nLine 2\\\\\"}";
 
-    CJSON_JSON *const root = CJSON_parse(escaped_characters, sizeof(escaped_characters) - 1);
+    CJSON *const root = CJSON_parse(escaped_characters, sizeof(escaped_characters) - 1);
     assert(root->type == CJSON_OBJECT);
     bool success;
 
@@ -187,7 +187,7 @@ static void test_escaped_characters(void) {
 static void test_escaped_unicode(void) {
     const char escaped_characters[] = "{\"key\": \"Unicode test: \\u00A9\\u03A9\\uD840\\uDC00\"}";
 
-    CJSON_JSON *const root = CJSON_parse(escaped_characters, sizeof(escaped_characters) - 1);
+    CJSON *const root = CJSON_parse(escaped_characters, sizeof(escaped_characters) - 1);
     assert(root->type == CJSON_OBJECT);
 
     bool success;
@@ -211,11 +211,11 @@ static void test_escaped_unicode(void) {
 static void test_bools(void) {
     const char escaped_characters[] = "{\"isTrue\": true, \"isFalse\": false}";
 
-    CJSON_JSON *const root = CJSON_parse(escaped_characters, sizeof(escaped_characters) - 1);
+    CJSON *const root = CJSON_parse(escaped_characters, sizeof(escaped_characters) - 1);
     assert(root->type == CJSON_OBJECT);
 
     bool success, value;
-    CJSON_JSON *json;
+    CJSON *json;
 
     json = CJSON_get(root, "isTrue");
     assert(json != NULL);
@@ -241,7 +241,7 @@ static void test_bools(void) {
 static void test_exponent(void) {
     const char exponent[] = "{\"largeNumber\": 1e15, \"negativeLarge\": -1e15}";
 
-    CJSON_JSON *const root = CJSON_parse(exponent, sizeof(exponent) - 1);
+    CJSON *const root = CJSON_parse(exponent, sizeof(exponent) - 1);
     assert(root->type == CJSON_OBJECT);
 
     bool success;
@@ -260,10 +260,10 @@ static void test_exponent(void) {
 static void test_null(void) {
     const char null_value[] = "{\"key\": null}";
 
-    CJSON_JSON *const root = CJSON_parse(null_value, sizeof(null_value) - 1);
+    CJSON *const root = CJSON_parse(null_value, sizeof(null_value) - 1);
     assert(root->type == CJSON_OBJECT);
 
-    const CJSON_JSON *const null_json = CJSON_get(root, "key");
+    const CJSON *const null_json = CJSON_get(root, "key");
     assert(null_json != NULL);
     assert(null_json->type == CJSON_NULL);
     assert(null_json->value.null == NULL);
@@ -279,7 +279,7 @@ static void test_null(void) {
 static void test_missing_value(void) {
     const char missing_key[] = "{\"key1\": \"value1\", \"key2\": }";
 
-    CJSON_JSON *const root = CJSON_parse(missing_key, sizeof(missing_key) - 1);
+    CJSON *const root = CJSON_parse(missing_key, sizeof(missing_key) - 1);
     assert(root->type == CJSON_ERROR);
     assert(root->value.error == CJSON_OBJECT_FAILED_TO_PARSE);
 
@@ -292,7 +292,7 @@ static void test_comments(void) {
         "\"key\": \"value\""
     "}";
 
-    CJSON_JSON *const root = CJSON_parse(comments, sizeof(comments) - 1);
+    CJSON *const root = CJSON_parse(comments, sizeof(comments) - 1);
     assert(root->type == CJSON_ERROR);
     assert(root->value.error == CJSON_TOKEN_ERROR);
 
@@ -302,7 +302,7 @@ static void test_comments(void) {
 static void test_deep_nesting(void) {
     const char deep_nesting[] = "{\"key1\": {\"key2\": {\"key3\": {\"key4\": {\"key5\": \"value\"}}}}}";
 
-    CJSON_JSON *const root = CJSON_parse(deep_nesting, sizeof(deep_nesting) - 1);
+    CJSON *const root = CJSON_parse(deep_nesting, sizeof(deep_nesting) - 1);
     assert(root->type == CJSON_OBJECT);
 
     bool success;
@@ -316,7 +316,7 @@ static void test_deep_nesting(void) {
 static void test_no_quotes_key(void) {
     const char no_quotes_key[] = "{ key: 1 }";
 
-    CJSON_JSON *const root = CJSON_parse(no_quotes_key, sizeof(no_quotes_key) - 1);
+    CJSON *const root = CJSON_parse(no_quotes_key, sizeof(no_quotes_key) - 1);
     assert(root->type == CJSON_ERROR);
     assert(root->value.error == CJSON_TOKEN_ERROR);
 
@@ -326,11 +326,11 @@ static void test_no_quotes_key(void) {
 static void test_nested_arrays(void) {
     const char nested_arrays[] = "[[1, 2, [3, 4]], [5, 6]]";
 
-    CJSON_JSON *const root = CJSON_parse(nested_arrays, sizeof(nested_arrays) - 1);
+    CJSON *const root = CJSON_parse(nested_arrays, sizeof(nested_arrays) - 1);
     assert(root->type == CJSON_ARRAY);
     assert(root->value.array.length == 2U);
 
-    CJSON_JSON *level1_json, *level2_json, *level3_json;
+    CJSON *level1_json, *level2_json, *level3_json;
 
     //[1, 2, [3, 4]]
     level1_json = CJSON_get(root, "[0]");
@@ -387,7 +387,7 @@ static void test_nested_arrays(void) {
 static void test_duplicate_keys(void) {
     const char duplicate_keys[] = "{\"key\": \"value1\", \"key\": \"value2\"}";
 
-    CJSON_JSON *const root = CJSON_parse(duplicate_keys, sizeof(duplicate_keys) - 1);
+    CJSON *const root = CJSON_parse(duplicate_keys, sizeof(duplicate_keys) - 1);
     assert(root->type == CJSON_OBJECT);
 
     bool success;
@@ -400,7 +400,7 @@ static void test_duplicate_keys(void) {
 
 static void test_create_string(void) {
     const char *const value = "test";
-    CJSON_JSON *const root = CJSON_init();
+    CJSON *const root = CJSON_init();
     CJSON_set_string(root, value);
     assert(root->type == CJSON_STRING);
     assert(strcmp(root->value.string, value) == 0);
@@ -410,7 +410,7 @@ static void test_create_string(void) {
 
 static void test_create_primitives(void) {
     const int64_t value1 = -25000000000LL;
-    CJSON_JSON *root = CJSON_init();
+    CJSON *root = CJSON_init();
     CJSON_set_int64(root, value1);
     assert(root->type == CJSON_INT64);
     assert(root->value.int64 == value1);
@@ -445,7 +445,7 @@ static void test_create_primitives(void) {
 }
 
 static void test_create_array(void) {
-    CJSON_JSON *const root = CJSON_init();
+    CJSON *const root = CJSON_init();
     CJSON_Array *const array1 = CJSON_make_array(root);
     assert(root->type == CJSON_ARRAY);
     assert(&root->value.array == array1);
@@ -475,7 +475,7 @@ static void test_create_array(void) {
 }
 
 static void test_create_object(void) {
-    CJSON_JSON *const root = CJSON_init();
+    CJSON *const root = CJSON_init();
     CJSON_Object *const object1 = CJSON_make_object(root);
     assert(root->type == CJSON_OBJECT);
     assert(&root->value.object == object1);

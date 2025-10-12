@@ -22,7 +22,7 @@ typedef enum CJSON_ArrayParsingError {
     CJSON_ArrayIncompleteError
 } CJSON_ArrayParsingError;
  
-static bool CJSON_parse_tokens(CJSON_JSON *const node, CJSON_Tokens *const tokens);
+static bool CJSON_parse_tokens(CJSON *const node, CJSON_Tokens *const tokens);
 
 static char *CJSON_parse_utf8_string(const CJSON_Token *const token) {
     assert(token != NULL);
@@ -152,7 +152,7 @@ cleanup:
     return NULL;
 }
 
-static bool CJSON_parse_string(CJSON_JSON *const node, CJSON_Tokens *const tokens) {
+static bool CJSON_parse_string(CJSON *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
@@ -162,7 +162,7 @@ static bool CJSON_parse_string(CJSON_JSON *const node, CJSON_Tokens *const token
 
     char *string = CJSON_parse_utf8_string(token);
     if(string == NULL) {
-        *node = (CJSON_JSON) {
+        *node = (CJSON) {
             .type = CJSON_ERROR,
             .value.error =  CJSON_STRING_FAILED_TO_PARSE
         };
@@ -171,7 +171,7 @@ static bool CJSON_parse_string(CJSON_JSON *const node, CJSON_Tokens *const token
         return false;
     }
 
-    *node = (CJSON_JSON) {
+    *node = (CJSON) {
         .type = CJSON_STRING,
         .value.string = string
     };
@@ -183,7 +183,7 @@ static bool CJSON_parse_string(CJSON_JSON *const node, CJSON_Tokens *const token
     return true;
 }
 
-static bool CJSON_parse_number(CJSON_JSON *const node, CJSON_Tokens *const tokens) {
+static bool CJSON_parse_number(CJSON *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
@@ -199,7 +199,7 @@ static bool CJSON_parse_number(CJSON_JSON *const node, CJSON_Tokens *const token
     if(token->type == CJSON_TOKEN_FLOAT) {
         const double float64 = parse_float64(str, &success);
         if(!success) {
-            *node = (CJSON_JSON) {
+            *node = (CJSON) {
                 .type = CJSON_ERROR,
                 .value.error = CJSON_FLOAT64_FAILED_TO_PARSE
             };
@@ -208,7 +208,7 @@ static bool CJSON_parse_number(CJSON_JSON *const node, CJSON_Tokens *const token
             return false;
         }
 
-        *node = (CJSON_JSON) {
+        *node = (CJSON) {
             .type = CJSON_FLOAT64,
             .value.float64 = float64
         };
@@ -216,7 +216,7 @@ static bool CJSON_parse_number(CJSON_JSON *const node, CJSON_Tokens *const token
         if(token->type == CJSON_TOKEN_SCIENTIFIC_INT) {
             const long double long_double = parse_long_double(str, &success);
             if(!success || long_double < INT64_MIN || long_double > INT64_MAX) {
-                *node = (CJSON_JSON) {
+                *node = (CJSON) {
                     .type = CJSON_ERROR,
                     .value.error = CJSON_INT64_FAILED_TO_PARSE
                 };
@@ -225,14 +225,14 @@ static bool CJSON_parse_number(CJSON_JSON *const node, CJSON_Tokens *const token
                 return false;
             }
 
-            *node = (CJSON_JSON) {
+            *node = (CJSON) {
                 .type = CJSON_INT64,
                 .value.int64 = (int64_t)long_double,
             };
         } else {
             const int64_t int64 = parse_int64(str, &success);
             if(!success) {
-                *node = (CJSON_JSON) {
+                *node = (CJSON) {
                     .type = CJSON_ERROR,
                     .value.error = CJSON_INT64_FAILED_TO_PARSE
                 };
@@ -241,7 +241,7 @@ static bool CJSON_parse_number(CJSON_JSON *const node, CJSON_Tokens *const token
                 return false;     
             }
 
-            *node = (CJSON_JSON) {
+            *node = (CJSON) {
                 .type = CJSON_INT64,
                 .value.int64 = int64,
             };
@@ -249,7 +249,7 @@ static bool CJSON_parse_number(CJSON_JSON *const node, CJSON_Tokens *const token
     } else if(token->type == CJSON_TOKEN_SCIENTIFIC_INT) {
         const long double long_double = parse_long_double(str, &success);
         if(!success || long_double > UINT64_MAX) {
-            *node = (CJSON_JSON) {
+            *node = (CJSON) {
                 .type = CJSON_ERROR,
                 .value.error = CJSON_UINT64_FAILED_TO_PARSE
             };
@@ -258,14 +258,14 @@ static bool CJSON_parse_number(CJSON_JSON *const node, CJSON_Tokens *const token
             return false;
         }
 
-        *node = (CJSON_JSON) {
+        *node = (CJSON) {
             .type = CJSON_UINT64,
             .value.uint64 = (uint64_t)long_double,
         };
     } else {
         const uint64_t uint64 = parse_uint64(str, &success);
         if(!success) {
-            *node = (CJSON_JSON) {
+            *node = (CJSON) {
                 .type = CJSON_ERROR,
                 .value.error = CJSON_UINT64_FAILED_TO_PARSE
             };
@@ -274,7 +274,7 @@ static bool CJSON_parse_number(CJSON_JSON *const node, CJSON_Tokens *const token
             return false; 
         }
 
-        *node = (CJSON_JSON) {
+        *node = (CJSON) {
             .type = CJSON_UINT64,
             .value.uint64 = uint64,
         };
@@ -287,7 +287,7 @@ static bool CJSON_parse_number(CJSON_JSON *const node, CJSON_Tokens *const token
     return true;
 }
 
-static void CJSON_parse_bool(CJSON_JSON *const node, CJSON_Tokens *const tokens) {
+static void CJSON_parse_bool(CJSON *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
@@ -303,7 +303,7 @@ static void CJSON_parse_bool(CJSON_JSON *const node, CJSON_Tokens *const tokens)
     BENCHMARK_END();
 }
 
-static void CJSON_parse_null(CJSON_JSON *const node, CJSON_Tokens *const tokens) {
+static void CJSON_parse_null(CJSON *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
@@ -317,7 +317,7 @@ static void CJSON_parse_null(CJSON_JSON *const node, CJSON_Tokens *const tokens)
     BENCHMARK_END();
 }
 
-static bool CJSON_parse_object(CJSON_JSON *const node, CJSON_Tokens *const tokens) {
+static bool CJSON_parse_object(CJSON *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
@@ -326,7 +326,7 @@ static bool CJSON_parse_object(CJSON_JSON *const node, CJSON_Tokens *const token
     tokens->index++;
 
     if(tokens->length == tokens->index) {
-        *node = (CJSON_JSON) {
+        *node = (CJSON) {
             .type = CJSON_ERROR,
             .value.error = CJSON_OBJECT_FAILED_TO_PARSE
         };
@@ -450,7 +450,7 @@ cleanup:
     return false;
 }
 
-static bool CJSON_parse_array(CJSON_JSON *const node, CJSON_Tokens *const tokens) {
+static bool CJSON_parse_array(CJSON *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
@@ -459,7 +459,7 @@ static bool CJSON_parse_array(CJSON_JSON *const node, CJSON_Tokens *const tokens
     tokens->index++;
 
     if(tokens->length == tokens->index) {
-        *node = (CJSON_JSON) {
+        *node = (CJSON) {
             .type = CJSON_ERROR,
             .value.error = CJSON_ARRAY_FAILED_TO_PARSE
         };
@@ -484,7 +484,7 @@ static bool CJSON_parse_array(CJSON_JSON *const node, CJSON_Tokens *const tokens
     }
 
     while(tokens->index + 2U < tokens->length) {
-        CJSON_JSON *const next_json = CJSON_Array_next(array);
+        CJSON *const next_json = CJSON_Array_next(array);
         if(!CJSON_parse_tokens(next_json, tokens)) {
             error = CJSON_ArrayValueError;
             next_error = next_json->value.error;
@@ -518,7 +518,7 @@ cleanup:
     
     switch(error) {
     case CJSON_ArrayIncompleteError: {
-        *node = (CJSON_JSON) {
+        *node = (CJSON) {
             .type = CJSON_ERROR,
             .value.error = CJSON_ARRAY_FAILED_TO_PARSE
         };
@@ -545,7 +545,7 @@ cleanup:
     return false;
 }
 
-static bool CJSON_parse_tokens(CJSON_JSON *const node, CJSON_Tokens *const tokens) {
+static bool CJSON_parse_tokens(CJSON *const node, CJSON_Tokens *const tokens) {
     assert(node != NULL);
     assert(tokens != NULL);
 
@@ -591,7 +591,7 @@ static bool CJSON_parse_tokens(CJSON_JSON *const node, CJSON_Tokens *const token
     case CJSON_TOKEN_RBRACKET:
     case CJSON_TOKEN_RCURLY:
     case CJSON_TOKEN_INVALID:
-        *node = (CJSON_JSON) {
+        *node = (CJSON) {
             .type = CJSON_ERROR,
             .value.error = CJSON_TOKEN_ERROR
         };
@@ -602,8 +602,8 @@ static bool CJSON_parse_tokens(CJSON_JSON *const node, CJSON_Tokens *const token
     return false;
 }
 
-CJSON_JSON *CJSON_init(void) {
-    CJSON_JSON *root = CJSON_MALLOC(sizeof(CJSON_JSON));
+CJSON *CJSON_init(void) {
+    CJSON *root = CJSON_MALLOC(sizeof(CJSON));
     assert(root != NULL);
 
     root->type = CJSON_NULL;
@@ -612,7 +612,7 @@ CJSON_JSON *CJSON_init(void) {
     return root;
 }
 
-CJSON_Array *CJSON_make_array(CJSON_JSON *const node) {
+CJSON_Array *CJSON_make_array(CJSON *const node) {
     CJSON_internal_free(node);
     CJSON_Array_init(&node->value.array);
     node->type = CJSON_ARRAY;
@@ -620,7 +620,7 @@ CJSON_Array *CJSON_make_array(CJSON_JSON *const node) {
     return &node->value.array;
 }
 
-CJSON_Object *CJSON_make_object(CJSON_JSON *const node) {
+CJSON_Object *CJSON_make_object(CJSON *const node) {
     CJSON_internal_free(node);
     CJSON_Object_init(&node->value.object);
     node->type = CJSON_OBJECT;
@@ -628,7 +628,7 @@ CJSON_Object *CJSON_make_object(CJSON_JSON *const node) {
     return &node->value.object;
 }
 
-CJSON_JSON *CJSON_parse(const char *const data, const unsigned int length) {
+CJSON *CJSON_parse(const char *const data, const unsigned int length) {
     assert(data != NULL);
     assert(length > 0);
 
@@ -637,7 +637,7 @@ CJSON_JSON *CJSON_parse(const char *const data, const unsigned int length) {
     CJSON_Lexer lexer;
     CJSON_Lexer_init(&lexer, data, length);
 
-    CJSON_JSON *root = CJSON_MALLOC(sizeof(CJSON_JSON));
+    CJSON *root = CJSON_MALLOC(sizeof(CJSON));
     assert(root != NULL);
 
     CJSON_Tokens tokens;
@@ -649,7 +649,7 @@ CJSON_JSON *CJSON_parse(const char *const data, const unsigned int length) {
     } while(CJSON_Lexer_tokenize(&lexer, token));
 
     if(token->type == CJSON_TOKEN_INVALID) {
-        *root = (CJSON_JSON) {
+        *root = (CJSON) {
             .type = CJSON_ERROR,
             .value.error = CJSON_TOKEN_ERROR
         };
@@ -664,18 +664,18 @@ CJSON_JSON *CJSON_parse(const char *const data, const unsigned int length) {
     return root;
 }
 
-CJSON_JSON *CJSON_parse_file(const char *const path) {
+CJSON *CJSON_parse_file(const char *const path) {
     assert(path != NULL);
     assert(strlen(path) > 0);
 
     size_t filesize;
-    CJSON_JSON *root;
+    CJSON *root;
     char *const data = file_get_contents(path, &filesize);  
 
     if(data == NULL) {
-        root = CJSON_MALLOC(sizeof(CJSON_JSON));
+        root = CJSON_MALLOC(sizeof(CJSON));
         assert(root != NULL);
-        *root = (CJSON_JSON) {
+        *root = (CJSON) {
             .type = CJSON_ERROR,
             .value.error = CJSON_FAILED_TO_OPEN_FILE
         };
@@ -689,14 +689,14 @@ CJSON_JSON *CJSON_parse_file(const char *const path) {
     return root;
 }
 
-void CJSON_free(CJSON_JSON *const json) {
+void CJSON_free(CJSON *const json) {
     assert(json != NULL);
     
     CJSON_internal_free(json);
     CJSON_FREE(json);
 }
 
-void CJSON_internal_free(CJSON_JSON *const json) {
+void CJSON_internal_free(CJSON *const json) {
     assert(json != NULL);
 
     BENCHMARK_START();
@@ -714,12 +714,12 @@ void CJSON_internal_free(CJSON_JSON *const json) {
     default:;
     }
 
-    *json = (CJSON_JSON){0};
+    *json = (CJSON){0};
 
     BENCHMARK_END();
 }
 
-const char *CJSON_get_error(const CJSON_JSON *const node) {
+const char *CJSON_get_error(const CJSON *const node) {
     assert(node != NULL);
 
     if(node->type != CJSON_ERROR) {
@@ -760,7 +760,7 @@ const char *CJSON_get_error(const CJSON_JSON *const node) {
     return NULL;
 }
 
-CJSON_JSON *CJSON_get(CJSON_JSON *node, const char *query) {
+CJSON *CJSON_get(CJSON *node, const char *query) {
     assert(node != NULL);
     assert(query != NULL);
 
@@ -859,7 +859,7 @@ CJSON_JSON *CJSON_get(CJSON_JSON *node, const char *query) {
     assert(success != NULL);\
                             \
     BENCHMARK_START();\
-    CJSON_JSON *const ret = CJSON_get(node, query);\
+    CJSON *const ret = CJSON_get(node, query);\
     if(ret == NULL || ret->type != JSON_TYPE) {\
         *success = false;\
         BENCHMARK_END();\
@@ -877,39 +877,39 @@ CJSON_JSON *CJSON_get(CJSON_JSON *node, const char *query) {
     BENCHMARK_END();\
     return &ret->value.MEMBER;
 
-char *CJSON_get_string(CJSON_JSON *const node, const char *query, bool *const success) {
+char *CJSON_get_string(CJSON *const node, const char *query, bool *const success) {
     CJSON_GET_VALUE(CJSON_STRING, string)
 }
 
-double CJSON_get_float64(CJSON_JSON *const node, const char *query, bool *const success) {
+double CJSON_get_float64(CJSON *const node, const char *query, bool *const success) {
     CJSON_GET_VALUE(CJSON_FLOAT64, float64)
 }
 
-int64_t CJSON_get_int64(CJSON_JSON *const node, const char *query, bool *const success) {
+int64_t CJSON_get_int64(CJSON *const node, const char *query, bool *const success) {
     CJSON_GET_VALUE(CJSON_INT64, int64)
 }
 
-uint64_t CJSON_get_uint64(CJSON_JSON *const node, const char *query, bool *const success) {
+uint64_t CJSON_get_uint64(CJSON *const node, const char *query, bool *const success) {
     CJSON_GET_VALUE(CJSON_UINT64, uint64)
 }
 
-CJSON_Object *CJSON_get_object(CJSON_JSON *const node, const char *query, bool *const success) {
+CJSON_Object *CJSON_get_object(CJSON *const node, const char *query, bool *const success) {
     CJSON_GET_PTR(CJSON_OBJECT, object)
 }
 
-CJSON_Array *CJSON_get_array(CJSON_JSON *const node, const char *query, bool *const success) {
+CJSON_Array *CJSON_get_array(CJSON *const node, const char *query, bool *const success) {
     CJSON_GET_PTR(CJSON_ARRAY, array)
 }
 
-void *CJSON_get_null(CJSON_JSON *const node, const char *query, bool *const success) {
+void *CJSON_get_null(CJSON *const node, const char *query, bool *const success) {
     CJSON_GET_VALUE(CJSON_NULL, null)
 }
 
-bool CJSON_get_bool(CJSON_JSON *const node, const char *query, bool *const success) {
+bool CJSON_get_bool(CJSON *const node, const char *query, bool *const success) {
     CJSON_GET_VALUE(CJSON_BOOL, boolean)
 }
 
-void CJSON_set_string(CJSON_JSON *const node, const char *const value) {
+void CJSON_set_string(CJSON *const node, const char *const value) {
     assert(node != NULL);
 
     BENCHMARK_START();
@@ -919,7 +919,7 @@ void CJSON_set_string(CJSON_JSON *const node, const char *const value) {
 
     CJSON_internal_free(node);
 
-    *node = (CJSON_JSON) {
+    *node = (CJSON) {
         .type = CJSON_STRING,
         .value = {.string = copy} 
     };
@@ -927,14 +927,14 @@ void CJSON_set_string(CJSON_JSON *const node, const char *const value) {
     BENCHMARK_END();
 }
 
-void CJSON_set_float64(CJSON_JSON *const node, const double value) {
+void CJSON_set_float64(CJSON *const node, const double value) {
     assert(node != NULL);
 
     BENCHMARK_START();
 
     CJSON_internal_free(node);
 
-    *node = (CJSON_JSON) {
+    *node = (CJSON) {
         .type = CJSON_FLOAT64,
         .value = {.float64 = value}
     };
@@ -942,14 +942,14 @@ void CJSON_set_float64(CJSON_JSON *const node, const double value) {
     BENCHMARK_END();
 }
 
-void CJSON_set_int64(CJSON_JSON *const node, const int64_t value) {
+void CJSON_set_int64(CJSON *const node, const int64_t value) {
     assert(node != NULL);
 
     BENCHMARK_START();
 
     CJSON_internal_free(node);
 
-    *node = (CJSON_JSON) {
+    *node = (CJSON) {
         .type = CJSON_INT64,
         .value = {.int64 = value}
     };
@@ -957,14 +957,14 @@ void CJSON_set_int64(CJSON_JSON *const node, const int64_t value) {
     BENCHMARK_END();
 }
 
-void CJSON_set_uint64(CJSON_JSON *const node, const uint64_t value) {
+void CJSON_set_uint64(CJSON *const node, const uint64_t value) {
     assert(node != NULL);
 
     BENCHMARK_START();
 
     CJSON_internal_free(node);
 
-    *node = (CJSON_JSON) {
+    *node = (CJSON) {
         .type = CJSON_UINT64,
         .value = {.uint64 = value}
     }; 
@@ -972,7 +972,7 @@ void CJSON_set_uint64(CJSON_JSON *const node, const uint64_t value) {
     BENCHMARK_END();
 }
 
-void CJSON_set_object(CJSON_JSON *const node, const CJSON_Object *const value) {
+void CJSON_set_object(CJSON *const node, const CJSON_Object *const value) {
     assert(node != NULL);
     assert(value != NULL);
 
@@ -980,7 +980,7 @@ void CJSON_set_object(CJSON_JSON *const node, const CJSON_Object *const value) {
 
     CJSON_internal_free(node);
 
-    *node = (CJSON_JSON) {
+    *node = (CJSON) {
         .type = CJSON_OBJECT,
         .value = {.object = *value}
     };
@@ -988,7 +988,7 @@ void CJSON_set_object(CJSON_JSON *const node, const CJSON_Object *const value) {
     BENCHMARK_END();
 }
 
-void CJSON_set_array(CJSON_JSON *const node, const CJSON_Array *const value) {
+void CJSON_set_array(CJSON *const node, const CJSON_Array *const value) {
     assert(node != NULL);
     assert(value != NULL);
 
@@ -996,7 +996,7 @@ void CJSON_set_array(CJSON_JSON *const node, const CJSON_Array *const value) {
 
     CJSON_internal_free(node);
     
-    *node = (CJSON_JSON) {
+    *node = (CJSON) {
         .type = CJSON_ARRAY,
         .value = {.array = *value}
     };
@@ -1004,28 +1004,28 @@ void CJSON_set_array(CJSON_JSON *const node, const CJSON_Array *const value) {
     BENCHMARK_END();
 }
 
-void CJSON_set_null(CJSON_JSON *const node) {
+void CJSON_set_null(CJSON *const node) {
     assert(node != NULL);
 
     BENCHMARK_START();
 
     CJSON_internal_free(node);
 
-    *node = (CJSON_JSON) {
+    *node = (CJSON) {
         .type = CJSON_NULL,
     };
 
     BENCHMARK_END();
 }
 
-void CJSON_set_bool(CJSON_JSON *const node, const bool value) {
+void CJSON_set_bool(CJSON *const node, const bool value) {
     assert(node != NULL);
 
     BENCHMARK_START();
 
     CJSON_internal_free(node);
 
-    *node = (CJSON_JSON) {
+    *node = (CJSON) {
         .type = CJSON_BOOL,
         .value = {.boolean = value}
     };
