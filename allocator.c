@@ -10,6 +10,7 @@ static struct CJSON_ArenaNode *CJSON_ArenaNode_new(const unsigned size) {
         return NULL;
     }
 
+    node->size   = size;
     node->offset = 0U;
     node->next   = NULL;
     node->data   = (unsigned char*)node + sizeof(*node);
@@ -31,15 +32,14 @@ bool CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned size, cons
     arena->max_nodes  = max_nodes;
     arena->node_count = 1U;
     
+    arena->head.size   = size;
     arena->head.offset = 0U;
     arena->head.next   = NULL;
     arena->head.data   = (unsigned char*)CJSON_CALLOC(size, sizeof(unsigned char));
     if(arena->head.data == NULL) {
-        arena->size = 0U;
+        arena->head.size = 0U;
         return false;
     }
-
-    arena->size = size;
 
     return true;
 }
@@ -49,11 +49,11 @@ void CJSON_Arena_free(struct CJSON_Arena *const arena) {
 
     arena->current    = NULL;
     arena->max_nodes  = CJSON_ARENA_INFINITE_NODES;
-    arena->size       = 0U;
     arena->node_count = 1U;
 
     CJSON_FREE(arena->head.data);
     arena->head.data   = NULL;
+    arena->head.size   = 0U;
     arena->head.offset = 0U;
     
     struct CJSON_ArenaNode *current = arena->head.next;
@@ -78,10 +78,6 @@ void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned size, un
     assert(size > 0U);
     assert((alignment & (alignment - 1U)) == 0U);
 
-    if(size > arena->size) {
-        return NULL;
-    }
-
     if(alignment == 0) {
         alignment = CJSON_ALIGNOF(uintmax_t);
     }
@@ -90,7 +86,7 @@ void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned size, un
     uintptr_t aligned_address     = (start_address + ((uintptr_t)alignment - 1U)) & ~((uintptr_t)alignment - 1U);
     unsigned padding              = (unsigned)(aligned_address - start_address);
 
-    if(arena->current->offset + padding + size > arena->size) {
+    if(arena->current->offset + padding + size > arena->current->size) {
         struct CJSON_ArenaNode *next = arena->current->next;
 
         if(next == NULL) {
@@ -98,8 +94,16 @@ void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned size, un
                 return NULL;
             }
 
-            next = CJSON_ArenaNode_new(arena->size);
-            if(next == NULL) {
+            unsigned node_size = arena->current->size;
+            if(node_size < size) {
+                if(node_size > UINT_MAX / 2U) {
+                    node_size = size;
+                } else do {
+                    node_size *= 2U;
+                } while(node_size < size);
+            } 
+
+            if((next = CJSON_ArenaNode_new(node_size)) == NULL) {
                 return NULL;
             }
             arena->node_count++;

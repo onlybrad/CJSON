@@ -20,13 +20,13 @@ extern "C" {
 struct CJSON_ArenaNode {
     unsigned char          *data;
     struct CJSON_ArenaNode *next;
+    unsigned                size;
     unsigned                offset;
 };
 
 struct CJSON_Arena {
     struct CJSON_ArenaNode  head;
     struct CJSON_ArenaNode *current;
-    unsigned                size;
     unsigned                node_count;
     unsigned                max_nodes;
 #ifndef NDEBUG
