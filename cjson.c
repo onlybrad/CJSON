@@ -745,11 +745,14 @@ struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
             }
 
             key = CJSON_MALLOC((size_t)(counter + 1U) * sizeof(char));
-            assert(key != NULL);
+            if(key == NULL) {
+                return NULL;
+            }
             memcpy(key, query + i - counter, counter);
             key[counter] = '\0';
 
             json = CJSON_Object_get(&json->data.object, key);
+            CJSON_FREE(key);
             key = NULL;
       
         } else if(!is_object_key && json->type == CJSON_ARRAY) {
@@ -767,17 +770,22 @@ struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
             }
 
             key = CJSON_MALLOC((size_t)(counter + 1U) * sizeof(char));
-            assert(key != NULL);
+            if(key == NULL) {
+                return NULL;
+            }
+
             memcpy(key, query + i - counter, counter);
             key[counter] = '\0';
 
             bool success;
             uint64_t index = parse_uint64(key, &success);
             if(!success) {
+                CJSON_FREE(key);
                 return NULL;
             }
 
             json = CJSON_Array_get(&json->data.array, (unsigned)index);
+            CJSON_FREE(key);
             key = NULL;
             i++;
         } else {
