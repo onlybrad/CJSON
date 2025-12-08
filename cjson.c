@@ -725,7 +725,9 @@ struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
     }
 
     size_t length = strlen(query);
-    assert(length > 0 && length <= UINT_MAX);
+    if(length > (size_t)UINT_MAX) {
+        return NULL;
+    }
 
     char *key;
     bool is_object_key = query[0] != '[';
