@@ -4,45 +4,34 @@
 
 #include "../cjson.h"
 #include "../util.h"
-
-#include "../benchmark.h"
-
-#ifdef COUNT_ALLOCATIONS
-int malloced = 0;
-int freed = 0;
-#endif
+#include "../allocator.h"
 
 int main(void) {
-#ifdef BENCHMARK
-    Benchmark_init();
-#endif
+    struct CJSON_Buffer buffer;
+    const enum CJSON_UtilError error = file_get_contents("tests\\really-big-json-file.json", &buffer);
+    if(error != CJSON_UTIL_ERROR_NONE) {
+        return EXIT_FAILURE;
+    }
 
-    size_t filesize;
-    char *const data = file_get_contents("tests\\really-big-json-file.json", &filesize);
-
-#ifdef BENCHMARK
-    BENCHMARK_START();
-    CJSON_JSON *const json = CJSON_parse(data, (unsigned int)filesize);
-    BENCHMARK_END();
-#else
     const long start = usec_timestamp();
-    CJSON *const json = CJSON_parse(data, (unsigned int)filesize);
+    struct CJSON_Root root;
+    const bool success = CJSON_parse(&root, (const char*)buffer.data, buffer.size);
+    if(!success) {
+        fputs(CJSON_get_error(&root.json), stderr);
+        CJSON_Buffer_free(&buffer);
+        return EXIT_FAILURE;
+    }
+
     const long end = usec_timestamp();
-    printf("Execution time: %li", end - start);
+    printf("Execution time: %li\n", end - start);
+
+    CJSON_Buffer_free(&buffer);
+    CJSON_free(&root);
+
+#ifndef NDEBUG
+    const struct CJSON_AllocationStats *allocation_stats = CJSON_get_allocation_stats();
+    printf("allocated   times: %i\n", allocation_stats->allocated);
+    printf("deallocated times: %i\n", allocation_stats->deallocated);
 #endif
-
-    free(data);
-    CJSON_free(json);
-
-#ifdef COUNT_ALLOCATIONS
-    printf("malloced = %i\n", malloced);
-    printf("freed = %i\n", freed);
-#endif
-
-#ifdef BENCHMARK
-    Benchmark_print_all();
-    Benchmark_free();
-#endif
-
-    return 0;
+    return EXIT_SUCCESS;
 }

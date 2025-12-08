@@ -1,9 +1,13 @@
 #ifndef CJSON_TOKEN_H
 #define CJSON_TOKEN_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 
-typedef enum CJSON_Token_Type {
+enum CJSON_Token_Type {
     CJSON_TOKEN_LCURLY,
     CJSON_TOKEN_RCURLY,
     CJSON_TOKEN_LBRACKET,
@@ -16,13 +20,18 @@ typedef enum CJSON_Token_Type {
     CJSON_TOKEN_SCIENTIFIC_INT,
     CJSON_TOKEN_BOOL,
     CJSON_TOKEN_NULL,
-    CJSON_TOKEN_INVALID
-} CJSON_Token_Type;
+    CJSON_TOKEN_INVALID,
+    CJSON_TOKEN_DONE
+};
 
-typedef struct CJSON_Token {
-    const char *value;
-    unsigned int length;
-    CJSON_Token_Type type;
-} CJSON_Token;
+struct CJSON_Token {
+    const char           *value;
+    unsigned              length;
+    enum CJSON_Token_Type type;
+};
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,21 +1,26 @@
 #ifndef CJSON_Tokens_H
 #define CJSON_Tokens_H
 
-#define INITIAL_TOKENS_CAPACITY (1 << 10)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdbool.h>
 #include "token.h"
-#include "allocator.h"
 
-typedef struct CJSON_Tokens {
-    CJSON_Token *data;
-    unsigned int index;
-    unsigned int length;
-    unsigned int capacity;
-} CJSON_Tokens;
+struct CJSON_Tokens {
+    struct CJSON_Token *data;
+    unsigned            index;
+    unsigned            count;
+    unsigned            capacity;
+};
 
-void CJSON_Tokens_init(CJSON_Tokens *const tokens);
-void CJSON_Tokens_free(CJSON_Tokens *const tokens);
-CJSON_Token *CJSON_Tokens_next(CJSON_Tokens *const tokens);
+bool CJSON_Tokens_init(struct CJSON_Tokens *tokens, unsigned capacity);
+void CJSON_Tokens_free(struct CJSON_Tokens *tokens);
+struct CJSON_Token *CJSON_Tokens_next(struct CJSON_Tokens *tokens);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
