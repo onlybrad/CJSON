@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include "allocator.h"
+#include "util.h"
 
 static struct CJSON_ArenaNode *CJSON_ArenaNode_new(const unsigned size) {
     struct CJSON_ArenaNode *const node = (struct CJSON_ArenaNode *)CJSON_CALLOC(sizeof(*node) + (size_t)size, sizeof(unsigned char));
@@ -18,7 +19,7 @@ static struct CJSON_ArenaNode *CJSON_ArenaNode_new(const unsigned size) {
     return node;
 }
 
-bool CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned size, const unsigned max_nodes, const char *const name) {
+EXTERN_C bool CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned size, const unsigned max_nodes, const char *const name) {
     assert(arena != NULL);
     assert(size > 0);
 
@@ -44,7 +45,7 @@ bool CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned size, cons
     return true;
 }
 
-void CJSON_Arena_free(struct CJSON_Arena *const arena) {
+EXTERN_C void CJSON_Arena_free(struct CJSON_Arena *const arena) {
     assert(arena != NULL);
 
     arena->current    = NULL;
@@ -66,14 +67,14 @@ void CJSON_Arena_free(struct CJSON_Arena *const arena) {
     }
 }
 
-void CJSON_Arena_reset(struct CJSON_Arena *const arena) {
+EXTERN_C void CJSON_Arena_reset(struct CJSON_Arena *const arena) {
     assert(arena != NULL);
     
     arena->current     = &arena->head;
     arena->head.offset = 0U;
 }
 
-void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned size, unsigned alignment) {
+EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned size, unsigned alignment) {
     assert(arena != NULL);
     assert(size > 0U);
     assert((alignment & (alignment - 1U)) == 0U);
@@ -120,7 +121,7 @@ void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned size, un
     return (void*)aligned_address;
 }
 
-char *CJSON_Arena_strdup(struct CJSON_Arena *const arena, const char *const str, unsigned *const length) {
+EXTERN_C char *CJSON_Arena_strdup(struct CJSON_Arena *const arena, const char *const str, unsigned *const length) {
     assert(arena != NULL);
     assert(str != NULL);
 

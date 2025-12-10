@@ -1,9 +1,9 @@
-#ifndef CJSON_ALLOCATOR
-#define CJSON_ALLOCATOR
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifndef CJSON_ALLOCATOR
+#define CJSON_ALLOCATOR
 
 #include <stdbool.h>
 
@@ -72,9 +72,9 @@ const struct CJSON_AllocationStats *CJSON_get_allocation_stats(void);
 
 #endif
 
-#ifdef __cplusplus
-}
 #endif
 
+#ifdef __cplusplus
+}
 #endif
 

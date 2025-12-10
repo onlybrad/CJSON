@@ -3,6 +3,7 @@
 #include <string.h>
 #include "tokens.h"
 #include "allocator.h"
+#include "util.h"
 
 static bool JSON_Tokens_resize(struct CJSON_Tokens *const tokens, const unsigned capacity) {
     assert(tokens != NULL);
@@ -22,7 +23,7 @@ static bool JSON_Tokens_resize(struct CJSON_Tokens *const tokens, const unsigned
     return true;
 }
 
-bool CJSON_Tokens_init(struct CJSON_Tokens *const tokens, const unsigned capacity) {
+EXTERN_C bool CJSON_Tokens_init(struct CJSON_Tokens *const tokens, const unsigned capacity) {
     assert(tokens != NULL);
 
     tokens->data = NULL;
@@ -31,7 +32,7 @@ bool CJSON_Tokens_init(struct CJSON_Tokens *const tokens, const unsigned capacit
     return JSON_Tokens_resize(tokens, capacity);
 }
 
-inline void CJSON_Tokens_free(struct CJSON_Tokens *const tokens) {
+EXTERN_C void CJSON_Tokens_free(struct CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
     CJSON_FREE(tokens->data);
@@ -39,7 +40,7 @@ inline void CJSON_Tokens_free(struct CJSON_Tokens *const tokens) {
     memset(tokens, 0, sizeof(*tokens));
 }
 
-struct CJSON_Token *CJSON_Tokens_next(struct CJSON_Tokens *const tokens) {
+EXTERN_C struct CJSON_Token *CJSON_Tokens_next(struct CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
     if(tokens->count == tokens->capacity) {
@@ -53,4 +54,3 @@ struct CJSON_Token *CJSON_Tokens_next(struct CJSON_Tokens *const tokens) {
 
     return token;
 }
-

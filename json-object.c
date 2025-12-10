@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include "cjson.h"
+#include "util.h"
 
 #define INITIAL_JSON_OBJECT_CAPACITY (1 << 3)
 
@@ -56,7 +57,7 @@ static bool CJSON_Object_resize(struct CJSON_Object *const object, struct CJSON_
     return true;
 }
 
-bool CJSON_Object_init(struct CJSON_Object *const object, struct CJSON_Root *const root, const unsigned capacity) {
+EXTERN_C bool CJSON_Object_init(struct CJSON_Object *const object, struct CJSON_Root *const root, const unsigned capacity) {
     assert(object != NULL);
     assert(root != NULL);
     
@@ -75,7 +76,7 @@ bool CJSON_Object_init(struct CJSON_Object *const object, struct CJSON_Root *con
     return true;
 }
 
-struct CJSON_KV *CJSON_Object_get_entry(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key) {
+EXTERN_C struct CJSON_KV *CJSON_Object_get_entry(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key) {
     assert(object != NULL);
     assert(key != NULL);
 
@@ -98,7 +99,7 @@ struct CJSON_KV *CJSON_Object_get_entry(struct CJSON_Object *const object, struc
     return object->entries + i;
 }
 
-struct CJSON_KV *CJSON_Object_find_entry(const struct CJSON_Object *const object, const char *const key) {
+EXTERN_C struct CJSON_KV *CJSON_Object_find_entry(const struct CJSON_Object *const object, const char *const key) {
     assert(object != NULL);
     assert(key != NULL);
 
@@ -124,7 +125,7 @@ struct CJSON_KV *CJSON_Object_find_entry(const struct CJSON_Object *const object
     return NULL;
 }
 
-struct CJSON *CJSON_Object_get(const struct CJSON_Object *const object, const char *const key) {
+EXTERN_C struct CJSON *CJSON_Object_get(const struct CJSON_Object *const object, const char *const key) {
     assert(object != NULL);
     assert(key != NULL);
 
@@ -133,7 +134,7 @@ struct CJSON *CJSON_Object_get(const struct CJSON_Object *const object, const ch
     return entry == NULL ? NULL : &entry->value;
 }
 
-bool CJSON_Object_set(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const struct CJSON *const value) {
+EXTERN_C bool CJSON_Object_set(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const struct CJSON *const value) {
     assert(object != NULL);
     assert(root != NULL);
     assert(key != NULL);
@@ -156,7 +157,7 @@ bool CJSON_Object_set(struct CJSON_Object *const object, struct CJSON_Root *cons
     return true;
 }
 
-void CJSON_Object_delete(struct CJSON_Object *const object, const char *const key) {
+EXTERN_C void CJSON_Object_delete(struct CJSON_Object *const object, const char *const key) {
     assert(object != NULL);
     assert(key != NULL);
 
@@ -188,39 +189,39 @@ void CJSON_Object_delete(struct CJSON_Object *const object, const char *const ke
     CJSON_OBJECT_GET(JSON_TYPE)\
     return &ret->data.MEMBER;
 
-const char *CJSON_Object_get_string(const struct CJSON_Object *const object, const char *const key, bool *const success) {
+EXTERN_C const char *CJSON_Object_get_string(const struct CJSON_Object *const object, const char *const key, bool *const success) {
     CJSON_OBJECT_GET_VALUE(CJSON_STRING, string.chars)
 }
 
-double CJSON_Object_get_float64(const struct CJSON_Object *const object, const char *const key, bool *const success) {
+EXTERN_C double CJSON_Object_get_float64(const struct CJSON_Object *const object, const char *const key, bool *const success) {
     CJSON_OBJECT_GET_VALUE(CJSON_FLOAT64, float64)
 }
 
-int64_t CJSON_Object_get_int64(const struct CJSON_Object *const object, const char *const key, bool *const success) {
+EXTERN_C int64_t CJSON_Object_get_int64(const struct CJSON_Object *const object, const char *const key, bool *const success) {
     CJSON_OBJECT_GET_VALUE(CJSON_INT64, int64)    
 }
 
-uint64_t CJSON_Object_get_uint64(const struct CJSON_Object *const object, const char *const key, bool *const success) {
+EXTERN_C uint64_t CJSON_Object_get_uint64(const struct CJSON_Object *const object, const char *const key, bool *const success) {
     CJSON_OBJECT_GET_VALUE(CJSON_UINT64, uint64)
 }
 
-struct CJSON_Object *CJSON_Object_get_object(const struct CJSON_Object *const object, const char *const key, bool *const success) {
+EXTERN_C struct CJSON_Object *CJSON_Object_get_object(const struct CJSON_Object *const object, const char *const key, bool *const success) {
     CJSON_OBJECT_GET_PTR(CJSON_OBJECT, object)
 }
 
-struct CJSON_Array *CJSON_Object_get_array(const struct CJSON_Object *const object, const char *const key, bool *const success) {
+EXTERN_C struct CJSON_Array *CJSON_Object_get_array(const struct CJSON_Object *const object, const char *const key, bool *const success) {
     CJSON_OBJECT_GET_PTR(CJSON_ARRAY, array)    
 }
 
-void *CJSON_Object_get_null(const struct CJSON_Object *const object, const char *const key, bool *const success) {
+EXTERN_C void *CJSON_Object_get_null(const struct CJSON_Object *const object, const char *const key, bool *const success) {
     CJSON_OBJECT_GET_VALUE(CJSON_NULL, null)
 }
 
-bool CJSON_Object_get_bool(const struct CJSON_Object *const object, const char *const key, bool *const success) {
+EXTERN_C bool CJSON_Object_get_bool(const struct CJSON_Object *const object, const char *const key, bool *const success) {
     CJSON_OBJECT_GET_VALUE(CJSON_BOOL, boolean)
 }
 
-bool CJSON_Object_set_string(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const char *const value) {
+EXTERN_C bool CJSON_Object_set_string(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const char *const value) {
     assert(object != NULL);
     assert(root != NULL);
     assert(key != NULL);
@@ -238,7 +239,7 @@ bool CJSON_Object_set_string(struct CJSON_Object *const object, struct CJSON_Roo
     return CJSON_Object_set(object, root, key, &json);
 }
 
-bool CJSON_Object_set_float64(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const double value) {
+EXTERN_C bool CJSON_Object_set_float64(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const double value) {
     assert(object != NULL);
     assert(root != NULL);
     assert(key != NULL);
@@ -250,7 +251,7 @@ bool CJSON_Object_set_float64(struct CJSON_Object *const object, struct CJSON_Ro
     return CJSON_Object_set(object, root, key, &json);
 }
 
-bool CJSON_Object_set_int64(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const int64_t value) {
+EXTERN_C bool CJSON_Object_set_int64(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const int64_t value) {
     assert(object != NULL);
     assert(root != NULL);
     assert(key != NULL);
@@ -262,7 +263,7 @@ bool CJSON_Object_set_int64(struct CJSON_Object *const object, struct CJSON_Root
     return CJSON_Object_set(object, root, key, &json);
 }
 
-bool CJSON_Object_set_uint64(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const uint64_t value) {
+EXTERN_C bool CJSON_Object_set_uint64(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const uint64_t value) {
     assert(object != NULL);
     assert(root != NULL);
     assert(key != NULL);
@@ -274,7 +275,7 @@ bool CJSON_Object_set_uint64(struct CJSON_Object *const object, struct CJSON_Roo
     return CJSON_Object_set(object, root, key, &json);
 }
 
-bool CJSON_Object_set_object(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const struct CJSON_Object *const value) {
+EXTERN_C bool CJSON_Object_set_object(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const struct CJSON_Object *const value) {
     assert(object != NULL);
     assert(root != NULL);
     assert(key != NULL);
@@ -287,7 +288,7 @@ bool CJSON_Object_set_object(struct CJSON_Object *const object, struct CJSON_Roo
     return CJSON_Object_set(object, root, key, &json);
 }
 
-bool CJSON_Object_set_array(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const struct CJSON_Array *const value) {
+EXTERN_C bool CJSON_Object_set_array(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const struct CJSON_Array *const value) {
     assert(object != NULL);
     assert(root != NULL);
     assert(key != NULL);
@@ -300,7 +301,7 @@ bool CJSON_Object_set_array(struct CJSON_Object *const object, struct CJSON_Root
     return CJSON_Object_set(object, root, key, &json);
 }
 
-bool CJSON_Object_set_null(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key) {
+EXTERN_C bool CJSON_Object_set_null(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key) {
     assert(object != NULL);
     assert(root != NULL);
     assert(key != NULL);
@@ -312,7 +313,7 @@ bool CJSON_Object_set_null(struct CJSON_Object *const object, struct CJSON_Root 
     return CJSON_Object_set(object, root, key, &json);
 }
 
-bool CJSON_Object_set_bool(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const bool value) {
+EXTERN_C bool CJSON_Object_set_bool(struct CJSON_Object *const object, struct CJSON_Root *const root, const char *const key, const bool value) {
     assert(object != NULL);
     assert(root != NULL);
     assert(key != NULL);

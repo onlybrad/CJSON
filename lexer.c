@@ -208,7 +208,7 @@ static void read_invalid_token(struct CJSON_Lexer *const lexer, struct CJSON_Tok
     token->length = i - position - 1U;
 }
 
-void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *const data, const unsigned length) {
+EXTERN_C void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *const data, const unsigned length) {
     assert(lexer != NULL);
     assert(data != NULL);
     assert(length > 0U);
@@ -218,7 +218,7 @@ void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *const data, c
     lexer->position = 0U;
 }
 
-bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens,  struct CJSON_Token *const token) {
+EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens,  struct CJSON_Token *const token) {
     assert(lexer != NULL);
     assert(token != NULL);
 

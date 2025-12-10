@@ -1,9 +1,9 @@
-#ifndef CJSON_TOKEN_H
-#define CJSON_TOKEN_H
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifndef CJSON_TOKEN_H
+#define CJSON_TOKEN_H
 
 #include <stdio.h>
 
@@ -30,8 +30,8 @@ struct CJSON_Token {
     enum CJSON_Token_Type type;
 };
 
-#ifdef __cplusplus
-}
 #endif
 
+#ifdef __cplusplus
+}
 #endif

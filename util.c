@@ -10,7 +10,7 @@
 #include "util.h"
 #include "allocator.h"
 
-unsigned next_power_of_2(unsigned num) {
+EXTERN_C unsigned next_power_of_2(unsigned num) {
     if (num == 0U) {
         return 1U;
     }
@@ -25,7 +25,7 @@ unsigned next_power_of_2(unsigned num) {
     return num + 1;
 }
 
-unsigned previous_power_of_2(unsigned num) {
+EXTERN_C unsigned previous_power_of_2(unsigned num) {
     if (num == 0U) {
         return 1U;
     }
@@ -39,7 +39,7 @@ unsigned previous_power_of_2(unsigned num) {
     return num - (num >> 1U);
 }
 
-unsigned closest_power_of_2(unsigned num) {
+EXTERN_C unsigned closest_power_of_2(unsigned num) {
     if(num == 0U) {
         return 1U;
     }
@@ -54,7 +54,7 @@ unsigned closest_power_of_2(unsigned num) {
     return up;
 }
 
-inline bool is_whitespace(const char c) {
+EXTERN_C bool is_whitespace(const char c) {
     switch(c) {
     case ' ':
     case '\t':
@@ -66,7 +66,7 @@ inline bool is_whitespace(const char c) {
     }
 }
 
-inline bool is_delimiter(const char c) {
+EXTERN_C bool is_delimiter(const char c) {
     switch(c) {
     case '[':
     case ']':
@@ -80,7 +80,7 @@ inline bool is_delimiter(const char c) {
     }
 }
 
-inline bool is_digit(const char c) {
+EXTERN_C bool is_digit(const char c) {
     switch(c) {
     case '0':
     case '1':
@@ -98,7 +98,7 @@ inline bool is_digit(const char c) {
     }
 }
 
-uint16_t hex_to_utf16(const char *const codepoint, bool *const success) {
+EXTERN_C uint16_t hex_to_utf16(const char *const codepoint, bool *const success) {
     assert(codepoint != NULL);
     assert(success != NULL);
 
@@ -119,7 +119,7 @@ uint16_t hex_to_utf16(const char *const codepoint, bool *const success) {
     return ret;
 }
 
-unsigned utf16_to_utf8_2bytes(char *const destination, const uint16_t high) {
+EXTERN_C unsigned utf16_to_utf8_2bytes(char *const destination, const uint16_t high) {
     assert(destination != NULL);
 
     if(high <= 0x7F) {
@@ -137,7 +137,7 @@ unsigned utf16_to_utf8_2bytes(char *const destination, const uint16_t high) {
     }
 }
 
-void utf16_to_utf8_4bytes(char *const destination, const uint16_t high, const uint16_t low) {
+EXTERN_C void utf16_to_utf8_4bytes(char *const destination, const uint16_t high, const uint16_t low) {
     assert(destination != NULL);
 
     const uint32_t codepoint = (uint32_t)(((high - 0xD800) << 10) | (low - 0xDC00)) + 0x10000;
@@ -148,7 +148,7 @@ void utf16_to_utf8_4bytes(char *const destination, const uint16_t high, const ui
     destination[3] = (char)(((codepoint >> 0)  & 0x3F) | 0x80);
 }
 
-double parse_float64(const char *const str, bool *const success) {
+EXTERN_C double parse_float64(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
     
@@ -167,7 +167,7 @@ double parse_float64(const char *const str, bool *const success) {
     return ret;
 }
 
-long double parse_long_double(const char *const str, bool *const success) {
+EXTERN_C long double parse_long_double(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
 
@@ -186,7 +186,7 @@ long double parse_long_double(const char *const str, bool *const success) {
     return ret;
 }
 
-uint64_t parse_uint64(const char *const str, bool *const success) {
+EXTERN_C uint64_t parse_uint64(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
     
@@ -205,7 +205,7 @@ uint64_t parse_uint64(const char *const str, bool *const success) {
     return ret;
 }
 
-int64_t parse_int64(const char *const str, bool *const success) {
+EXTERN_C int64_t parse_int64(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
 
@@ -224,7 +224,7 @@ int64_t parse_int64(const char *const str, bool *const success) {
     return ret;
 }
 
-void print_bytes(const void *const buffer, const size_t size) {
+EXTERN_C void print_bytes(const void *const buffer, const size_t size) {
     assert(buffer != NULL);
     assert(size > 0);
 
@@ -235,7 +235,7 @@ void print_bytes(const void *const buffer, const size_t size) {
     printf("0x%02hhx]\n", ((const unsigned char*)buffer)[size - 1]);
 }
 
-void CJSON_Buffer_free(struct CJSON_Buffer *const buffer) {
+EXTERN_C void CJSON_Buffer_free(struct CJSON_Buffer *const buffer) {
     assert(buffer != NULL);
 
     CJSON_FREE(buffer->data);
@@ -243,7 +243,7 @@ void CJSON_Buffer_free(struct CJSON_Buffer *const buffer) {
     buffer->size = 0U;
 }
 
-enum CJSON_UtilError file_get_contents(const char *const path, struct CJSON_Buffer *const buffer) {
+EXTERN_C enum CJSON_UtilError file_get_contents(const char *const path, struct CJSON_Buffer *const buffer) {
     assert(path != NULL);
     assert(strlen(path) > 0);
     assert(strlen(path) < LONG_MAX);
@@ -268,6 +268,7 @@ enum CJSON_UtilError file_get_contents(const char *const path, struct CJSON_Buff
     FILE *const file = fopen(path, "rb");
 #endif
     enum CJSON_UtilError error;
+    long length;
 
     if(file == NULL) {
         error = CJSON_UTIL_ERROR_FOPEN;
@@ -279,7 +280,7 @@ enum CJSON_UtilError file_get_contents(const char *const path, struct CJSON_Buff
         goto cleanup;
     }
 
-    const long length = ftell(file);
+    length = ftell(file);
     if(length == -1L) {
         error = CJSON_UTIL_ERROR_FTELL;
         goto cleanup;
@@ -316,7 +317,7 @@ cleanup:
     return error;
 }
 
-long usec_timestamp(void) {
+EXTERN_C long usec_timestamp(void) {
 #ifdef _WIN32
     FILETIME ft;
     GetSystemTimeAsFileTime(&ft);

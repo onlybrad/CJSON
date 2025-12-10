@@ -1,9 +1,9 @@
-#ifndef CJSON_JSON_H
-#define CJSON_JSON_H
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifndef CJSON_JSON_H
+#define CJSON_JSON_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -158,8 +158,8 @@ void                 CJSON_set_array  (struct CJSON*, const struct CJSON_Array*)
 void                 CJSON_set_null   (struct CJSON*);
 void                 CJSON_set_bool   (struct CJSON*, bool);
 
-#ifdef __cplusplus
-}
 #endif
 
+#ifdef __cplusplus
+}
 #endif

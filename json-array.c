@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include "cjson.h"
+#include "util.h"
 
 #define INITIAL_JSON_ARRAY_CAPACITY (1 << 3)
 
