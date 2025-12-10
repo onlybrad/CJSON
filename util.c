@@ -10,6 +10,50 @@
 #include "util.h"
 #include "allocator.h"
 
+unsigned next_power_of_2(unsigned num) {
+    if (num == 0U) {
+        return 1U;
+    }
+
+    num--;
+    num |= num >> 1U;
+    num |= num >> 2U;
+    num |= num >> 4U;
+    num |= num >> 8U;
+    num |= num >> 16U;
+
+    return num + 1;
+}
+
+unsigned previous_power_of_2(unsigned num) {
+    if (num == 0U) {
+        return 1U;
+    }
+
+    num  |= num >> 1U;
+    num  |= num >> 2U;
+    num  |= num >> 4U;
+    num  |= num >> 8U;
+    num  |= num >> 16U;
+    
+    return num - (num >> 1U);
+}
+
+unsigned closest_power_of_2(unsigned num) {
+    if(num == 0U) {
+        return 1U;
+    }
+
+    const unsigned up   = next_power_of_2(num);
+    const unsigned down = previous_power_of_2(num);
+
+    if(num - down < up - num) {
+        return down;
+    }
+
+    return up;
+}
+
 inline bool is_whitespace(const char c) {
     switch(c) {
     case ' ':
@@ -54,12 +98,12 @@ inline bool is_digit(const char c) {
     }
 }
 
-uint16_t parse_codepoint(const char *const codepoint, bool *const success) {
+uint16_t hex_to_utf16(const char *const codepoint, bool *const success) {
     assert(codepoint != NULL);
     assert(success != NULL);
 
     char hex[7] = "0x";
-    memcpy(hex + 2, codepoint, 4);
+    memcpy(hex + 2, codepoint, 4U);
     char *end_ptr;
     errno = 0;
 
@@ -67,7 +111,7 @@ uint16_t parse_codepoint(const char *const codepoint, bool *const success) {
     if(end_ptr == hex || *end_ptr != '\0' || errno == ERANGE) {
         *success = false;
 
-        return (uint16_t)0;
+        return (uint16_t)0U;
     }
 
     *success = true;
@@ -75,25 +119,25 @@ uint16_t parse_codepoint(const char *const codepoint, bool *const success) {
     return ret;
 }
 
-unsigned codepoint_utf16_to_utf8(char *const destination, const uint16_t codepoint) {
+unsigned utf16_to_utf8_2bytes(char *const destination, const uint16_t high) {
     assert(destination != NULL);
 
-    if(codepoint <= 0x7F) {
-        destination[0] = (char)(codepoint & 0x7f);
+    if(high <= 0x7F) {
+        destination[0] = (char)(high & 0x7f);
         return 1U;
-    } else if(codepoint <= 0x7FF) {
-        destination[0] = (char)((codepoint  >> 6)         | 0xC0);
-        destination[1] = (char)(((codepoint >> 0) & 0x3F) | 0x80);
+    } else if(high <= 0x7FF) {
+        destination[0] = (char)((high  >> 6)         | 0xC0);
+        destination[1] = (char)(((high >> 0) & 0x3F) | 0x80);
         return 2U;
     } else {
-        destination[0] = (char)((codepoint  >> 12)        | 0xE0);
-        destination[1] = (char)(((codepoint >> 6) & 0x3F) | 0x80);
-        destination[2] = (char)(((codepoint >> 0) & 0x3F) | 0x80);
+        destination[0] = (char)((high  >> 12)        | 0xE0);
+        destination[1] = (char)(((high >> 6) & 0x3F) | 0x80);
+        destination[2] = (char)(((high >> 0) & 0x3F) | 0x80);
         return 3U;
     }
 }
 
-void surrogate_utf16_to_utf8(char *const destination, const uint16_t high, const uint16_t low) {
+void utf16_to_utf8_4bytes(char *const destination, const uint16_t high, const uint16_t low) {
     assert(destination != NULL);
 
     const uint32_t codepoint = (uint32_t)(((high - 0xD800) << 10) | (low - 0xDC00)) + 0x10000;

@@ -510,7 +510,7 @@ static void test_create_object(void) {
     const int64_t value3 = -25000000000LL;
 
     struct CJSON_Object object2;
-    CJSON_Object_init(&object2, &root);
+    CJSON_Object_init(&object2, &root, 0U);
     CJSON_Object_set_uint64(&object2, &root, "key1", value1);
     
     CJSON_Object_set_object(object1, &root, "key1", &object2);

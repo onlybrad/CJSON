@@ -28,17 +28,20 @@ struct CJSON_Buffer {
 #define MIN(A,B) ((A)>(B)?(B):(A))
 #define static_strlen(STR) (sizeof(STR) - 1)
 
-#define VALID_2_BYTES_UTF16(CODEPOINT) (CODEPOINT < 0xD7FF || CODEPOINT >= 0xE000)
-#define VALID_4_BYTES_UTF16(HIGH, LOW) (HIGH >= 0xD800 && HIGH <= 0xDBFF && LOW >= 0xDC00 && LOW <= 0xDFFF)
+#define IS_VALID_2_BYTES_UTF16(CODEPOINT) (CODEPOINT < 0xD7FF || CODEPOINT >= 0xE000)
+#define IS_VALID_4_BYTES_UTF16(HIGH, LOW) (HIGH >= 0xD800 && HIGH <= 0xDBFF && LOW >= 0xDC00 && LOW <= 0xDFFF)
 
 #define UNSIGNED_MAX_LENGTH 10U
 
+unsigned     next_power_of_2        (unsigned num);
+unsigned     previous_power_of_2    (unsigned num);
+unsigned     closest_power_of_2     (unsigned num);
 bool         is_whitespace          (char c);
 bool         is_delimiter           (char c);
 bool         is_digit               (char c);
-uint16_t     parse_codepoint        (const char *unicode, bool *success);
-unsigned     codepoint_utf16_to_utf8(char *destination, uint16_t codepoint);
-void         surrogate_utf16_to_utf8 (char *destination, uint16_t high, uint16_t low);
+uint16_t     hex_to_utf16        (const char *unicode, bool *success);
+unsigned     utf16_to_utf8_2bytes(char *destination, uint16_t codepoint);
+void         utf16_to_utf8_4bytes (char *destination, uint16_t high, uint16_t low);
 double       parse_float64          (const char *str, bool *success);
 long double  parse_long_double      (const char *str, bool *success);
 uint64_t     parse_uint64           (const char *str, bool *success);

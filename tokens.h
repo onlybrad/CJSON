@@ -10,9 +10,16 @@ extern "C" {
 
 struct CJSON_Tokens {
     struct CJSON_Token *data;
-    unsigned            index;
-    unsigned            count;
-    unsigned            capacity;
+    struct {
+        unsigned string,
+        number,
+        array,
+        object,
+        keyword;
+    } counter;     
+    unsigned index,
+    count,
+    capacity;
 };
 
 bool CJSON_Tokens_init(struct CJSON_Tokens *tokens, unsigned capacity);

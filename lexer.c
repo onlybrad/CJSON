@@ -218,7 +218,7 @@ void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *const data, c
     lexer->position = 0U;
 }
 
-bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Token *const token) {
+bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens,  struct CJSON_Token *const token) {
     assert(lexer != NULL);
     assert(token != NULL);
 
@@ -240,6 +240,7 @@ bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Token *c
     case '}':
         token->length = 1U;
         token->type = CJSON_TOKEN_RCURLY;
+        tokens->counter.object++;
         break;
     case '[':
         token->length = 1U;
@@ -248,6 +249,7 @@ bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Token *c
     case ']':
         token->length = 1U;
         token->type = CJSON_TOKEN_RBRACKET;
+        tokens->counter.array++;
         break;
     case ':':
         token->length = 1U;
@@ -261,6 +263,7 @@ bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Token *c
         if(!read_string(lexer, token)) {
             return false;
         }
+        tokens->counter.string++;
         break;
     }
     case '-':
@@ -277,6 +280,7 @@ bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Token *c
         if(!read_number(lexer, token)) {
             return false;
         }
+        tokens->counter.number++;
         break;
     }
     default: {
@@ -284,6 +288,7 @@ bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Token *c
             read_invalid_token(lexer, token);
             return false;
         }
+        tokens->counter.keyword++;
         break;
     }
     }

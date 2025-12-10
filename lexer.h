@@ -7,6 +7,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include "token.h"
+#include "tokens.h"
 
 struct CJSON_Lexer {
     const char *data;
@@ -15,7 +16,7 @@ struct CJSON_Lexer {
 };
 
 void CJSON_Lexer_init(struct CJSON_Lexer*, const char *data, unsigned length);
-bool CJSON_Lexer_tokenize(struct CJSON_Lexer*, struct CJSON_Token*);
+bool CJSON_Lexer_tokenize(struct CJSON_Lexer*, struct CJSON_Tokens*, struct CJSON_Token*);
 
 #ifdef __cplusplus
 }

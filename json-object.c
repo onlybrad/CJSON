@@ -56,13 +56,13 @@ static bool CJSON_Object_resize(struct CJSON_Object *const object, struct CJSON_
     return true;
 }
 
-bool CJSON_Object_init(struct CJSON_Object *const object, struct CJSON_Root *const root) {
+bool CJSON_Object_init(struct CJSON_Object *const object, struct CJSON_Root *const root, const unsigned capacity) {
     assert(object != NULL);
     assert(root != NULL);
     
     struct CJSON_KV *entries = CJSON_ARENA_ALLOC(
         &root->object_arena,
-        INITIAL_JSON_OBJECT_CAPACITY,
+        capacity < INITIAL_JSON_OBJECT_CAPACITY ? INITIAL_JSON_OBJECT_CAPACITY : capacity,
         struct CJSON_KV
     );
     if(entries == NULL) {

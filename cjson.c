@@ -10,7 +10,6 @@
 #define CJSON_INIT_ARENA_SIZE          1024U
 #define CJSON_INIT_ARENA_MAX_NODES     CJSON_ARENA_INFINITE_NODES
 #define CJSON_PARSE_TOKENS_SIZE_FACTOR 2U
-#define CJSON_PARSE_ARENA_SIZE_FACTOR  8U
 #define CJSON_PARSE_ARENA_MAX_NODES    CJSON_ARENA_INFINITE_NODES
 
 enum CJSON_ObjectError {
@@ -42,18 +41,17 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
     assert(root != NULL);
     assert(token != NULL);
 
-    char *chars = CJSON_ARENA_ALLOC(&root->string_arena, token->length - 1U, char);
-    if(chars == NULL) {
+    char *output_current = CJSON_ARENA_ALLOC(&root->string_arena, token->length - 1U, char);
+    if(output_current == NULL) {
         return false;
     }
+    char *const output_start    = output_current;
+    const char *const input_end = token->value + token->length - 2;
+    const char *input_current   = token->value + 1;
+    bool escaping               = false;
     
-    unsigned str_index = 0U;
-    unsigned tok_index = 1U;
-    const char *const value = token->value;
-    bool escaping = false;
-
-    while(tok_index < token->length - 1U) {
-        switch(value[tok_index]) {
+    while(input_current != input_end + 1) {
+        switch(*input_current) {
             case '\b':
             case '\f':
             case '\n':
@@ -63,92 +61,92 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
         }
 
         if(!escaping) {
-            if(value[tok_index] == '\\') {
+            if(*input_current == '\\') {
                 escaping = true;
-                tok_index++;
+                input_current++;
                 continue;
             }
 
-            chars[str_index++] = value[tok_index++];
+            *(output_current++) = *(input_current++);
             continue;
         } 
         
-        else switch(value[tok_index]) {
+        else switch(*input_current) {
         case '"':
-            chars[str_index++] = '"';
-            tok_index++;
-            escaping = false;
+            escaping   = false;
+            *(output_current++) = '"';
+            input_current++;
             continue;
         case 'b':
-            chars[str_index++] = '\b';
-            tok_index++;
-            escaping = false;
+            escaping   = false;
+            *(output_current++) = '\b';
+            input_current++;
             continue;
         case 'f':
-            chars[str_index++] = '\f';
-            tok_index++;
-            escaping = false;
+            escaping   = false;
+            *(output_current++) = '\f';
+            input_current++;
             continue;
         case 'n':
-            chars[str_index++] = '\n';
-            tok_index++;
-            escaping = false;
+            escaping   = false;
+            *(output_current++) = '\n';
+            input_current++;
             continue;
         case 'r':
-            chars[str_index++] = '\r';
-            tok_index++;
-            escaping = false;
+            escaping   = false;
+            *(output_current++) = '\r';
+            input_current++;
             continue;
         case 't':
-            chars[str_index++] = '\t';
-            tok_index++;
-            escaping = false;
+            escaping   = false;
+            *(output_current++) = '\t';
+            input_current++;
             continue;
         case '/':
-            chars[str_index++] = '/';
-            tok_index++;
-            escaping = false;
+            escaping   = false;
+            *(output_current++) = '/';
+            input_current++;
             continue;
         case '\\': {
-            chars[str_index++] = '\\';
-            tok_index++;
-            escaping = false;
+            escaping   = false;
+            *(output_current++) = '\\';
+            input_current++;
             continue;
         }
         case 'u': {
-            if(tok_index + 4U >= token->length - 1U) {
+            if(input_end - input_current < 4) {
                 return false;
             }
 
-            tok_index++;
+            input_current++;
 
             bool success;
-            const uint16_t codepoint = parse_codepoint(value + tok_index, &success);
+            const uint16_t high = hex_to_utf16(input_current, &success);
             //\u0000 is apparently an acceptable escaped character in JSON so if the parsing function returns 0 then it's either an error or \u0000. \0 would break cstrings so it's gonna be treated as an error as well.
-            if(codepoint == 0U) {
+            if(high == 0U) {
                 return false;    
             }
 
-            if(VALID_2_BYTES_UTF16(codepoint)) {
-                str_index += codepoint_utf16_to_utf8(chars + str_index, codepoint);
-                tok_index += 4U;
-                escaping = false;
+            if(IS_VALID_2_BYTES_UTF16(high)) {
+                output_current        += utf16_to_utf8_2bytes(output_current, high);
+                input_current += 4;
+                escaping      = false;
                 continue;
             }
 
-            if(tok_index + 9U >= token->length - 1U || value[tok_index + 4U] != '\\' || value[tok_index + 5U] != 'u') {
+            if(input_end - input_current < 9 || input_current[4] != '\\' || input_current[5] != 'u') {
                 return false;
             }
 
-            const uint16_t low = parse_codepoint(value + tok_index + 6U, &success);
-            if(!success || !VALID_4_BYTES_UTF16(codepoint, low)) {
+            const uint16_t low = hex_to_utf16(input_current + 6, &success);
+            if(!success || !IS_VALID_4_BYTES_UTF16(high, low)) {
                 return false; 
             }
 
-            surrogate_utf16_to_utf8(chars + str_index, codepoint, low);
-            str_index += 4U;
-            tok_index += 10U;
-            escaping = false;
+            utf16_to_utf8_4bytes(output_current, high, low);
+            output_current        += 4;
+            input_current += 10;
+            escaping      = false;
             continue;
         }
         default:
@@ -160,9 +158,10 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
         return false;
     }
 
-    chars[str_index] = '\0';
-    string->chars = chars;
-    string->length = str_index;
+    unsigned length = (unsigned)(output_current - output_start);
+    output_current[length]  = '\0';
+    string->chars           = output_start;
+    string->length          = length;
 
     return true;
 }
@@ -305,7 +304,8 @@ static bool CJSON_parse_object(struct CJSON *const json, struct CJSON_Root *cons
     const struct CJSON_Token  *token   = tokens->data + tokens->index;
     struct CJSON_Object *const object  = &json->data.object;
     json->type = CJSON_OBJECT;
-    if(!CJSON_Object_init(object, root)) {
+    
+    if(!CJSON_Object_init(object, root, 8U)) {
         object_error = CJSON_OBJECT_ERROR_MEMORY;
         goto end;
     }
@@ -560,7 +560,7 @@ static bool CJSON_init_arenas(struct CJSON_Root *const root, unsigned size, cons
         &root->array_arena,
         &root->string_arena
     };
-    
+        
     for(int i = 0; i < (int)(sizeof(arenas)/sizeof(*arenas)); i++) {
         if(!CJSON_Arena_init(arenas[i], size, max_nodes, CJSON_ARENA_NAMES[i])) {
             return false;
@@ -575,6 +575,9 @@ bool CJSON_init(struct CJSON_Root *const root) {
 
     root->json.type      = CJSON_NULL;
     root->json.data.null = NULL;
+    root->string_length  = 0U;
+
+    CJSON_Tokens_init(&root->tokens, 0U);
 
     return CJSON_init_arenas(root, CJSON_INIT_ARENA_SIZE, CJSON_INIT_ARENA_MAX_NODES);
 }
@@ -594,7 +597,7 @@ struct CJSON_Array *CJSON_make_array(struct CJSON *const json, struct CJSON_Root
 struct CJSON_Object *CJSON_make_object(struct CJSON *const json, struct CJSON_Root *const root) {
     assert(json != NULL);
 
-    if(!CJSON_Object_init(&json->data.object, root)) {
+    if(!CJSON_Object_init(&json->data.object, root, 0U)) {
         return NULL;
     }
     json->type = CJSON_OBJECT;
@@ -607,34 +610,38 @@ bool CJSON_parse(struct CJSON_Root *const root, const char *const data, const un
     assert(data != NULL);
     assert(length > 0U);
 
-    if(!CJSON_init_arenas(root, length / CJSON_PARSE_ARENA_SIZE_FACTOR, CJSON_PARSE_ARENA_MAX_NODES)) {
+    root->string_length = length;
+
+    if(!CJSON_init_arenas(root, length, CJSON_PARSE_ARENA_MAX_NODES)) {
+        return false;
+    }
+
+    if(!CJSON_Tokens_init(&root->tokens, length / CJSON_PARSE_TOKENS_SIZE_FACTOR)) {
+        root->json.type       = CJSON_ERROR;
+        root->json.data.error = CJSON_ERROR_MEMORY;
         return false;
     }
 
     struct CJSON_Lexer lexer;
     CJSON_Lexer_init(&lexer, data, length);
-
-    struct CJSON_Tokens tokens;
-    CJSON_Tokens_init(&tokens, length / CJSON_PARSE_TOKENS_SIZE_FACTOR);
     
     struct CJSON_Token *token;
     do {
-        if((token = CJSON_Tokens_next(&tokens)) == NULL) {
-            CJSON_Tokens_free(&tokens);
+        if((token = CJSON_Tokens_next(&root->tokens)) == NULL) {
+            root->json.type       = CJSON_ERROR;
+            root->json.data.error = CJSON_ERROR_MEMORY;
             return false;
         }
-    } while(CJSON_Lexer_tokenize(&lexer, token));
+    } while(CJSON_Lexer_tokenize(&lexer, &root->tokens, token));
 
     if(token->type != CJSON_TOKEN_DONE) {
-        CJSON_Tokens_free(&tokens);
         root->json.type       = CJSON_ERROR;
         root->json.data.error = CJSON_ERROR_TOKEN;
 
         return false;
     }
 
-    CJSON_parse_tokens(root, &root->json, &tokens);
-    CJSON_Tokens_free(&tokens);
+    CJSON_parse_tokens(root, &root->json, &root->tokens);
 
     return root->json.type != CJSON_ERROR;
 }
@@ -649,7 +656,6 @@ bool CJSON_parse_file(struct CJSON_Root *const root, const char *const path) {
     if(error != CJSON_UTIL_ERROR_NONE) {
         root->json.type       = CJSON_ERROR;
         root->json.data.error = CJSON_ERROR_FILE;
-
         return false;
     }
 
@@ -673,6 +679,8 @@ void CJSON_free(struct CJSON_Root *const root) {
     for(int i = 0; i < (int)(sizeof(arenas)/sizeof(*arenas)); i++) {
         CJSON_Arena_free(arenas[i]);
     }
+
+    CJSON_Tokens_free(&root->tokens);
 }
 
 const char *CJSON_get_error(const struct CJSON *const json) {
@@ -724,60 +732,54 @@ struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
         return NULL;
     }
 
-    size_t length = strlen(query);
-    if(length > (size_t)UINT_MAX) {
+    if(*query == '\0' || strlen(query) > (size_t)UINT_MAX) {
         return NULL;
     }
 
-    char *key;
-    bool is_object_key = query[0] != '[';
-    unsigned i = 0U;
-
-    if(query[0] == '.' || query[0] == '[') {
-        length--;
+    bool is_object_key = *query != '[';
+    if(*query == '.' || *query == '[') {
         query++;
     }
 
-    while(i < (unsigned)length) {
+    char *key;
+    size_t key_size;
+    while(true) {
         if(is_object_key && json->type == CJSON_OBJECT) {
-            unsigned counter = 0U;
-            while(query[i] != '.' && query[i] != '[' && i < length) {
-                i++;
-                counter++;
+            key_size = 0U;
+            while(*query != '.' && *query != '[' && *query != '\0') {
+                query++;
+                key_size++;
             }
 
-            key = CJSON_MALLOC((size_t)(counter + 1U) * sizeof(char));
+            key = (char*)CJSON_MALLOC((key_size + 1U) * sizeof(char));
             if(key == NULL) {
                 return NULL;
             }
-            memcpy(key, query + i - counter, counter);
-            key[counter] = '\0';
+            memcpy(key, query - key_size, key_size);
+            key[key_size] = '\0';
 
             json = CJSON_Object_get(&json->data.object, key);
-            CJSON_FREE(key);
-            key = NULL;
-      
+            CJSON_FREE(key);    
         } else if(!is_object_key && json->type == CJSON_ARRAY) {
-            unsigned counter = 0U;
-            while(i < length && query[i] != ']') {
-                if(query[i] < '0' || query[i] > '9') {
+            key_size = 0U;
+            while(*query != ']' && *query != '\0') {
+                if(*query < '0' || *query > '9') {
                     return NULL;
                 }
-                i++;
-                counter++;
+                query++;
+                key_size++;
             }
 
-            if(query[i] != ']' || counter > UNSIGNED_MAX_LENGTH) {
+            if(*query != ']' || key_size > UNSIGNED_MAX_LENGTH) {
                 return NULL;
             }
 
-            key = CJSON_MALLOC((size_t)(counter + 1U) * sizeof(char));
+            key = (char*)CJSON_MALLOC((key_size + 1U) * sizeof(char));
             if(key == NULL) {
                 return NULL;
             }
-
-            memcpy(key, query + i - counter, counter);
-            key[counter] = '\0';
+            memcpy(key, query - key_size, key_size);
+            key[key_size] = '\0';
 
             bool success;
             uint64_t index = parse_uint64(key, &success);
@@ -788,18 +790,18 @@ struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
 
             json = CJSON_Array_get(&json->data.array, (unsigned)index);
             CJSON_FREE(key);
-            key = NULL;
-            i++;
+            query++;
         } else {
             return NULL;
         }
 
-        if(json == NULL) {
-            return NULL;
+        if(json == NULL || *query == '\0') {
+            break;
         }
-
-        is_object_key = query[i++] != '[';
-    } 
+        
+        is_object_key = *query != '[';
+        query++;
+    }
     
     return json;
 }
@@ -832,35 +834,35 @@ struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
     *success = true;\
     return &ret->data.MEMBER;
 
-const char *CJSON_get_string(struct CJSON *const json, const char *query, bool *const success) {
+const char *CJSON_get_string(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_STRING, string.chars)
 }
 
-double CJSON_get_float64(struct CJSON *const json, const char *query, bool *const success) {
+double CJSON_get_float64(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_FLOAT64, float64)
 }
 
-int64_t CJSON_get_int64(struct CJSON *const json, const char *query, bool *const success) {
+int64_t CJSON_get_int64(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_INT64, int64)
 }
 
-uint64_t CJSON_get_uint64(struct CJSON *const json, const char *query, bool *const success) {
+uint64_t CJSON_get_uint64(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_UINT64, uint64)
 }
 
-struct CJSON_Object *CJSON_get_object(struct CJSON *const json, const char *query, bool *const success) {
+struct CJSON_Object *CJSON_get_object(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_PTR(CJSON_OBJECT, object)
 }
 
-struct CJSON_Array *CJSON_get_array(struct CJSON *const json, const char *query, bool *const success) {
+struct CJSON_Array *CJSON_get_array(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_PTR(CJSON_ARRAY, array)
 }
 
-void *CJSON_get_null(struct CJSON *const json, const char *query, bool *const success) {
+void *CJSON_get_null(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_NULL, null)
 }
 
-bool CJSON_get_bool(struct CJSON *const json, const char *query, bool *const success) {
+bool CJSON_get_bool(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_BOOL, boolean)
 }
 
