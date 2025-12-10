@@ -781,7 +781,6 @@ EXTERN_C struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
 
             bool success;
             uint64_t index = parse_uint64(key, &success);
-
             if(!success) {
                 return NULL;
             }
