@@ -317,7 +317,7 @@ cleanup:
     return error;
 }
 
-EXTERN_C long usec_timestamp(void) {
+EXTERN_C unsigned long long usec_timestamp(void) {
 #ifdef _WIN32
     FILETIME ft;
     GetSystemTimeAsFileTime(&ft);
@@ -326,11 +326,11 @@ EXTERN_C long usec_timestamp(void) {
     tt |= ft.dwLowDateTime;
     tt /= 10ULL;
     tt -= 11644473600000000ULL;
-    return (long)tt;
+    return tt;
 #else
     struct timeval current_time;
     gettimeofday(&current_time, NULL);
 
-    return current_time.tv_sec * 1000000L + current_time.tv_usec;
+    return (unsigned long long)(current_time.tv_sec * 1000000L + current_time.tv_usec);
 #endif
 }

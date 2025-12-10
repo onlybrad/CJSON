@@ -46,21 +46,21 @@ struct CJSON_Buffer {
 
 #define UNSIGNED_MAX_LENGTH 10U
 
-unsigned     next_power_of_2     (unsigned num);
-unsigned     previous_power_of_2 (unsigned num);
-unsigned     closest_power_of_2  (unsigned num);
-bool         is_whitespace       (char c);
-bool         is_delimiter        (char c);
-bool         is_digit            (char c);
-uint16_t     hex_to_utf16        (const char *unicode, bool *success);
-unsigned     utf16_to_utf8_2bytes(char *destination, uint16_t codepoint);
-void         utf16_to_utf8_4bytes(char *destination, uint16_t high, uint16_t low);
-double       parse_float64       (const char *str, bool *success);
-long double  parse_long_double   (const char *str, bool *success);
-uint64_t     parse_uint64        (const char *str, bool *success);
-int64_t      parse_int64         (const char *str, bool *success);
-void         print_bytes         (const void *buffer, const size_t size);
-long         usec_timestamp      (void);
+unsigned           next_power_of_2     (unsigned num);
+unsigned           previous_power_of_2 (unsigned num);
+unsigned           closest_power_of_2  (unsigned num);
+bool               is_whitespace       (char c);
+bool               is_delimiter        (char c);
+bool               is_digit            (char c);
+uint16_t           hex_to_utf16        (const char *unicode, bool *success);
+unsigned           utf16_to_utf8_2bytes(char *destination, uint16_t codepoint);
+void               utf16_to_utf8_4bytes(char *destination, uint16_t high, uint16_t low);
+double             parse_float64       (const char *str, bool *success);
+long double        parse_long_double   (const char *str, bool *success);
+uint64_t           parse_uint64        (const char *str, bool *success);
+int64_t            parse_int64         (const char *str, bool *success);
+void               print_bytes         (const void *buffer, const size_t size);
+unsigned long long usec_timestamp      (void);
 
 void CJSON_Buffer_free(struct CJSON_Buffer*);
 

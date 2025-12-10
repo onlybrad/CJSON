@@ -13,7 +13,7 @@ int main(void) {
         return EXIT_FAILURE;
     }
 
-    const long start = usec_timestamp();
+    const unsigned long long start = usec_timestamp();
     struct CJSON_Root root;
     const bool success = CJSON_parse(&root, (const char*)buffer.data, buffer.size);
     if(!success) {
@@ -22,8 +22,8 @@ int main(void) {
         return EXIT_FAILURE;
     }
 
-    const long end = usec_timestamp();
-    printf("Execution time: %li\n", end - start);
+    const unsigned long long end = usec_timestamp();
+    printf("Execution time: %llu\n", end - start);
 
     CJSON_Buffer_free(&buffer);
     CJSON_free(&root);
