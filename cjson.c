@@ -40,6 +40,7 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
     assert(string != NULL);
     assert(root != NULL);
     assert(token != NULL);
+    assert(token->length >= 2);
 
     char *output_current = CJSON_ARENA_ALLOC(&root->string_arena, token->length - 1U, char);
     if(output_current == NULL) {
@@ -71,7 +72,7 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
             continue;
         } 
         
-        else switch(*input_current) {
+        switch(*input_current) {
         case '"':
             escaping            = false;
             *(output_current++) = '"';
