@@ -742,10 +742,10 @@ EXTERN_C struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
         query++;
     }
 
-    char *key;
     size_t key_size;
     while(true) {
         if(is_object_key && json->type == CJSON_OBJECT) {
+            char *key;
             key_size = 0U;
             while(*query != '.' && *query != '[' && *query != '\0') {
                 query++;
@@ -762,6 +762,7 @@ EXTERN_C struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
             json = CJSON_Object_get(&json->data.object, key);
             CJSON_FREE(key);    
         } else if(!is_object_key && json->type == CJSON_ARRAY) {
+            char key[UNSIGNED_MAX_LENGTH + 1U];
             key_size = 0U;
             while(*query != ']' && *query != '\0') {
                 if(*query < '0' || *query > '9') {
@@ -775,16 +776,12 @@ EXTERN_C struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
                 return NULL;
             }
 
-            key = (char*)CJSON_MALLOC((key_size + 1U) * sizeof(char));
-            if(key == NULL) {
-                return NULL;
-            }
             memcpy(key, query - key_size, key_size);
             key[key_size] = '\0';
 
             bool success;
             uint64_t index = parse_uint64(key, &success);
-            CJSON_FREE(key);
+
             if(!success) {
                 return NULL;
             }
