@@ -28,7 +28,7 @@ static bool CJSON_Array_resize(struct CJSON_Array *const array, struct CJSON_Roo
     return true;
 }
 
-bool CJSON_Array_init(struct CJSON_Array *const array, struct CJSON_Root *const root) {
+EXTERN_C bool CJSON_Array_init(struct CJSON_Array *const array, struct CJSON_Root *const root) {
     assert(array != NULL);
     assert(root != NULL);
 
@@ -48,7 +48,7 @@ bool CJSON_Array_init(struct CJSON_Array *const array, struct CJSON_Root *const 
     return true;
 }
 
-struct CJSON *CJSON_Array_next(struct CJSON_Array *const array, struct CJSON_Root *const root) {
+EXTERN_C struct CJSON *CJSON_Array_next(struct CJSON_Array *const array, struct CJSON_Root *const root) {
     assert(array != NULL);
     assert(root != NULL);
 
@@ -64,13 +64,13 @@ struct CJSON *CJSON_Array_next(struct CJSON_Array *const array, struct CJSON_Roo
     return ret;
 }
 
-struct CJSON *CJSON_Array_get(const struct CJSON_Array *const array, const unsigned index) {
+EXTERN_C struct CJSON *CJSON_Array_get(const struct CJSON_Array *const array, const unsigned index) {
     assert(array != NULL);
 
     return index >= array->count ? NULL : array->values + index;
 }
 
-bool CJSON_Array_set(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const struct CJSON *const value) {
+EXTERN_C bool CJSON_Array_set(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const struct CJSON *const value) {
     assert(array != NULL);
     assert(root != NULL);
     assert(value != NULL);
@@ -91,7 +91,7 @@ bool CJSON_Array_set(struct CJSON_Array *const array, struct CJSON_Root *const r
     return true;
 }
 
-bool CJSON_Array_push(struct CJSON_Array *const array, struct CJSON_Root *const root,  const struct CJSON *const value) {
+EXTERN_C bool CJSON_Array_push(struct CJSON_Array *const array, struct CJSON_Root *const root,  const struct CJSON *const value) {
     assert(array != NULL);
     assert(root != NULL);
     assert(value != NULL);
@@ -134,39 +134,39 @@ bool CJSON_Array_push(struct CJSON_Array *const array, struct CJSON_Root *const 
     *success = true;\
     return &ret->data.MEMBER;
 
-const char *CJSON_Array_get_string(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+EXTERN_C const char *CJSON_Array_get_string(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
     JSON_ARRAY_GET_VALUE(CJSON_STRING, string.chars)
 }
 
-double CJSON_Array_get_float64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+EXTERN_C double CJSON_Array_get_float64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
     JSON_ARRAY_GET_VALUE(CJSON_FLOAT64, float64)
 }
 
-int64_t CJSON_Array_get_int64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+EXTERN_C int64_t CJSON_Array_get_int64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
     JSON_ARRAY_GET_VALUE(CJSON_INT64, int64)    
 }
 
-uint64_t CJSON_Array_get_uint64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+EXTERN_C uint64_t CJSON_Array_get_uint64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
     JSON_ARRAY_GET_VALUE(CJSON_UINT64, uint64)
 }
 
-struct CJSON_Array *CJSON_Array_get_array(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+EXTERN_C struct CJSON_Array *CJSON_Array_get_array(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
     JSON_ARRAY_GET_PTR(CJSON_ARRAY, array)
 }
 
-struct CJSON_Object *CJSON_Array_get_object(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+EXTERN_C struct CJSON_Object *CJSON_Array_get_object(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
     JSON_ARRAY_GET_PTR(CJSON_OBJECT, object)    
 }
 
-void *CJSON_Array_get_null(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+EXTERN_C void *CJSON_Array_get_null(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
     JSON_ARRAY_GET_VALUE(CJSON_NULL, null)
 }
 
-bool CJSON_Array_get_bool(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+EXTERN_C bool CJSON_Array_get_bool(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
     JSON_ARRAY_GET_VALUE(CJSON_BOOL, boolean)
 }
 
-bool CJSON_Array_set_string(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const char *const value) {
+EXTERN_C bool CJSON_Array_set_string(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const char *const value) {
     assert(array != NULL);
     assert(root != NULL);
     assert(value != NULL);
@@ -183,7 +183,7 @@ bool CJSON_Array_set_string(struct CJSON_Array *const array, struct CJSON_Root *
     return CJSON_Array_set(array, root, index, &json);
 }
 
-bool CJSON_Array_set_float64(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const double value) {
+EXTERN_C bool CJSON_Array_set_float64(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const double value) {
     assert(array != NULL);
     assert(root != NULL);
     
@@ -194,7 +194,7 @@ bool CJSON_Array_set_float64(struct CJSON_Array *const array, struct CJSON_Root 
     return CJSON_Array_set(array, root, index, &json);
 }
 
-bool CJSON_Array_set_int64(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const int64_t value) {
+EXTERN_C bool CJSON_Array_set_int64(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const int64_t value) {
     assert(array != NULL);
     assert(root != NULL);
 
@@ -205,7 +205,7 @@ bool CJSON_Array_set_int64(struct CJSON_Array *const array, struct CJSON_Root *c
     return CJSON_Array_set(array, root, index, &json);
 }
 
-bool CJSON_Array_set_uint64(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const uint64_t value) {
+EXTERN_C bool CJSON_Array_set_uint64(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const uint64_t value) {
     assert(array != NULL);
     assert(root != NULL);
 
@@ -216,7 +216,7 @@ bool CJSON_Array_set_uint64(struct CJSON_Array *const array, struct CJSON_Root *
     return CJSON_Array_set(array, root, index, &json);
 }
 
-bool CJSON_Array_set_array(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const struct CJSON_Array *const value) {
+EXTERN_C bool CJSON_Array_set_array(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const struct CJSON_Array *const value) {
     assert(array != NULL);
     assert(root != NULL);
     assert(value != NULL);
@@ -228,7 +228,7 @@ bool CJSON_Array_set_array(struct CJSON_Array *const array, struct CJSON_Root *c
     return CJSON_Array_set(array, root, index, &json);
 }
 
-bool CJSON_Array_set_object(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const struct CJSON_Object *const value) {
+EXTERN_C bool CJSON_Array_set_object(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const struct CJSON_Object *const value) {
     assert(array != NULL);
     assert(root != NULL);
     assert(value != NULL);
@@ -240,7 +240,7 @@ bool CJSON_Array_set_object(struct CJSON_Array *const array, struct CJSON_Root *
     return CJSON_Array_set(array, root, index, &json);
 }
 
-bool CJSON_Array_set_null(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index) {
+EXTERN_C bool CJSON_Array_set_null(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index) {
     assert(array != NULL);
     assert(root != NULL);
 
@@ -251,7 +251,7 @@ bool CJSON_Array_set_null(struct CJSON_Array *const array, struct CJSON_Root *co
     return CJSON_Array_set(array, root, index, &json);
 }
 
-bool CJSON_Array_set_bool(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const bool value) {
+EXTERN_C bool CJSON_Array_set_bool(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const bool value) {
     assert(array != NULL);
     assert(root != NULL);
 
