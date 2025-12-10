@@ -158,7 +158,7 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
         return false;
     }
 
-    unsigned length        = (unsigned)(output_current - output_start);
+    const unsigned length  = (unsigned)(output_current - output_start);
     output_current[length] = '\0';
     string->chars          = output_start;
     string->length         = length;
