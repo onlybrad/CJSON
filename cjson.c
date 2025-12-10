@@ -784,13 +784,12 @@ EXTERN_C struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
 
             bool success;
             uint64_t index = parse_uint64(key, &success);
+            CJSON_FREE(key);
             if(!success) {
-                CJSON_FREE(key);
                 return NULL;
             }
 
             json = CJSON_Array_get(&json->data.array, (unsigned)index);
-            CJSON_FREE(key);
             query++;
         } else {
             return NULL;
