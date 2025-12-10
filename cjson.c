@@ -49,7 +49,7 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
     const char *const input_end = token->value + token->length - 2;
     const char *input_current   = token->value + 1;
     bool escaping               = false;
-    
+
     while(input_current != input_end + 1) {
         switch(*input_current) {
             case '\b':
@@ -73,42 +73,42 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
         
         else switch(*input_current) {
         case '"':
-            escaping   = false;
+            escaping            = false;
             *(output_current++) = '"';
             input_current++;
             continue;
         case 'b':
-            escaping   = false;
+            escaping            = false;
             *(output_current++) = '\b';
             input_current++;
             continue;
         case 'f':
-            escaping   = false;
+            escaping            = false;
             *(output_current++) = '\f';
             input_current++;
             continue;
         case 'n':
-            escaping   = false;
+            escaping            = false;
             *(output_current++) = '\n';
             input_current++;
             continue;
         case 'r':
-            escaping   = false;
+            escaping            = false;
             *(output_current++) = '\r';
             input_current++;
             continue;
         case 't':
-            escaping   = false;
+            escaping            = false;
             *(output_current++) = '\t';
             input_current++;
             continue;
         case '/':
-            escaping   = false;
+            escaping            = false;
             *(output_current++) = '/';
             input_current++;
             continue;
         case '\\': {
-            escaping   = false;
+            escaping            = false;
             *(output_current++) = '\\';
             input_current++;
             continue;
@@ -128,9 +128,9 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
             }
 
             if(IS_VALID_2_BYTES_UTF16(high)) {
-                output_current        += utf16_to_utf8_2bytes(output_current, high);
-                input_current += 4;
-                escaping      = false;
+                output_current += utf16_to_utf8_2bytes(output_current, high);
+                input_current  += 4;
+                escaping        = false;
                 continue;
             }
 
@@ -144,9 +144,9 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
             }
 
             utf16_to_utf8_4bytes(output_current, high, low);
-            output_current        += 4;
-            input_current += 10;
-            escaping      = false;
+            output_current += 4;
+            input_current  += 10;
+            escaping        = false;
             continue;
         }
         default:
@@ -158,10 +158,10 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
         return false;
     }
 
-    unsigned length = (unsigned)(output_current - output_start);
-    output_current[length]  = '\0';
-    string->chars           = output_start;
-    string->length          = length;
+    unsigned length        = (unsigned)(output_current - output_start);
+    output_current[length] = '\0';
+    string->chars          = output_start;
+    string->length         = length;
 
     return true;
 }
