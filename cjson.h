@@ -79,7 +79,6 @@ struct CJSON_Root {
     struct CJSON_Arena array_arena,
     object_arena,
     string_arena;
-    unsigned string_length;
 };
 
 struct CJSON_KV {
@@ -109,8 +108,10 @@ bool                 CJSON_Object_set_object (struct CJSON_Object*, struct CJSON
 bool                 CJSON_Object_set_array  (struct CJSON_Object*, struct CJSON_Root*, const char *key, const struct CJSON_Array*);
 bool                 CJSON_Object_set_null   (struct CJSON_Object*, struct CJSON_Root*, const char *key);
 bool                 CJSON_Object_set_bool   (struct CJSON_Object*, struct CJSON_Root*, const char *key, bool);
+unsigned             CJSON_Object_total_objects(const struct CJSON_Object*);
+unsigned             CJSON_Object_total_arrays (const struct CJSON_Object*);
 
-bool                 CJSON_Array_init       (struct CJSON_Array*, struct CJSON_Root*);
+bool                 CJSON_Array_init       (struct CJSON_Array*, struct CJSON_Root*, unsigned capacity);
 struct CJSON        *CJSON_Array_next       (struct CJSON_Array*, struct CJSON_Root*);
 struct CJSON        *CJSON_Array_get        (const struct CJSON_Array*, unsigned index);
 bool                 CJSON_Array_set        (struct CJSON_Array*, struct CJSON_Root*, unsigned index, const struct CJSON *);
@@ -131,32 +132,36 @@ bool                 CJSON_Array_set_array  (struct CJSON_Array*, struct CJSON_R
 bool                 CJSON_Array_set_object (struct CJSON_Array*, struct CJSON_Root*, unsigned index, const struct CJSON_Object*);
 bool                 CJSON_Array_set_null   (struct CJSON_Array*, struct CJSON_Root*, unsigned index);
 bool                 CJSON_Array_set_bool   (struct CJSON_Array*, struct CJSON_Root*, unsigned index, bool);
+unsigned             CJSON_Array_total_objects(const struct CJSON_Array*);
+unsigned             CJSON_Array_total_arrays (const struct CJSON_Array*);
 
 bool CJSON_init      (struct CJSON_Root*);
 bool CJSON_parse     (struct CJSON_Root*, const char *data, unsigned length);
 bool CJSON_parse_file(struct CJSON_Root*, const char *path);
 void CJSON_free      (struct CJSON_Root*);
 
-struct CJSON_Array  *CJSON_make_array (struct CJSON*, struct CJSON_Root*);
-struct CJSON_Object *CJSON_make_object(struct CJSON*, struct CJSON_Root*);
-const char          *CJSON_get_error  (const struct CJSON*);
-struct CJSON        *CJSON_get        (struct CJSON*, const char *query);
-const char          *CJSON_get_string (struct CJSON*, const char *query, bool *success);
-double               CJSON_get_float64(struct CJSON*, const char *query, bool *success);
-int64_t              CJSON_get_int64  (struct CJSON*, const char *query, bool *success);
-uint64_t             CJSON_get_uint64 (struct CJSON*, const char *query, bool *success);
-struct CJSON_Object *CJSON_get_object (struct CJSON*, const char *query, bool *success);
-struct CJSON_Array  *CJSON_get_array  (struct CJSON*, const char *query, bool *success);
-void                *CJSON_get_null   (struct CJSON*, const char *query, bool *success);
-bool                 CJSON_get_bool   (struct CJSON*, const char *query, bool *success);
-bool                 CJSON_set_string (struct CJSON*, struct CJSON_Root*, const char*);
-void                 CJSON_set_float64(struct CJSON*, double);
-void                 CJSON_set_int64  (struct CJSON*, int64_t);
-void                 CJSON_set_uint64 (struct CJSON*, uint64_t);
-void                 CJSON_set_object (struct CJSON*, const struct CJSON_Object*);
-void                 CJSON_set_array  (struct CJSON*, const struct CJSON_Array*);
-void                 CJSON_set_null   (struct CJSON*);
-void                 CJSON_set_bool   (struct CJSON*, bool);
+struct CJSON_Array  *CJSON_make_array   (struct CJSON*, struct CJSON_Root*);
+struct CJSON_Object *CJSON_make_object  (struct CJSON*, struct CJSON_Root*);
+const char          *CJSON_get_error    (const struct CJSON*);
+struct CJSON        *CJSON_get          (struct CJSON*, const char *query);
+const char          *CJSON_get_string   (struct CJSON*, const char *query, bool *success);
+double               CJSON_get_float64  (struct CJSON*, const char *query, bool *success);
+int64_t              CJSON_get_int64    (struct CJSON*, const char *query, bool *success);
+uint64_t             CJSON_get_uint64   (struct CJSON*, const char *query, bool *success);
+struct CJSON_Object *CJSON_get_object   (struct CJSON*, const char *query, bool *success);
+struct CJSON_Array  *CJSON_get_array    (struct CJSON*, const char *query, bool *success);
+void                *CJSON_get_null     (struct CJSON*, const char *query, bool *success);
+bool                 CJSON_get_bool     (struct CJSON*, const char *query, bool *success);
+bool                 CJSON_set_string   (struct CJSON*, struct CJSON_Root*, const char*);
+void                 CJSON_set_float64  (struct CJSON*, double);
+void                 CJSON_set_int64    (struct CJSON*, int64_t);
+void                 CJSON_set_uint64   (struct CJSON*, uint64_t);
+void                 CJSON_set_object   (struct CJSON*, const struct CJSON_Object*);
+void                 CJSON_set_array    (struct CJSON*, const struct CJSON_Array*);
+void                 CJSON_set_null     (struct CJSON*);
+void                 CJSON_set_bool     (struct CJSON*, bool);
+unsigned             CJSON_total_objects(const struct CJSON*);
+unsigned             CJSON_total_arrays (const struct CJSON*);
 
 #endif
 

@@ -26,8 +26,17 @@ static bool JSON_Tokens_resize(struct CJSON_Tokens *const tokens, const unsigned
 EXTERN_C bool CJSON_Tokens_init(struct CJSON_Tokens *const tokens, const unsigned capacity) {
     assert(tokens != NULL);
 
-    tokens->data = NULL;
-    memset(tokens, 0, sizeof(*tokens));
+    tokens->counter.object  = 0U;
+    tokens->counter.array   = 0U;
+    tokens->counter.number  = 0U;
+    tokens->counter.string  = 0U;
+    tokens->counter.keyword = 0U;
+    tokens->counter.chars   = 0U;
+    tokens->counter.comma   = 0U;
+    tokens->data            = NULL;
+    tokens->capacity        = 0U;
+    tokens->count           = 0U;
+    tokens->index           = 0U;
     
     return JSON_Tokens_resize(tokens, capacity);
 }
@@ -36,8 +45,7 @@ EXTERN_C void CJSON_Tokens_free(struct CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
     CJSON_FREE(tokens->data);
-    tokens->data = NULL;
-    memset(tokens, 0, sizeof(*tokens));
+    CJSON_Tokens_init(tokens, 0U);
 }
 
 EXTERN_C struct CJSON_Token *CJSON_Tokens_next(struct CJSON_Tokens *const tokens) {

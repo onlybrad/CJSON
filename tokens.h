@@ -11,13 +11,15 @@ extern "C" {
 
 struct CJSON_Tokens {
     struct CJSON_Token *data;
-    struct {
+    struct CJSON_Token_Stats {
         unsigned string,
         number,
         array,
         object,
-        keyword;
-    } counter;     
+        keyword,
+        comma,
+        chars;
+    } counter;
     unsigned index,
     count,
     capacity;

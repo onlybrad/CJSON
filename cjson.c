@@ -7,10 +7,9 @@
 #include "allocator.h"
 #include "util.h"
 
-#define CJSON_INIT_ARENA_SIZE          1024U
-#define CJSON_INIT_ARENA_MAX_NODES     CJSON_ARENA_INFINITE_NODES
-#define CJSON_PARSE_TOKENS_SIZE_FACTOR 2U
-#define CJSON_PARSE_ARENA_MAX_NODES    CJSON_ARENA_INFINITE_NODES
+#define CJSON_DEFAULT_ARENA_SIZE         1024U
+#define CJSON_DEFAULT_ARENA_NODE_MAX     CJSON_ARENA_INFINITE_NODES
+#define CJSON_TOKENS_SIZE_FACTOR         2U
 
 enum CJSON_ObjectError {
     CJSON_OBJECT_ERROR_KEY,
@@ -28,12 +27,6 @@ enum CJSON_ArrayError {
     CJSON_ARRAY_ERROR_MEMORY
 };
 
-static const char *CJSON_ARENA_NAMES[] = {
-    "Object Arena",
-    "Array Arena",
-    "String Arena"
-};
- 
 static bool CJSON_parse_tokens(struct CJSON_Root*, struct CJSON*, struct CJSON_Tokens*);
 
 static bool CJSON_decode_string_token(struct CJSON_String *const string, struct CJSON_Root *const root, const struct CJSON_Token *const token) {
@@ -47,11 +40,11 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
         return false;
     }
     char *const output_start    = output_current;
-    const char *const input_end = token->value + token->length - 2;
+    const char *const input_error = token->value + token->length - 2;
     const char *input_current   = token->value + 1;
     bool escaping               = false;
 
-    while(input_current != input_end + 1) {
+    while(input_current != input_error + 1) {
         switch(*input_current) {
             case '\b':
             case '\f':
@@ -115,7 +108,7 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
             continue;
         }
         case 'u': {
-            if(input_end - input_current < 4) {
+            if(input_error - input_current < 4) {
                 return false;
             }
 
@@ -135,7 +128,7 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
                 continue;
             }
 
-            if(input_end - input_current < 9 || input_current[4] != '\\' || input_current[5] != 'u') {
+            if(input_error - input_current < 9 || input_current[4] != '\\' || input_current[5] != 'u') {
                 return false;
             }
 
@@ -306,9 +299,9 @@ static bool CJSON_parse_object(struct CJSON *const json, struct CJSON_Root *cons
     struct CJSON_Object *const object  = &json->data.object;
     json->type = CJSON_OBJECT;
     
-    if(!CJSON_Object_init(object, root, 8U)) {
+    if(!CJSON_Object_init(object, root, token->length)) {
         object_error = CJSON_OBJECT_ERROR_MEMORY;
-        goto end;
+        goto error;
     }
 
     if(token->type == CJSON_TOKEN_RCURLY) {
@@ -319,13 +312,13 @@ static bool CJSON_parse_object(struct CJSON *const json, struct CJSON_Root *cons
     while(tokens->index + 4U < tokens->count) {
         if(token->type != CJSON_TOKEN_STRING) {
             object_error = CJSON_OBJECT_ERROR_KEY;
-            goto end;
+            goto error;
         }
 
         struct CJSON_String key;
         if(!CJSON_decode_string_token(&key, root, token)) {
             object_error = CJSON_OBJECT_ERROR_KEY;
-            goto end;
+            goto error;
         }
 
         token++;
@@ -333,7 +326,7 @@ static bool CJSON_parse_object(struct CJSON *const json, struct CJSON_Root *cons
         if(token->type != CJSON_TOKEN_COLON) {
             object_error = CJSON_OBJECT_ERROR_COLON;
             tokens->index++;
-            goto end;
+            goto error;
         }
 
         tokens->index += 2U;
@@ -341,7 +334,7 @@ static bool CJSON_parse_object(struct CJSON *const json, struct CJSON_Root *cons
         struct CJSON_KV *const entry = CJSON_Object_get_entry(object, root, key.chars);
         if(entry == NULL) {
             object_error = CJSON_OBJECT_ERROR_MEMORY;
-            goto end;
+            goto error;
         }
 
         if(entry->key == NULL) {
@@ -351,7 +344,7 @@ static bool CJSON_parse_object(struct CJSON *const json, struct CJSON_Root *cons
         if(!CJSON_parse_tokens(root, &entry->value, tokens)) {
             object_error = CJSON_OBJECT_ERROR_VALUE;
             error        = entry->value.data.error;
-            goto end;
+            goto error;
         }
 
         token = tokens->data + tokens->index;
@@ -368,12 +361,12 @@ static bool CJSON_parse_object(struct CJSON *const json, struct CJSON_Root *cons
         }
 
         object_error = CJSON_OBJECT_ERROR_COMMA;
-        goto end;
+        goto error;
     }
     
     object_error = CJSON_OBJECT_ERROR_INCOMPLETE;
 
-end:
+error:
     json->type = CJSON_ERROR;
 
     switch(object_error) {
@@ -427,18 +420,18 @@ static bool CJSON_parse_array(struct CJSON *const json, struct CJSON_Root *const
         return false;
     }
 
-    const struct CJSON_Token *token;
-
-    enum CJSON_Error          error;
-    enum CJSON_ArrayError     array_error;
-    struct CJSON_Array *const array = &json->data.array;
     json->type = CJSON_ARRAY;
-    if(!CJSON_Array_init(array, root)) {
+    
+    enum CJSON_Error      error;
+    enum CJSON_ArrayError array_error;
+    const struct CJSON_Token *token = tokens->data + tokens->index;
+    
+    struct CJSON_Array *const array = &json->data.array;
+    if(!CJSON_Array_init(array, root, token->length)) {
         array_error = CJSON_ARRAY_ERROR_MEMORY;
-        goto end;
+        goto error;
     }
 
-    token = tokens->data + tokens->index;
     if(token->type == CJSON_TOKEN_RBRACKET) {
         tokens->index++;
         return true;
@@ -448,13 +441,13 @@ static bool CJSON_parse_array(struct CJSON *const json, struct CJSON_Root *const
         struct CJSON *const next_json = CJSON_Array_next(array, root);
         if(next_json == NULL) {
             array_error = CJSON_ARRAY_ERROR_MEMORY;
-            goto end;
+            goto error;
         }
 
         if(!CJSON_parse_tokens(root, next_json, tokens)) {
             array_error = CJSON_ARRAY_ERROR_VALUE;
             error       = next_json->data.error;
-            goto end;
+            goto error;
         }
 
         token = tokens->data + tokens->index;
@@ -471,12 +464,12 @@ static bool CJSON_parse_array(struct CJSON *const json, struct CJSON_Root *const
         }
 
         array_error = CJSON_ARRAY_ERROR_COMMA;
-        goto end;
+        goto error;
     }
 
     array_error = CJSON_ARRAY_ERROR_INCOMPLETE;
 
-end:
+error:
     json->type = CJSON_ERROR;
     
     switch(array_error) {
@@ -550,21 +543,38 @@ static bool CJSON_parse_tokens(struct CJSON_Root *const root, struct CJSON *cons
     return false;
 }
 
-static bool CJSON_init_arenas(struct CJSON_Root *const root, unsigned size, const unsigned max_nodes) {
+static bool CJSON_init_arenas(struct CJSON_Root *const root, const unsigned sizes[3], const unsigned max_nodes) {
     assert(root != NULL);
+    assert(sizes != NULL);
 
-    if(size < CJSON_INIT_ARENA_SIZE) {
-        size = CJSON_INIT_ARENA_SIZE;
-    }
+    static const char *const CJSON_ARENA_NAMES[] = {
+        "Object Arena",
+        "Array Arena",
+        "String Arena",
+        NULL
+    };
 
-    struct CJSON_Arena *arenas[] = {
+    static const unsigned CJSON_SIZES[] = {
+        (unsigned)sizeof(struct CJSON_KV),
+        (unsigned)sizeof(struct CJSON),
+        (unsigned)sizeof(char),
+    };
+
+    struct CJSON_Arena *const arenas[] = {
         &root->object_arena,
         &root->array_arena,
-        &root->string_arena
+        &root->string_arena,
+        NULL
     };
-        
-    for(int i = 0; i < (int)(sizeof(arenas)/sizeof(*arenas)); i++) {
-        if(!CJSON_Arena_init(arenas[i], size, max_nodes, CJSON_ARENA_NAMES[i])) {
+
+    const char *const *name        = CJSON_ARENA_NAMES;
+    const unsigned    *object_size = CJSON_SIZES;
+    for(struct CJSON_Arena *const *arena = arenas; 
+        *arena != NULL; 
+        arena++, sizes++, name++, object_size++
+    ) {
+        const unsigned arena_size = MAX(*sizes, CJSON_DEFAULT_ARENA_SIZE * *object_size);
+        if(!CJSON_Arena_init(*arena, arena_size, max_nodes, *name)) {
             return false;
         }
     }
@@ -577,18 +587,18 @@ EXTERN_C bool CJSON_init(struct CJSON_Root *const root) {
 
     root->json.type      = CJSON_NULL;
     root->json.data.null = NULL;
-    root->string_length  = 0U;
 
     CJSON_Tokens_init(&root->tokens, 0U);
 
-    return CJSON_init_arenas(root, CJSON_INIT_ARENA_SIZE, CJSON_INIT_ARENA_MAX_NODES);
+    static const unsigned arena_default_sizes[] = {0U, 0U, 0U};
+    return CJSON_init_arenas(root, arena_default_sizes, CJSON_DEFAULT_ARENA_NODE_MAX);
 }
 
 EXTERN_C struct CJSON_Array *CJSON_make_array(struct CJSON *const json, struct CJSON_Root *const root) {
     assert(json != NULL);
     assert(root != NULL);
 
-    if(!CJSON_Array_init(&json->data.array, root)) {
+    if(!CJSON_Array_init(&json->data.array, root, 0U)) {
         return NULL;
     }
     json->type = CJSON_ARRAY;
@@ -612,40 +622,54 @@ EXTERN_C bool CJSON_parse(struct CJSON_Root *const root, const char *const data,
     assert(data != NULL);
     assert(length > 0U);
 
-    root->string_length = length;
-
-    if(!CJSON_init_arenas(root, length, CJSON_PARSE_ARENA_MAX_NODES)) {
-        return false;
-    }
-
-    if(!CJSON_Tokens_init(&root->tokens, length / CJSON_PARSE_TOKENS_SIZE_FACTOR)) {
-        root->json.type       = CJSON_ERROR;
-        root->json.data.error = CJSON_ERROR_MEMORY;
-        return false;
-    }
-
-    struct CJSON_Lexer lexer;
-    CJSON_Lexer_init(&lexer, data, length);
-    
+    unsigned            arena_sizes[3];
+    struct CJSON_Lexer  lexer;
     struct CJSON_Token *token;
+
+    CJSON_Arena_zero(&root->object_arena);
+    CJSON_Arena_zero(&root->array_arena);
+    CJSON_Arena_zero(&root->string_arena);
+    CJSON_Lexer_init(&lexer, data, length);
+
+    if(!CJSON_Tokens_init(&root->tokens, length / CJSON_TOKENS_SIZE_FACTOR)) {
+        root->json.data.error = CJSON_ERROR_MEMORY;
+        goto error;
+    }
+
     do {
         if((token = CJSON_Tokens_next(&root->tokens)) == NULL) {
-            root->json.type       = CJSON_ERROR;
             root->json.data.error = CJSON_ERROR_MEMORY;
-            return false;
+            goto error;
         }
     } while(CJSON_Lexer_tokenize(&lexer, &root->tokens, token));
 
     if(token->type != CJSON_TOKEN_DONE) {
-        root->json.type       = CJSON_ERROR;
         root->json.data.error = CJSON_ERROR_TOKEN;
+        goto error;
+    }
 
-        return false;
+    if(!CJSON_Lexer_finalize(&lexer, &root->tokens)) {
+        root->json.data.error = CJSON_ERROR_MEMORY;
+        goto error;
+    }
+
+    arena_sizes[0] = root->tokens.counter.object * (unsigned)sizeof(struct CJSON_KV);
+    arena_sizes[1] = root->tokens.counter.array  * (unsigned)sizeof(struct CJSON);
+    arena_sizes[2] = root->tokens.counter.chars  * (unsigned)sizeof(char);
+    if(!CJSON_init_arenas(root, arena_sizes, CJSON_DEFAULT_ARENA_NODE_MAX)) {
+        root->json.data.error = CJSON_ERROR_MEMORY;
+        goto error;
     }
 
     CJSON_parse_tokens(root, &root->json, &root->tokens);
+    CJSON_Lexer_free(&lexer);
 
     return root->json.type != CJSON_ERROR;
+
+error:
+    CJSON_Lexer_free(&lexer);
+    root->json.type = CJSON_ERROR;
+    return false;
 }
 
 EXTERN_C bool CJSON_parse_file(struct CJSON_Root *const root, const char *const path) {
@@ -675,11 +699,12 @@ EXTERN_C void CJSON_free(struct CJSON_Root *const root) {
     struct CJSON_Arena *arenas[] = {
         &root->object_arena,
         &root->array_arena,
-        &root->string_arena
+        &root->string_arena,
+        NULL
     };
     
-    for(int i = 0; i < (int)(sizeof(arenas)/sizeof(*arenas)); i++) {
-        CJSON_Arena_free(arenas[i]);
+    for(struct CJSON_Arena *const *arena = arenas; *arena != NULL; arena++) {
+        CJSON_Arena_free(*arena);
     }
 
     CJSON_Tokens_free(&root->tokens);
@@ -831,39 +856,39 @@ EXTERN_C struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
     *success = true;\
     return &ret->data.MEMBER;
 
-const char *CJSON_get_string(struct CJSON *const json, const char *const query, bool *const success) {
+EXTERN_C const char *CJSON_get_string(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_STRING, string.chars)
 }
 
-double CJSON_get_float64(struct CJSON *const json, const char *const query, bool *const success) {
+EXTERN_C double CJSON_get_float64(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_FLOAT64, float64)
 }
 
-int64_t CJSON_get_int64(struct CJSON *const json, const char *const query, bool *const success) {
+EXTERN_C int64_t CJSON_get_int64(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_INT64, int64)
 }
 
-uint64_t CJSON_get_uint64(struct CJSON *const json, const char *const query, bool *const success) {
+EXTERN_C uint64_t CJSON_get_uint64(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_UINT64, uint64)
 }
 
-struct CJSON_Object *CJSON_get_object(struct CJSON *const json, const char *const query, bool *const success) {
+EXTERN_C struct CJSON_Object *CJSON_get_object(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_PTR(CJSON_OBJECT, object)
 }
 
-struct CJSON_Array *CJSON_get_array(struct CJSON *const json, const char *const query, bool *const success) {
+EXTERN_C struct CJSON_Array *CJSON_get_array(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_PTR(CJSON_ARRAY, array)
 }
 
-void *CJSON_get_null(struct CJSON *const json, const char *const query, bool *const success) {
+EXTERN_C void *CJSON_get_null(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_NULL, null)
 }
 
-bool CJSON_get_bool(struct CJSON *const json, const char *const query, bool *const success) {
+EXTERN_C bool CJSON_get_bool(struct CJSON *const json, const char *const query, bool *const success) {
     CJSON_GET_VALUE(CJSON_BOOL, boolean)
 }
 
-bool CJSON_set_string(struct CJSON *const json, struct CJSON_Root *const root, const char *const value) {
+EXTERN_C bool CJSON_set_string(struct CJSON *const json, struct CJSON_Root *const root, const char *const value) {
     assert(json != NULL);
     assert(value != NULL);
 
@@ -883,28 +908,28 @@ bool CJSON_set_string(struct CJSON *const json, struct CJSON_Root *const root, c
     return true;
 }
 
-void CJSON_set_float64(struct CJSON *const json, const double value) {
+EXTERN_C void CJSON_set_float64(struct CJSON *const json, const double value) {
     assert(json != NULL);
 
     json->type         = CJSON_FLOAT64;
     json->data.float64 = value;
 }
 
-void CJSON_set_int64(struct CJSON *const json, const int64_t value) {
+EXTERN_C void CJSON_set_int64(struct CJSON *const json, const int64_t value) {
     assert(json != NULL);
 
     json->type       = CJSON_INT64;
     json->data.int64 = value;
 }
 
-void CJSON_set_uint64(struct CJSON *const json, const uint64_t value) {
+EXTERN_C void CJSON_set_uint64(struct CJSON *const json, const uint64_t value) {
     assert(json != NULL);
 
     json->type        = CJSON_UINT64;
     json->data.uint64 = value;
 }
 
-void CJSON_set_object(struct CJSON *const json, const struct CJSON_Object *const value) {
+EXTERN_C void CJSON_set_object(struct CJSON *const json, const struct CJSON_Object *const value) {
     assert(json != NULL);
     assert(value != NULL);
 
@@ -912,7 +937,7 @@ void CJSON_set_object(struct CJSON *const json, const struct CJSON_Object *const
     json->data.object = *value;
 }
 
-void CJSON_set_array(struct CJSON *const json, const struct CJSON_Array *const value) {
+EXTERN_C void CJSON_set_array(struct CJSON *const json, const struct CJSON_Array *const value) {
     assert(json != NULL);
     assert(value != NULL);
     
@@ -920,16 +945,40 @@ void CJSON_set_array(struct CJSON *const json, const struct CJSON_Array *const v
     json->data.array = *value;
 }
 
-void CJSON_set_null(struct CJSON *const json) {
+EXTERN_C void CJSON_set_null(struct CJSON *const json) {
     assert(json != NULL);
 
     json->type      = CJSON_NULL;
     json->data.null = NULL;
 }
 
-void CJSON_set_bool(struct CJSON *const json, const bool value) {
+EXTERN_C void CJSON_set_bool(struct CJSON *const json, const bool value) {
     assert(json != NULL);
 
     json->type         = CJSON_BOOL;
     json->data.boolean = value;
+}
+
+EXTERN_C unsigned CJSON_total_objects(const struct CJSON *json) {
+    if(json->type == CJSON_ARRAY) {
+        return CJSON_Array_total_objects(&json->data.array);
+    }
+
+    if(json->type == CJSON_OBJECT) {
+        return CJSON_Object_total_objects(&json->data.object);
+    }
+
+    return 0U;
+}
+
+EXTERN_C unsigned CJSON_total_arrays(const struct CJSON *json) {
+    if(json->type == CJSON_ARRAY) {
+        return CJSON_Array_total_arrays(&json->data.array);
+    }
+
+    if(json->type == CJSON_OBJECT) {
+        return CJSON_Object_total_arrays(&json->data.object);
+    }
+
+    return 0U;
 }

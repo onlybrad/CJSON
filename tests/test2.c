@@ -25,13 +25,17 @@ int main(void) {
     const unsigned long long end = usec_timestamp();
     printf("Execution time: %llu\n", end - start);
 
+    printf("Total number of arrays : %u\n", CJSON_total_arrays(&root.json));
+    printf("Total number of objects: %u\n", CJSON_total_objects(&root.json));
+
     CJSON_Buffer_free(&buffer);
     CJSON_free(&root);
-
+    
 #ifndef NDEBUG
     const struct CJSON_AllocationStats *allocation_stats = CJSON_get_allocation_stats();
-    printf("allocated   times: %i\n", allocation_stats->allocated);
-    printf("deallocated times: %i\n", allocation_stats->deallocated);
+    printf("times allocated on the heap    : %i\n", allocation_stats->allocated);
+    printf("times deallocated from the heap: %i\n", allocation_stats->deallocated);
 #endif
+
     return EXIT_SUCCESS;
 }

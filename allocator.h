@@ -6,6 +6,7 @@ extern "C" {
 #define CJSON_ALLOCATOR
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define CJSON_ARENA_INFINITE_NODES 0U
 
@@ -36,6 +37,7 @@ struct CJSON_Arena {
 
 #define CJSON_ARENA_ALLOC(ARENA, COUNT, TYPE) (TYPE*)CJSON_Arena_alloc(ARENA, (COUNT) * sizeof(TYPE), CJSON_ALIGNOF(TYPE))
 
+void  CJSON_Arena_zero(struct CJSON_Arena*);
 bool  CJSON_Arena_init  (struct CJSON_Arena*, unsigned size, unsigned max_nodes, const char *name);
 void  CJSON_Arena_free  (struct CJSON_Arena*);
 void  CJSON_Arena_reset (struct CJSON_Arena*);

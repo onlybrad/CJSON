@@ -5,7 +5,7 @@
 #include "cjson.h"
 #include "util.h"
 
-#define INITIAL_JSON_OBJECT_CAPACITY (1 << 3)
+#define CJSON_OBJECT_DEFAULT_CAPACITY 8U
 
 static char DELETED_ENTRY[] = {0};
 
@@ -57,21 +57,21 @@ static bool CJSON_Object_resize(struct CJSON_Object *const object, struct CJSON_
     return true;
 }
 
-EXTERN_C bool CJSON_Object_init(struct CJSON_Object *const object, struct CJSON_Root *const root, const unsigned capacity) {
+EXTERN_C bool CJSON_Object_init(struct CJSON_Object *const object, struct CJSON_Root *const root, unsigned capacity) {
     assert(object != NULL);
     assert(root != NULL);
+
+    if(capacity < CJSON_OBJECT_DEFAULT_CAPACITY) {
+        capacity = CJSON_OBJECT_DEFAULT_CAPACITY;
+    }
     
-    struct CJSON_KV *entries = CJSON_ARENA_ALLOC(
-        &root->object_arena,
-        capacity < INITIAL_JSON_OBJECT_CAPACITY ? INITIAL_JSON_OBJECT_CAPACITY : capacity,
-        struct CJSON_KV
-    );
+    struct CJSON_KV *entries = CJSON_ARENA_ALLOC(&root->object_arena, capacity, struct CJSON_KV);
     if(entries == NULL) {
         return false;
     }
 
     object->entries  = entries;
-    object->capacity = INITIAL_JSON_OBJECT_CAPACITY;
+    object->capacity = capacity;
     
     return true;
 }
@@ -323,4 +323,40 @@ EXTERN_C bool CJSON_Object_set_bool(struct CJSON_Object *const object, struct CJ
     json.data.boolean = value;
 
     return CJSON_Object_set(object, root, key, &json);
+}
+
+EXTERN_C unsigned CJSON_Object_total_objects(const struct CJSON_Object *const object) {
+    assert(object != NULL);
+
+    unsigned total = 0U;
+
+    for(const struct CJSON_KV *entry = object->entries,
+    *const last_entry = entry + object->capacity - 1;
+    entry != last_entry + 1;
+    entry++
+    ) {
+        if(entry->key != NULL || entry->key != DELETED_ENTRY) {
+            total += CJSON_total_objects(&entry->value);
+        }
+    }
+
+    return total + 1U;
+}
+
+EXTERN_C unsigned CJSON_Object_total_arrays(const struct CJSON_Object *const object) {
+    assert(object != NULL);
+
+    unsigned total = 0U;
+
+    for(const struct CJSON_KV *entry = object->entries,
+    *const last_entry = entry + object->capacity - 1;
+    entry != last_entry + 1;
+    entry++
+    ) {
+        if(entry->key != NULL || entry->key != DELETED_ENTRY) {
+            total += CJSON_total_arrays(&entry->value);
+        }
+    }
+    
+    return total;
 }

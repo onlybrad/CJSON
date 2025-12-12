@@ -36,9 +36,19 @@ struct CJSON_Buffer {
 #ifndef MIN
     #define MIN(A,B) ((A)>(B)?(B):(A))
 #endif
+#ifndef MAX
+    #define MAX(A,B) ((A)>(B)?(A):(B))
+#endif
 
 #ifndef static_strlen
     #define static_strlen(STR) (sizeof(STR) - 1)
+#endif
+
+#ifndef UNSIGNED_TO_VOID_PTR
+    #define UNSIGNED_TO_VOID_PTR(UNSIGNED)((void*)(uintptr_t)(UNSIGNED))
+#endif
+#ifndef VOID_PTR_TO_UNSIGNED
+    #define VOID_PTR_TO_UNSIGNED(VOID_PTR)((unsigned)(uintptr_t)(VOID_PTR))
 #endif
 
 #define IS_VALID_2_BYTES_UTF16(CODEPOINT) (CODEPOINT < 0xD7FF || CODEPOINT >= 0xE000)

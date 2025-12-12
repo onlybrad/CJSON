@@ -4,10 +4,12 @@
 #include "token.h"
 #include "util.h"
 
-static void skip_whitespace(struct CJSON_Lexer *const lexer) {
-    unsigned position = lexer->position; 
-    const unsigned length = lexer->length;
-    const char *const data = lexer->data;
+static void CJSON_Lexer_skip_whitespace(struct CJSON_Lexer *const lexer) {
+    assert(lexer != NULL);
+
+    unsigned          position = lexer->position; 
+    const unsigned    length   = lexer->length;
+    const char *const data     = lexer->data;
 
     while(position < length && is_whitespace(data[position])
     ) {
@@ -17,7 +19,10 @@ static void skip_whitespace(struct CJSON_Lexer *const lexer) {
     lexer->position = position;
 }
 
-static bool read_string(struct CJSON_Lexer *const lexer, struct CJSON_Token *const token) {
+static bool CJSON_Lexer_read_string(struct CJSON_Lexer *const lexer, struct CJSON_Token *const token) {
+    assert(lexer != NULL);
+    assert(token != NULL);
+
     const unsigned position = lexer->position + 1U; 
     const unsigned length = lexer->length;
     const char *const data = lexer->data;
@@ -43,7 +48,10 @@ static bool read_string(struct CJSON_Lexer *const lexer, struct CJSON_Token *con
     return false;
 }
 
-static bool read_number(struct CJSON_Lexer *const lexer, struct CJSON_Token *const token) {
+static bool CJSON_Lexer_read_number(struct CJSON_Lexer *const lexer, struct CJSON_Token *const token) {
+    assert(lexer != NULL);
+    assert(token != NULL);
+
     unsigned position, i, length;
     length = lexer->length;
     const char *data = lexer->data;
@@ -145,6 +153,10 @@ static bool read_number(struct CJSON_Lexer *const lexer, struct CJSON_Token *con
 }
 
 static bool next_token_is_keyword(const struct CJSON_Lexer *const lexer, const char *const keyword, const unsigned keyword_length) {
+    assert(lexer != NULL);
+    assert(keyword != NULL);
+    assert(keyword_length > 0U);
+
     const unsigned position = lexer->position; 
     const unsigned lexer_length = lexer->length;
     const char *const data = lexer->data;
@@ -164,12 +176,14 @@ static bool next_token_is_keyword(const struct CJSON_Lexer *const lexer, const c
     return false;
 }
 
-static bool read_keyword(struct CJSON_Lexer *const lexer, struct CJSON_Token *const token) {
+static bool CJSON_Lexer_read_keyword(struct CJSON_Lexer *const lexer, struct CJSON_Token *const token) {
+    assert(lexer != NULL);
+    assert(token != NULL);
+
     static const char null_string[] = "null";
     static const char true_string[] = "true";
     static const char false_string[] = "false";
 
-    
     if(next_token_is_keyword(lexer, null_string, (unsigned)static_strlen(null_string))) {
         token->type = CJSON_TOKEN_NULL;
         token->length = (unsigned)static_strlen(null_string);
@@ -191,7 +205,10 @@ static bool read_keyword(struct CJSON_Lexer *const lexer, struct CJSON_Token *co
     return false;
 }
 
-static void read_invalid_token(struct CJSON_Lexer *const lexer, struct CJSON_Token *const token) {
+static void CJSON_Lexer_read_invalid_token(struct CJSON_Lexer *const lexer, struct CJSON_Token *const token) {
+    assert(lexer != NULL);
+    assert(token != NULL);
+
     const unsigned position = lexer->position; 
     const unsigned length = lexer->length;
     const char *const data = lexer->data;
@@ -208,6 +225,48 @@ static void read_invalid_token(struct CJSON_Lexer *const lexer, struct CJSON_Tok
     token->length = i - position - 1U;
 }
 
+EXTERN_C bool CJSON_Lexer_finalize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens) {
+    assert(lexer != NULL);
+    assert(tokens != NULL);
+
+    const unsigned object_and_array_count = tokens->counter.object + tokens->counter.array;
+
+    if(!CJSON_Stack_reserve(&lexer->stack, object_and_array_count)) {
+        return false;
+    }
+
+    struct CJSON_Token *const first_token = tokens->data;
+    const struct CJSON_Token *const last_token  = first_token + tokens->count - 1;
+    for(struct CJSON_Token *token = first_token, *object_or_array;
+        token != last_token + 1; 
+        token++
+    ) {
+        switch(token->type) {
+        case CJSON_TOKEN_LCURLY:
+        case CJSON_TOKEN_LBRACKET:
+            CJSON_Stack_push(&lexer->stack, token);
+            continue;
+        case CJSON_TOKEN_RCURLY:
+        case CJSON_TOKEN_RBRACKET:
+            CJSON_Stack_pop(&lexer->stack);
+            continue;
+        case CJSON_TOKEN_COMMA: {
+            void *const value = CJSON_Stack_peek(&lexer->stack);
+            if(value != NULL) {
+                object_or_array = (struct CJSON_Token*)value;
+                assert(object_or_array->type == CJSON_TOKEN_LCURLY || object_or_array->type == CJSON_TOKEN_LBRACKET);
+                object_or_array->length++;
+            }
+            break;
+        }
+        default:
+            continue;
+        }
+    }
+
+    return true;
+}
+
 EXTERN_C void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *const data, const unsigned length) {
     assert(lexer != NULL);
     assert(data != NULL);
@@ -216,13 +275,29 @@ EXTERN_C void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *cons
     lexer->data     = data;
     lexer->length   = length;
     lexer->position = 0U;
+    lexer->line     = 0U;
+    lexer->column   = 0U;
+
+    CJSON_Stack_init(&lexer->stack, 0U);
+}
+
+EXTERN_C void CJSON_Lexer_free(struct CJSON_Lexer *const lexer) {
+    assert(lexer != NULL);
+    
+    lexer->data     = NULL;
+    lexer->length   = 0U;
+    lexer->position = 0U;
+    lexer->line     = 0U;
+    lexer->column   = 0U;
+    
+    CJSON_Stack_free(&lexer->stack);
 }
 
 EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens,  struct CJSON_Token *const token) {
     assert(lexer != NULL);
     assert(token != NULL);
 
-    skip_whitespace(lexer);
+    CJSON_Lexer_skip_whitespace(lexer);
 
     if(lexer->position == lexer->length) {
         token->type = CJSON_TOKEN_DONE;
@@ -235,35 +310,39 @@ EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON
     switch(*token->value) {
     case '{':
         token->length = 1U;
-        token->type = CJSON_TOKEN_LCURLY;
+        token->type   = CJSON_TOKEN_LCURLY;
         break;
     case '}':
         token->length = 1U;
-        token->type = CJSON_TOKEN_RCURLY;
+        token->type   = CJSON_TOKEN_RCURLY;
         tokens->counter.object++;
         break;
     case '[':
         token->length = 1U;
-        token->type = CJSON_TOKEN_LBRACKET;
+        token->type   = CJSON_TOKEN_LBRACKET;
         break;
     case ']':
         token->length = 1U;
-        token->type = CJSON_TOKEN_RBRACKET;
+        token->type   = CJSON_TOKEN_RBRACKET;
         tokens->counter.array++;
         break;
     case ':':
         token->length = 1U;
-        token->type = CJSON_TOKEN_COLON;
+        token->type   = CJSON_TOKEN_COLON;
         break;
-    case ',':
+    case ',': {
         token->length = 1U;
-        token->type = CJSON_TOKEN_COMMA;
+        token->type   = CJSON_TOKEN_COMMA;
+        tokens->counter.comma++;
         break;
+    }
     case '"': {
-        if(!read_string(lexer, token)) {
+        if(!CJSON_Lexer_read_string(lexer, token)) {
             return false;
         }
+        assert(token->length >= 2U);
         tokens->counter.string++;
+        tokens->counter.chars += token->length - 1U;
         break;
     }
     case '-':
@@ -277,23 +356,25 @@ EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON
     case '7':
     case '8':
     case '9': {
-        if(!read_number(lexer, token)) {
+        if(!CJSON_Lexer_read_number(lexer, token)) {
             return false;
         }
+        assert(token->length >= 1U);
         tokens->counter.number++;
         break;
     }
     default: {
-        if(!read_keyword(lexer, token)) {
-            read_invalid_token(lexer, token);
+        if(!CJSON_Lexer_read_keyword(lexer, token)) {
+            CJSON_Lexer_read_invalid_token(lexer, token);
             return false;
         }
+        assert(token->length >= 4U);
         tokens->counter.keyword++;
         break;
     }
     }
     
     lexer->position += token->length;
-    
+
     return true;
 }
