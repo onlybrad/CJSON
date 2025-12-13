@@ -353,7 +353,7 @@ EXTERN_C unsigned CJSON_Object_total_arrays(const struct CJSON_Object *const obj
     entry != last_entry + 1;
     entry++
     ) {
-        if(entry->key != NULL || entry->key != DELETED_ENTRY) {
+        if(entry->key != NULL && entry->key != DELETED_ENTRY) {
             total += CJSON_total_arrays(&entry->value);
         }
     }
