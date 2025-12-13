@@ -110,61 +110,55 @@ EXTERN_C bool CJSON_Array_push(struct CJSON_Array *const array, struct CJSON_Roo
     return true;
 }
 
-#define JSON_ARRAY_GET_VALUE(JSON_TYPE, MEMBER)\
-    assert(array != NULL);\
-    assert(success != NULL);\
-                            \
-    struct CJSON *const ret = CJSON_Array_get(array, index);\
-    if(ret == NULL || ret->type != JSON_TYPE) {\
-        *success = false;\
-        return 0;\
-    }\
-    *success = true;\
-    return ret->data.MEMBER;
+#define CJSON_GET_TYPE        CJSON_STRING
+#define CJSON_GET_MEMBER      string.chars
+#define CJSON_GET_SUFFIX      string
+#define CJSON_GET_RETURN_TYPE const char*
+#include "cjson-array-get-template.h"
 
-#define JSON_ARRAY_GET_PTR(JSON_TYPE, MEMBER)\
-    assert(array != NULL);\
-    assert(success != NULL);\
-                            \
-    struct CJSON *const ret = CJSON_Array_get(array, index);\
-    if(ret == NULL || ret->type != JSON_TYPE) {\
-        *success = false;\
-        return 0;\
-    }\
-    *success = true;\
-    return &ret->data.MEMBER;
+#define CJSON_GET_TYPE        CJSON_FLOAT64
+#define CJSON_GET_MEMBER      float64
+#define CJSON_GET_SUFFIX      float64
+#define CJSON_GET_RETURN_TYPE double
+#include "cjson-array-get-template.h"
 
-EXTERN_C const char *CJSON_Array_get_string(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
-    JSON_ARRAY_GET_VALUE(CJSON_STRING, string.chars)
-}
+#define CJSON_GET_TYPE        CJSON_INT64
+#define CJSON_GET_MEMBER      int64
+#define CJSON_GET_SUFFIX      int64
+#define CJSON_GET_RETURN_TYPE int64_t
+#include "cjson-array-get-template.h"
 
-EXTERN_C double CJSON_Array_get_float64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
-    JSON_ARRAY_GET_VALUE(CJSON_FLOAT64, float64)
-}
+#define CJSON_GET_TYPE        CJSON_UINT64
+#define CJSON_GET_MEMBER      uint64
+#define CJSON_GET_SUFFIX      uint64
+#define CJSON_GET_RETURN_TYPE uint64_t
+#include "cjson-array-get-template.h"
 
-EXTERN_C int64_t CJSON_Array_get_int64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
-    JSON_ARRAY_GET_VALUE(CJSON_INT64, int64)    
-}
+#define CJSON_GET_TYPE        CJSON_OBJECT
+#define CJSON_GET_MEMBER      object
+#define CJSON_GET_SUFFIX      object
+#define CJSON_GET_RETURN_TYPE struct CJSON_Object*
+#define CJSON_GET_RETURN_PTR
+#include "cjson-array-get-template.h"
 
-EXTERN_C uint64_t CJSON_Array_get_uint64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
-    JSON_ARRAY_GET_VALUE(CJSON_UINT64, uint64)
-}
+#define CJSON_GET_TYPE        CJSON_ARRAY
+#define CJSON_GET_MEMBER      array
+#define CJSON_GET_SUFFIX      array
+#define CJSON_GET_RETURN_TYPE struct CJSON_Array*
+#define CJSON_GET_RETURN_PTR
+#include "cjson-array-get-template.h"
 
-EXTERN_C struct CJSON_Array *CJSON_Array_get_array(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
-    JSON_ARRAY_GET_PTR(CJSON_ARRAY, array)
-}
+#define CJSON_GET_TYPE        CJSON_NULL
+#define CJSON_GET_MEMBER      null
+#define CJSON_GET_SUFFIX      null
+#define CJSON_GET_RETURN_TYPE void*
+#include "cjson-array-get-template.h"
 
-EXTERN_C struct CJSON_Object *CJSON_Array_get_object(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
-    JSON_ARRAY_GET_PTR(CJSON_OBJECT, object)    
-}
-
-EXTERN_C void *CJSON_Array_get_null(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
-    JSON_ARRAY_GET_VALUE(CJSON_NULL, null)
-}
-
-EXTERN_C bool CJSON_Array_get_bool(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
-    JSON_ARRAY_GET_VALUE(CJSON_BOOL, boolean)
-}
+#define CJSON_GET_TYPE        CJSON_BOOL
+#define CJSON_GET_MEMBER      boolean
+#define CJSON_GET_RETURN_TYPE bool
+#define CJSON_GET_SUFFIX_BOOL
+#include "cjson-array-get-template.h"
 
 EXTERN_C bool CJSON_Array_set_string(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned index, const char *const value) {
     assert(array != NULL);

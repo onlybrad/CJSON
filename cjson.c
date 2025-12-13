@@ -828,65 +828,55 @@ EXTERN_C struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
     return json;
 }
 
-#define CJSON_GET_VALUE(JSON_TYPE, MEMBER)\
-    assert(json != NULL);\
-    assert(json->type != CJSON_ERROR);\
-    assert(query != NULL);\
-    assert(success != NULL);\
-                            \
-    struct CJSON *const ret = CJSON_get(json, query);\
-    if(ret == NULL || ret->type != JSON_TYPE) {\
-        *success = false;\
-        return 0;\
-    }\
-    *success = true;\
-    return ret->data.MEMBER;
- 
-#define CJSON_GET_PTR(JSON_TYPE, MEMBER)\
-    assert(json != NULL);\
-    assert(json->type != CJSON_ERROR);\
-    assert(query != NULL);\
-    assert(success != NULL);\
-                            \
-    struct CJSON *const ret = CJSON_get(json, query);\
-    if(ret == NULL || ret->type != JSON_TYPE) {\
-        *success = false;\
-        return 0;\
-    }\
-    *success = true;\
-    return &ret->data.MEMBER;
+#define CJSON_GET_TYPE        CJSON_STRING
+#define CJSON_GET_MEMBER      string.chars
+#define CJSON_GET_SUFFIX      string
+#define CJSON_GET_RETURN_TYPE const char*
+#include "cjson-get-template.h"
 
-EXTERN_C const char *CJSON_get_string(struct CJSON *const json, const char *const query, bool *const success) {
-    CJSON_GET_VALUE(CJSON_STRING, string.chars)
-}
+#define CJSON_GET_TYPE        CJSON_FLOAT64
+#define CJSON_GET_MEMBER      float64
+#define CJSON_GET_SUFFIX      float64
+#define CJSON_GET_RETURN_TYPE double
+#include "cjson-get-template.h"
 
-EXTERN_C double CJSON_get_float64(struct CJSON *const json, const char *const query, bool *const success) {
-    CJSON_GET_VALUE(CJSON_FLOAT64, float64)
-}
+#define CJSON_GET_TYPE        CJSON_INT64
+#define CJSON_GET_MEMBER      int64
+#define CJSON_GET_SUFFIX      int64
+#define CJSON_GET_RETURN_TYPE int64_t
+#include "cjson-get-template.h"
 
-EXTERN_C int64_t CJSON_get_int64(struct CJSON *const json, const char *const query, bool *const success) {
-    CJSON_GET_VALUE(CJSON_INT64, int64)
-}
+#define CJSON_GET_TYPE        CJSON_UINT64
+#define CJSON_GET_MEMBER      uint64
+#define CJSON_GET_SUFFIX      uint64
+#define CJSON_GET_RETURN_TYPE uint64_t
+#include "cjson-get-template.h"
 
-EXTERN_C uint64_t CJSON_get_uint64(struct CJSON *const json, const char *const query, bool *const success) {
-    CJSON_GET_VALUE(CJSON_UINT64, uint64)
-}
+#define CJSON_GET_TYPE        CJSON_OBJECT
+#define CJSON_GET_MEMBER      object
+#define CJSON_GET_SUFFIX      object
+#define CJSON_GET_RETURN_TYPE struct CJSON_Object*
+#define CJSON_GET_RETURN_PTR
+#include "cjson-get-template.h"
 
-EXTERN_C struct CJSON_Object *CJSON_get_object(struct CJSON *const json, const char *const query, bool *const success) {
-    CJSON_GET_PTR(CJSON_OBJECT, object)
-}
+#define CJSON_GET_TYPE        CJSON_ARRAY
+#define CJSON_GET_MEMBER      array
+#define CJSON_GET_SUFFIX      array
+#define CJSON_GET_RETURN_TYPE struct CJSON_Array*
+#define CJSON_GET_RETURN_PTR
+#include "cjson-get-template.h"
 
-EXTERN_C struct CJSON_Array *CJSON_get_array(struct CJSON *const json, const char *const query, bool *const success) {
-    CJSON_GET_PTR(CJSON_ARRAY, array)
-}
+#define CJSON_GET_TYPE        CJSON_NULL
+#define CJSON_GET_MEMBER      null
+#define CJSON_GET_SUFFIX      null
+#define CJSON_GET_RETURN_TYPE void*
+#include "cjson-get-template.h"
 
-EXTERN_C void *CJSON_get_null(struct CJSON *const json, const char *const query, bool *const success) {
-    CJSON_GET_VALUE(CJSON_NULL, null)
-}
-
-EXTERN_C bool CJSON_get_bool(struct CJSON *const json, const char *const query, bool *const success) {
-    CJSON_GET_VALUE(CJSON_BOOL, boolean)
-}
+#define CJSON_GET_TYPE        CJSON_BOOL
+#define CJSON_GET_MEMBER      boolean
+#define CJSON_GET_RETURN_TYPE bool
+#define CJSON_GET_SUFFIX_BOOL
+#include "cjson-get-template.h"
 
 EXTERN_C bool CJSON_set_string(struct CJSON *const json, struct CJSON_Root *const root, const char *const value) {
     assert(json != NULL);
