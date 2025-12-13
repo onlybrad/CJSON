@@ -25,9 +25,6 @@ int main(void) {
     const unsigned long long end = usec_timestamp();
     printf("Execution time: %llu\n", end - start);
 
-    printf("Total number of arrays : %u\n", CJSON_total_arrays(&root.json));
-    printf("Total number of objects: %u\n", CJSON_total_objects(&root.json));
-
     CJSON_Buffer_free(&buffer);
     CJSON_free(&root);
     

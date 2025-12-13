@@ -479,7 +479,7 @@ static void test_create_array(void) {
     const int64_t value3 = -25000000000LL;
 
     struct CJSON_Array array2;
-    CJSON_Array_init(&array2, &root);
+    CJSON_Array_init(&array2, &root, 0U);
     CJSON_Array_set_uint64(&array2, &root, 0, value1);
     
     CJSON_Array_set_array(array1, &root, 0, &array2);

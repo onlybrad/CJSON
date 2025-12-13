@@ -17,8 +17,9 @@ static bool JSON_Tokens_resize(struct CJSON_Tokens *const tokens, const unsigned
         return false;
     }
 
-    tokens->data     = data;
-    tokens->capacity = capacity;
+    tokens->capacity      = capacity;
+    tokens->data          = data;
+    tokens->current_token = data;
 
     return true;
 }
@@ -26,17 +27,19 @@ static bool JSON_Tokens_resize(struct CJSON_Tokens *const tokens, const unsigned
 EXTERN_C bool CJSON_Tokens_init(struct CJSON_Tokens *const tokens, const unsigned capacity) {
     assert(tokens != NULL);
 
-    tokens->counter.object  = 0U;
-    tokens->counter.array   = 0U;
-    tokens->counter.number  = 0U;
-    tokens->counter.string  = 0U;
-    tokens->counter.keyword = 0U;
-    tokens->counter.chars   = 0U;
-    tokens->counter.comma   = 0U;
-    tokens->data            = NULL;
-    tokens->capacity        = 0U;
-    tokens->count           = 0U;
-    tokens->index           = 0U;
+    tokens->data                      = NULL;
+    tokens->current_token             = NULL;
+    tokens->counter.object            = 0U;
+    tokens->counter.array             = 0U;
+    tokens->counter.number            = 0U;
+    tokens->counter.string            = 0U;
+    tokens->counter.keyword           = 0U;
+    tokens->counter.chars             = 0U;
+    tokens->counter.comma             = 0U;
+    tokens->counter.object_capacities = 0U;
+    tokens->counter.array_counts      = 0U;
+    tokens->capacity                  = 0U;
+    tokens->count                     = 0U;
     
     return JSON_Tokens_resize(tokens, capacity);
 }

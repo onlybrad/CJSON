@@ -5,8 +5,6 @@
 #include "cjson.h"
 #include "util.h"
 
-#define CJSON_OBJECT_DEFAULT_CAPACITY 8U
-
 static char DELETED_ENTRY[] = {0};
 
 static unsigned CJSON_hash(const char *const key) {
@@ -61,8 +59,8 @@ EXTERN_C bool CJSON_Object_init(struct CJSON_Object *const object, struct CJSON_
     assert(object != NULL);
     assert(root != NULL);
 
-    if(capacity < CJSON_OBJECT_DEFAULT_CAPACITY) {
-        capacity = CJSON_OBJECT_DEFAULT_CAPACITY;
+    if(capacity < CJSON_OBJECT_MINIMUM_CAPACITY) {
+        capacity = CJSON_OBJECT_MINIMUM_CAPACITY;
     }
     
     struct CJSON_KV *entries = CJSON_ARENA_ALLOC(&root->object_arena, capacity, struct CJSON_KV);
@@ -89,7 +87,7 @@ EXTERN_C struct CJSON_KV *CJSON_Object_get_entry(struct CJSON_Object *const obje
     ) != 0) {
         i = (i + 1U) % object->capacity;
         if(i == start) {
-            if(!CJSON_Object_resize(object, root, object->capacity * 2)) {
+            if(!CJSON_Object_resize(object, root, object->capacity * 2U)) {
                 return NULL;
             }
             return CJSON_Object_get_entry(object, root, key);
@@ -321,40 +319,4 @@ EXTERN_C bool CJSON_Object_set_bool(struct CJSON_Object *const object, struct CJ
     json.data.boolean = value;
 
     return CJSON_Object_set(object, root, key, &json);
-}
-
-EXTERN_C unsigned CJSON_Object_total_objects(const struct CJSON_Object *const object) {
-    assert(object != NULL);
-
-    unsigned total = 0U;
-
-    for(const struct CJSON_KV *entry = object->entries,
-    *const last_entry = entry + object->capacity - 1;
-    entry != last_entry + 1;
-    entry++
-    ) {
-        if(entry->key != NULL || entry->key != DELETED_ENTRY) {
-            total += CJSON_total_objects(&entry->value);
-        }
-    }
-
-    return total + 1U;
-}
-
-EXTERN_C unsigned CJSON_Object_total_arrays(const struct CJSON_Object *const object) {
-    assert(object != NULL);
-
-    unsigned total = 0U;
-
-    for(const struct CJSON_KV *entry = object->entries,
-    *const last_entry = entry + object->capacity - 1;
-    entry != last_entry + 1;
-    entry++
-    ) {
-        if(entry->key != NULL && entry->key != DELETED_ENTRY) {
-            total += CJSON_total_arrays(&entry->value);
-        }
-    }
-    
-    return total;
 }

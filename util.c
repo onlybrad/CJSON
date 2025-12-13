@@ -330,7 +330,6 @@ EXTERN_C unsigned long long usec_timestamp(void) {
 #else
     struct timeval current_time;
     gettimeofday(&current_time, NULL);
-
     return (unsigned long long)(current_time.tv_sec * 1000000L + current_time.tv_usec);
 #endif
 }

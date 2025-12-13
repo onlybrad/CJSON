@@ -5,8 +5,6 @@
 #include "cjson.h"
 #include "util.h"
 
-#define CJSON_ARRAY_DEFAULT_CAPACITY 8U
-
 static bool CJSON_Array_resize(struct CJSON_Array *const array, struct CJSON_Root *const root, const unsigned capacity) {
     assert(array != NULL);
     assert(root != NULL);
@@ -32,8 +30,8 @@ EXTERN_C bool CJSON_Array_init(struct CJSON_Array *const array, struct CJSON_Roo
     assert(array != NULL);
     assert(root != NULL);
 
-    if(capacity < CJSON_ARRAY_DEFAULT_CAPACITY) {
-        capacity = CJSON_ARRAY_DEFAULT_CAPACITY;
+    if(capacity < CJSON_ARRAY_MINIMUM_CAPACITY) {
+        capacity = CJSON_ARRAY_MINIMUM_CAPACITY;
     }
 
     struct CJSON *values = CJSON_ARENA_ALLOC(&root->array_arena, capacity, struct CJSON);
@@ -254,36 +252,4 @@ EXTERN_C bool CJSON_Array_set_bool(struct CJSON_Array *const array, struct CJSON
     json.data.boolean = value;
 
     return CJSON_Array_set(array, root, index, &json);
-}
-
-EXTERN_C unsigned CJSON_Array_total_objects(const struct CJSON_Array *const array) {
-    assert(array != NULL);
-
-    unsigned total = 0U;
-
-    for(const struct CJSON *value = array->values,
-        *const last_value = value + array->count - 1; 
-        value != last_value + 1;
-        value++
-    ) {
-        total += CJSON_total_objects(value);
-    }
-
-    return total;
-}
-
-EXTERN_C unsigned CJSON_Array_total_arrays(const struct CJSON_Array *const array) {
-    assert(array != NULL);
-
-    unsigned total = 0U;
-
-    for(const struct CJSON *value = array->values,
-        *const last_value = value + array->count - 1; 
-        value != last_value + 1;
-        value++
-    ) {
-        total += CJSON_total_arrays(value);
-    }
-
-    return total + 1U;
 }

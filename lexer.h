@@ -11,12 +11,10 @@ extern "C" {
 #include "stack.h"
 
 struct CJSON_Lexer {
-    const char        *data;
-    unsigned           length;
-    unsigned           position;
-    unsigned           line;
-    unsigned           column;
     struct CJSON_Stack stack;
+    const char        *data;
+    unsigned           length,
+                       position;
 };
 
 void CJSON_Lexer_init(struct CJSON_Lexer*, const char *data, unsigned length);

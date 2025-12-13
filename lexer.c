@@ -3,6 +3,8 @@
 #include "lexer.h"
 #include "token.h"
 #include "util.h"
+#include "json-array.h"
+#include "json-object.h"
 
 static void CJSON_Lexer_skip_whitespace(struct CJSON_Lexer *const lexer) {
     assert(lexer != NULL);
@@ -229,36 +231,49 @@ EXTERN_C bool CJSON_Lexer_finalize(struct CJSON_Lexer *const lexer, struct CJSON
     assert(lexer != NULL);
     assert(tokens != NULL);
 
-    const unsigned object_and_array_count = tokens->counter.object + tokens->counter.array;
-
-    if(!CJSON_Stack_reserve(&lexer->stack, object_and_array_count)) {
+    if(!CJSON_Stack_reserve(&lexer->stack, tokens->counter.object + tokens->counter.array)) {
         return false;
     }
 
-    struct CJSON_Token *const first_token = tokens->data;
-    const struct CJSON_Token *const last_token  = first_token + tokens->count - 1;
-    for(struct CJSON_Token *token = first_token, *object_or_array;
+    bool success;
+    const struct CJSON_Token *const last_token = tokens->data + tokens->count - 1;
+    for(struct CJSON_Token *token = tokens->data, *container;
         token != last_token + 1; 
         token++
     ) {
         switch(token->type) {
         case CJSON_TOKEN_LCURLY:
         case CJSON_TOKEN_LBRACKET:
-            CJSON_Stack_push(&lexer->stack, token);
+            CJSON_Stack_unsafe_push(&lexer->stack, token);
             continue;
+            
         case CJSON_TOKEN_RCURLY:
         case CJSON_TOKEN_RBRACKET:
-            CJSON_Stack_pop(&lexer->stack);
-            continue;
-        case CJSON_TOKEN_COMMA: {
-            void *const value = CJSON_Stack_peek(&lexer->stack);
-            if(value != NULL) {
-                object_or_array = (struct CJSON_Token*)value;
-                assert(object_or_array->type == CJSON_TOKEN_LCURLY || object_or_array->type == CJSON_TOKEN_LBRACKET);
-                object_or_array->length++;
+            container = (struct CJSON_Token*)CJSON_Stack_pop(&lexer->stack, &success);
+            if(!success) {
+                return false;
             }
-            break;
-        }
+
+            assert(container->type == CJSON_TOKEN_LCURLY || container->type == CJSON_TOKEN_LBRACKET);
+            if(container->type == CJSON_TOKEN_LCURLY) {
+                tokens->counter.object_capacities += MAX(container->length, CJSON_OBJECT_MINIMUM_CAPACITY);
+            } else {
+                tokens->counter.array_counts += MAX(container->length, CJSON_ARRAY_MINIMUM_CAPACITY);
+            }
+
+            continue;
+
+        case CJSON_TOKEN_COMMA:
+            container = (struct CJSON_Token*)CJSON_Stack_peek(&lexer->stack, &success);
+            if(!success) {
+                return false;
+            }
+
+            assert(container->type == CJSON_TOKEN_LCURLY || container->type == CJSON_TOKEN_LBRACKET);
+            container->length++;
+            
+            continue;
+
         default:
             continue;
         }
@@ -272,28 +287,24 @@ EXTERN_C void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *cons
     assert(data != NULL);
     assert(length > 0U);
 
+    CJSON_Stack_init(&lexer->stack, 0U);
+
     lexer->data     = data;
     lexer->length   = length;
     lexer->position = 0U;
-    lexer->line     = 0U;
-    lexer->column   = 0U;
-
-    CJSON_Stack_init(&lexer->stack, 0U);
 }
 
 EXTERN_C void CJSON_Lexer_free(struct CJSON_Lexer *const lexer) {
     assert(lexer != NULL);
     
+    CJSON_Stack_free(&lexer->stack);
+
     lexer->data     = NULL;
     lexer->length   = 0U;
     lexer->position = 0U;
-    lexer->line     = 0U;
-    lexer->column   = 0U;
-    
-    CJSON_Stack_free(&lexer->stack);
 }
 
-EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens,  struct CJSON_Token *const token) {
+EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens, struct CJSON_Token *const token) {
     assert(lexer != NULL);
     assert(token != NULL);
 

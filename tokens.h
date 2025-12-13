@@ -10,19 +10,21 @@ extern "C" {
 #include "token.h"
 
 struct CJSON_Tokens {
-    struct CJSON_Token *data;
+    struct CJSON_Token *data,
+                       *current_token;
     struct CJSON_Token_Stats {
         unsigned string,
-        number,
-        array,
-        object,
-        keyword,
-        comma,
-        chars;
+                 number,
+                 array,
+                 object,
+                 keyword,
+                 comma,
+                 chars,
+                 array_counts,
+                 object_capacities;
     } counter;
-    unsigned index,
-    count,
-    capacity;
+    unsigned count,
+             capacity;
 };
 
 bool CJSON_Tokens_init(struct CJSON_Tokens *tokens, unsigned capacity);

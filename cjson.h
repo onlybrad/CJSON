@@ -10,6 +10,8 @@ extern "C" {
 #include "allocator.h"
 #include "token.h"
 #include "tokens.h"
+#include "json-object.h"
+#include "json-array.h"
 
 enum CJSON_Type {
     CJSON_ERROR,
@@ -40,17 +42,6 @@ enum CJSON_Error {
     CJSON_ERROR_MEMORY
 };
 
-struct CJSON_Array {
-    struct CJSON *values;
-    unsigned      count;
-    unsigned      capacity;
-};
-
-struct CJSON_Object {
-    struct CJSON_KV *entries;
-    unsigned         capacity;
-};
-
 struct CJSON_String {
     char    *chars;
     unsigned length;
@@ -74,11 +65,11 @@ struct CJSON {
 };
 
 struct CJSON_Root {
-    struct CJSON json;
+    struct CJSON        json;
     struct CJSON_Tokens tokens;
-    struct CJSON_Arena array_arena,
-    object_arena,
-    string_arena;
+    struct CJSON_Arena  array_arena,
+                        object_arena,
+                        string_arena;
 };
 
 struct CJSON_KV {
@@ -108,8 +99,6 @@ bool                 CJSON_Object_set_object (struct CJSON_Object*, struct CJSON
 bool                 CJSON_Object_set_array  (struct CJSON_Object*, struct CJSON_Root*, const char *key, const struct CJSON_Array*);
 bool                 CJSON_Object_set_null   (struct CJSON_Object*, struct CJSON_Root*, const char *key);
 bool                 CJSON_Object_set_bool   (struct CJSON_Object*, struct CJSON_Root*, const char *key, bool);
-unsigned             CJSON_Object_total_objects(const struct CJSON_Object*);
-unsigned             CJSON_Object_total_arrays (const struct CJSON_Object*);
 
 bool                 CJSON_Array_init       (struct CJSON_Array*, struct CJSON_Root*, unsigned capacity);
 struct CJSON        *CJSON_Array_next       (struct CJSON_Array*, struct CJSON_Root*);
@@ -132,8 +121,6 @@ bool                 CJSON_Array_set_array  (struct CJSON_Array*, struct CJSON_R
 bool                 CJSON_Array_set_object (struct CJSON_Array*, struct CJSON_Root*, unsigned index, const struct CJSON_Object*);
 bool                 CJSON_Array_set_null   (struct CJSON_Array*, struct CJSON_Root*, unsigned index);
 bool                 CJSON_Array_set_bool   (struct CJSON_Array*, struct CJSON_Root*, unsigned index, bool);
-unsigned             CJSON_Array_total_objects(const struct CJSON_Array*);
-unsigned             CJSON_Array_total_arrays (const struct CJSON_Array*);
 
 bool CJSON_init      (struct CJSON_Root*);
 bool CJSON_parse     (struct CJSON_Root*, const char *data, unsigned length);
@@ -160,8 +147,6 @@ void                 CJSON_set_object   (struct CJSON*, const struct CJSON_Objec
 void                 CJSON_set_array    (struct CJSON*, const struct CJSON_Array*);
 void                 CJSON_set_null     (struct CJSON*);
 void                 CJSON_set_bool     (struct CJSON*, bool);
-unsigned             CJSON_total_objects(const struct CJSON*);
-unsigned             CJSON_total_arrays (const struct CJSON*);
 
 #endif
 

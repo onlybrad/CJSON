@@ -3,10 +3,6 @@
 #include "util.h"
 #include "allocator.h"
 
-#define CJSON_STACK_DEFAULT_CAPACITY 8U
-
-void *const CJSON_STACK_NULL = (void*)(uintptr_t)UINTPTR_MAX;
-
 EXTERN_C bool CJSON_Stack_init(struct CJSON_Stack *const stack, const unsigned capacity) {
     assert(stack != NULL);
 
@@ -53,13 +49,16 @@ EXTERN_C bool CJSON_Stack_reserve(struct CJSON_Stack *const stack, unsigned capa
     return true;
 }
 
-EXTERN_C void *CJSON_Stack_peek(const struct CJSON_Stack *const stack) {
+EXTERN_C void *CJSON_Stack_peek(const struct CJSON_Stack *const stack, bool *const success) {
     assert(stack != NULL);
+    assert(success != NULL);
 
     if(stack->count == 0U) {
-        return CJSON_STACK_NULL;
+        *success = false;
+        return NULL;
     }
 
+    *success = true;
     return stack->data[stack->count - 1U];
 }
 
@@ -67,7 +66,7 @@ EXTERN_C bool CJSON_Stack_push(struct CJSON_Stack *const stack, void *const datu
     assert(stack != NULL);
     
     if(stack->count == stack->capacity) {
-        if(!CJSON_Stack_reserve(stack, MAX(CJSON_STACK_DEFAULT_CAPACITY, stack->capacity * 2U))) {
+        if(!CJSON_Stack_reserve(stack, MAX(CJSON_STACK_MINIMUM_CAPACITY, stack->capacity * 2U))) {
             return false;
         }
     }
@@ -77,13 +76,33 @@ EXTERN_C bool CJSON_Stack_push(struct CJSON_Stack *const stack, void *const datu
     return true;
 }
 
-EXTERN_C void *CJSON_Stack_pop(struct CJSON_Stack *const stack) {
+EXTERN_C void *CJSON_Stack_unsafe_peek(const struct CJSON_Stack *const stack) {
     assert(stack != NULL);
-    assert(stack->count > 0U);
+
+    return stack->data[stack->count - 1U];
+}
+
+EXTERN_C void CJSON_Stack_unsafe_push(struct CJSON_Stack *const stack, void *const datum) {
+    assert(stack != NULL);
+    
+    stack->data[stack->count++] = datum;
+}
+
+EXTERN_C void *CJSON_Stack_pop(struct CJSON_Stack *const stack, bool *const success) {
+    assert(stack != NULL);
+    assert(success != NULL);
 
     if(stack->count == 0U) {
-        return CJSON_STACK_NULL;
+        *success = false;
+        return NULL;
     }
+    
+    *success = true;
+    return stack->data[--stack->count];
+}
+
+EXTERN_C void *CJSON_Stack_unsafe_pop(struct CJSON_Stack *const stack) {
+    assert(stack != NULL);
 
     return stack->data[--stack->count];
 }
