@@ -5,7 +5,7 @@
 #include "allocator.h"
 #include "util.h"
 
-#define CJSON_GET_DATA(NODE) ((unsigned char*)(NODE + sizeof(*NODE)))
+#define CJSON_GET_DATA(NODE) ((unsigned char *)((NODE) + 1))
 
 #ifndef NDEBUG
 
