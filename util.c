@@ -272,50 +272,54 @@ EXTERN_C enum CJSON_UtilError file_get_contents(const char *const path, struct C
     enum CJSON_UtilError error;
     long length;
 
-    if(file == NULL) {
-        error = CJSON_UTIL_ERROR_FOPEN;
-        goto cleanup;
-    }
+    do {
+        if(file == NULL) {
+            error = CJSON_UTIL_ERROR_FOPEN;
+            break;
+        }
 
-    if(fseek(file, 0, SEEK_END) != 0) {
-        error = CJSON_UTIL_ERROR_FSEEK;
-        goto cleanup;
-    }
+        if(fseek(file, 0, SEEK_END) != 0) {
+            error = CJSON_UTIL_ERROR_FSEEK;
+            break;
+        }
 
-    length = ftell(file);
-    if(length == -1L) {
-        error = CJSON_UTIL_ERROR_FTELL;
-        goto cleanup;
-    }
+        length = ftell(file);
+        if(length == -1L) {
+            error = CJSON_UTIL_ERROR_FTELL;
+            break;
+        }
 
-    if((uintmax_t)length >= (uintmax_t)UINT_MAX) {
-        error = CJSON_UTIL_ERROR_TOO_LARGE;
-        goto cleanup;
-    }
+        if((uintmax_t)length >= (uintmax_t)UINT_MAX) {
+            error = CJSON_UTIL_ERROR_TOO_LARGE;
+            break;
+        }
 
-    if(fseek(file, 0, SEEK_SET) != 0) {
-        error = CJSON_UTIL_ERROR_FSEEK;
-        goto cleanup;
-    }
+        if(fseek(file, 0, SEEK_SET) != 0) {
+            error = CJSON_UTIL_ERROR_FSEEK;
+            break;
+        }
 
-    //the buffer returned has 1 extra byte allocated in case a null terminated string is required
-    buffer->data = (unsigned char*)CJSON_MALLOC(((size_t)length + 1) * sizeof(unsigned char));
-    if(buffer->data == NULL) {
-        error = CJSON_UTIL_ERROR_MALLOC;
-        goto cleanup;
+        //the buffer returned has 1 extra byte allocated in case a null terminated string is required
+        buffer->data = (unsigned char*)CJSON_MALLOC(((size_t)length + 1) * sizeof(unsigned char));
+        if(buffer->data == NULL) {
+            error = CJSON_UTIL_ERROR_MALLOC;
+            break;
+        }
+        buffer->data[length] = '\0';
+        
+        if(fread(buffer->data, sizeof(unsigned char), (size_t)length, file) != (size_t)length) {
+            error = CJSON_UTIL_ERROR_FREAD;
+            break;
+        }
+
+        error = CJSON_UTIL_ERROR_NONE;
+        buffer->size = (unsigned)length;
+    } while(0);
+
+    if(error != CJSON_UTIL_ERROR_NONE) {
+        CJSON_Buffer_free(buffer);
     }
-    buffer->data[length] = '\0';
     
-    if(fread(buffer->data, sizeof(unsigned char), (size_t)length, file) != (size_t)length) {
-        error = CJSON_UTIL_ERROR_FREAD;
-        goto cleanup;
-    }
-
-    error = CJSON_UTIL_ERROR_NONE;
-    buffer->size = (unsigned)length;
-
-cleanup:
-    CJSON_Buffer_free(buffer);
     fclose(file);
     return error;
 }

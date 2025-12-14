@@ -538,42 +538,43 @@ EXTERN_C bool CJSON_parse(struct CJSON_Root *const root, const char *const data,
     CJSON_Arena_zero(&root->string_arena);
     CJSON_Lexer_init(&lexer, data, length);
 
-    if(!CJSON_Tokens_init(&root->tokens, length / CJSON_TOKENS_SIZE_FACTOR)) {
-        root->json.data.error = CJSON_ERROR_MEMORY;
-        goto error;
-    }
-
     do {
-        if((token = CJSON_Tokens_next(&root->tokens)) == NULL) {
+        if(!CJSON_Tokens_init(&root->tokens, length / CJSON_TOKENS_SIZE_FACTOR)) {
             root->json.data.error = CJSON_ERROR_MEMORY;
-            goto error;
+            break;
         }
-    } while(CJSON_Lexer_tokenize(&lexer, &root->tokens, token));
 
-    if(token->type != CJSON_TOKEN_DONE) {
-        root->json.data.error = CJSON_ERROR_TOKEN;
-        goto error;
-    }
+        do {
+            if((token = CJSON_Tokens_next(&root->tokens)) == NULL) {
+                root->json.data.error = CJSON_ERROR_MEMORY;
+                break;
+            }
+        } while(CJSON_Lexer_tokenize(&lexer, &root->tokens, token));
 
-    if(!CJSON_Lexer_finalize(&lexer, &root->tokens)) {
-        root->json.data.error = CJSON_ERROR_MEMORY;
-        goto error;
-    }
+        if(token->type != CJSON_TOKEN_DONE) {
+            root->json.data.error = CJSON_ERROR_TOKEN;
+            break;
+        }
 
-    arena_sizes[0] = root->tokens.counter.object_capacities * (unsigned)sizeof(struct CJSON_KV);
-    arena_sizes[1] = root->tokens.counter.array_counts      * (unsigned)sizeof(struct CJSON);
-    arena_sizes[2] = root->tokens.counter.chars             * (unsigned)sizeof(char);
-    if(!CJSON_init_arenas(root, arena_sizes, CJSON_DEFAULT_ARENA_NODE_MAX)) {
-        root->json.data.error = CJSON_ERROR_MEMORY;
-        goto error;
-    }
+        if(!CJSON_Lexer_finalize(&lexer, &root->tokens)) {
+            root->json.data.error = CJSON_ERROR_MEMORY;
+            break;
+        }
 
-    CJSON_parse_tokens(root, &root->json, &root->tokens);
-    CJSON_Lexer_free(&lexer);
+        arena_sizes[0] = root->tokens.counter.object_capacities * (unsigned)sizeof(struct CJSON_KV);
+        arena_sizes[1] = root->tokens.counter.array_counts      * (unsigned)sizeof(struct CJSON);
+        arena_sizes[2] = root->tokens.counter.chars             * (unsigned)sizeof(char);
+        if(!CJSON_init_arenas(root, arena_sizes, CJSON_DEFAULT_ARENA_NODE_MAX)) {
+            root->json.data.error = CJSON_ERROR_MEMORY;
+            break;
+        }
 
-    return root->json.type != CJSON_ERROR;
+        CJSON_parse_tokens(root, &root->json, &root->tokens);
+        CJSON_Lexer_free(&lexer);
 
-error:
+        return root->json.type != CJSON_ERROR;
+    } while(0);
+
     CJSON_Lexer_free(&lexer);
     root->json.type = CJSON_ERROR;
     return false;
