@@ -443,24 +443,28 @@ static void test_create_primitives(void) {
     assert(root.json.data.int64 == value1);
     CJSON_free(&root);
 
+    CJSON_init(&root);
     const uint64_t value2 = 25000000000ULL;
     CJSON_set_uint64(&root.json, value2);
     assert(root.json.type == CJSON_UINT64);
     assert(root.json.data.uint64 == value2);
     CJSON_free(&root);
 
+    CJSON_init(&root);
     const double value3 = 25000000000.50;
     CJSON_set_float64(&root.json, value3);
     assert(root.json.type == CJSON_FLOAT64);
     assert(root.json.data.float64 == value3);
     CJSON_free(&root);
 
+    CJSON_init(&root);
     const bool value4 = true;
     CJSON_set_bool(&root.json, value4);
     assert(root.json.type == CJSON_BOOL);
     assert(root.json.data.boolean);
     CJSON_free(&root);
 
+    CJSON_init(&root);
     CJSON_set_null(&root.json);
     assert(root.json.type == CJSON_NULL);
     assert(root.json.data.null == NULL);

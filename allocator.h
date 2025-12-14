@@ -19,17 +19,17 @@ extern "C" {
 #endif
 
 struct CJSON_ArenaNode {
-    unsigned char          *data;
     struct CJSON_ArenaNode *next;
-    unsigned                size;
-    unsigned                offset;
+    unsigned                size,
+                            offset;
+    //unsigned char         data[]; //use the CJSON_GET_DATA() macro to a get a pointer to this
 };
 
 struct CJSON_Arena {
-    struct CJSON_ArenaNode  head;
-    struct CJSON_ArenaNode *current;
-    unsigned                node_count;
-    unsigned                max_nodes;
+    struct CJSON_ArenaNode *head,
+                           *current;
+    unsigned                node_count,
+                            max_nodes;
 #ifndef NDEBUG
     const char             *name;
 #endif

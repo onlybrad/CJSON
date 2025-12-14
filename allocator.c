@@ -5,6 +5,8 @@
 #include "allocator.h"
 #include "util.h"
 
+#define CJSON_GET_DATA(NODE) ((unsigned char*)(NODE + sizeof(*NODE)))
+
 #ifndef NDEBUG
 
 static struct CJSON_AllocationStats allocation_stats;
@@ -73,7 +75,6 @@ static struct CJSON_ArenaNode *CJSON_ArenaNode_new(const unsigned size) {
     node->size   = size;
     node->offset = 0U;
     node->next   = NULL;
-    node->data   = (unsigned char*)node + sizeof(*node);
     
     return node;
 }
@@ -82,41 +83,30 @@ EXTERN_C bool CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned s
     assert(arena != NULL);
     assert(size > 0);
 
+    arena->node_count = 1U;
+    arena->max_nodes  = max_nodes;
+    arena->head       = CJSON_ArenaNode_new(size);
+    arena->current    = arena->head;
+
 #ifndef NDEBUG
     arena->name = name;
 #else
     (void)name;
 #endif
 
-    arena->current    = &arena->head;
-    arena->max_nodes  = max_nodes;
-    arena->node_count = 1U;
-    
-    arena->head.size   = size;
-    arena->head.offset = 0U;
-    arena->head.next   = NULL;
-    arena->head.data   = (unsigned char*)CJSON_CALLOC(size, sizeof(unsigned char));
-    if(arena->head.data == NULL) {
-        arena->head.size = 0U;
-        return false;
-    }
-
-    return true;
+    return arena->head != NULL;
 }
 
 EXTERN_C void CJSON_Arena_zero(struct CJSON_Arena *const arena) {
     assert(arena != NULL);
-
-    arena->head.data     = NULL;
-    arena->head.next     = NULL;
-    arena->head.size     = 0U;
-    arena->head.offset   = 0U;
-    arena->current       = NULL;
-    arena->node_count    = 0U;
+    
+    arena->node_count  = 0U;
+    arena->max_nodes   = 0U;
+    arena->head        = NULL;
+    arena->current     = NULL;
 #ifndef NDEBUG
-    arena->name          = NULL;
+    arena->name        = NULL;
 #endif
-
 }
 
 EXTERN_C void CJSON_Arena_free(struct CJSON_Arena *const arena) {
@@ -125,15 +115,9 @@ EXTERN_C void CJSON_Arena_free(struct CJSON_Arena *const arena) {
     arena->current    = NULL;
     arena->max_nodes  = CJSON_ARENA_INFINITE_NODES;
     arena->node_count = 1U;
-
-    CJSON_FREE(arena->head.data);
-    arena->head.data   = NULL;
-    arena->head.size   = 0U;
-    arena->head.offset = 0U;
     
-    struct CJSON_ArenaNode *current = arena->head.next;
-    arena->head.next = NULL;
-
+    struct CJSON_ArenaNode *current = arena->head;
+    arena->head = NULL;
     while(current != NULL) {
         struct CJSON_ArenaNode *const next = current->next;
         CJSON_FREE(current);
@@ -144,8 +128,8 @@ EXTERN_C void CJSON_Arena_free(struct CJSON_Arena *const arena) {
 EXTERN_C void CJSON_Arena_reset(struct CJSON_Arena *const arena) {
     assert(arena != NULL);
     
-    arena->current       = &arena->head;
-    arena->head.offset   = 0U;
+    arena->current      = arena->head;
+    arena->head->offset = 0U;
 }
 
 EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned size, unsigned alignment) {
@@ -157,7 +141,7 @@ EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned
         alignment = CJSON_ALIGNOF(uintmax_t);
     }
 
-    const uintptr_t start_address = (uintptr_t)(arena->current->data + arena->current->offset);
+    const uintptr_t start_address = (uintptr_t)(CJSON_GET_DATA(arena->current) + arena->current->offset);
     uintptr_t aligned_address     = (start_address + ((uintptr_t)alignment - 1U)) & ~((uintptr_t)alignment - 1U);
     unsigned padding              = (unsigned)(aligned_address - start_address);
 
@@ -186,7 +170,7 @@ EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned
             arena->current->next = next;
         }
 
-        aligned_address = (uintptr_t)next->data;
+        aligned_address = (uintptr_t)(CJSON_GET_DATA(next));
         padding         = 0U;
         next->offset    = 0U;
         arena->current  = next;
