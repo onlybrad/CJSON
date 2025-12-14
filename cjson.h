@@ -13,18 +13,6 @@ extern "C" {
 #include "json-object.h"
 #include "json-array.h"
 
-enum CJSON_Type {
-    CJSON_ERROR,
-    CJSON_STRING,
-    CJSON_FLOAT64,
-    CJSON_INT64,
-    CJSON_UINT64,
-    CJSON_ARRAY,
-    CJSON_OBJECT,
-    CJSON_NULL,
-    CJSON_BOOL
-};
-
 enum CJSON_Error {
     CJSON_ERROR_TOKEN,
     CJSON_ERROR_STRING,
@@ -47,21 +35,29 @@ struct CJSON_String {
     unsigned length;
 };
 
-union CJSON_Data {
-    struct CJSON_String string;
-    double              float64;
-    int64_t             int64;
-    uint64_t            uint64;
-    struct CJSON_Array  array;
-    struct CJSON_Object object;
-    void               *null;
-    bool                boolean;
-    enum CJSON_Error    error;
-};
-
 struct CJSON {
-    enum CJSON_Type  type;
-    union CJSON_Data data;
+    enum CJSON_Type {
+        CJSON_ERROR,
+        CJSON_STRING,
+        CJSON_FLOAT64,
+        CJSON_INT64,
+        CJSON_UINT64,
+        CJSON_ARRAY,
+        CJSON_OBJECT,
+        CJSON_NULL,
+        CJSON_BOOL
+    }  type;
+    union CJSON_Data {
+        struct CJSON_String string;
+        double              float64;
+        int64_t             int64;
+        uint64_t            uint64;
+        struct CJSON_Array  array;
+        struct CJSON_Object object;
+        void               *null;
+        bool                boolean;
+        enum CJSON_Error    error;
+    } data;
 };
 
 struct CJSON_Root {
