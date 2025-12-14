@@ -246,7 +246,6 @@ EXTERN_C void CJSON_Buffer_free(struct CJSON_Buffer *const buffer) {
 EXTERN_C enum CJSON_UtilError file_get_contents(const char *const path, struct CJSON_Buffer *const buffer) {
     assert(path != NULL);
     assert(strlen(path) > 0);
-    assert(strlen(path) < LONG_MAX);
 
     buffer->data = NULL;
     buffer->size = 0U;
