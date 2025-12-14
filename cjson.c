@@ -603,17 +603,9 @@ EXTERN_C void CJSON_free(struct CJSON_Root *const root) {
     root->json.type      = CJSON_NULL;
     root->json.data.null = NULL;
 
-    struct CJSON_Arena *arenas[] = {
-        &root->object_arena,
-        &root->array_arena,
-        &root->string_arena,
-        NULL
-    };
-    
-    for(struct CJSON_Arena *const *arena = arenas; *arena != NULL; arena++) {
-        CJSON_Arena_free(*arena);
-    }
-
+    CJSON_Arena_free(&root->object_arena);
+    CJSON_Arena_free(&root->array_arena);
+    CJSON_Arena_free(&root->string_arena);
     CJSON_Tokens_free(&root->tokens);
 }
 
