@@ -248,6 +248,9 @@ EXTERN_C enum CJSON_UtilError file_get_contents(const char *const path, struct C
     assert(strlen(path) > 0);
     assert(strlen(path) < LONG_MAX);
 
+    buffer->data = NULL;
+    buffer->size = 0U;
+
 #ifdef _WIN32
     const int wide_length = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0);
     if(wide_length == 0) {
@@ -313,6 +316,7 @@ EXTERN_C enum CJSON_UtilError file_get_contents(const char *const path, struct C
     buffer->size = (unsigned)length;
 
 cleanup:
+    CJSON_Buffer_free(buffer);
     fclose(file);
     return error;
 }
