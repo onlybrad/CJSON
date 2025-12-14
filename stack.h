@@ -7,8 +7,6 @@ extern "C" {
 
 #include <stdbool.h>
 
-#define CJSON_STACK_MINIMUM_CAPACITY 8U
-
 struct CJSON_Stack {
     void    **data;
     unsigned  count,

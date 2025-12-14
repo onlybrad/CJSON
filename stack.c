@@ -3,6 +3,8 @@
 #include "util.h"
 #include "allocator.h"
 
+#define CJSON_STACK_MINIMUM_CAPACITY 8U
+
 EXTERN_C bool CJSON_Stack_init(struct CJSON_Stack *const stack, const unsigned capacity) {
     assert(stack != NULL);
 
