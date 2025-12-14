@@ -20,8 +20,8 @@ struct CJSON_Tokens {
                  keyword,
                  comma,
                  chars,
-                 array_counts,
-                 object_capacities;
+                 array_elements,
+                 object_elements;
     } counter;
     unsigned count,
              capacity;

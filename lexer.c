@@ -227,7 +227,7 @@ static void CJSON_Lexer_read_invalid_token(struct CJSON_Lexer *const lexer, stru
     token->length = i - position - 1U;
 }
 
-EXTERN_C bool CJSON_Lexer_finalize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens) {
+static bool CJSON_Lexer_count_containers_elements(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens) {
     assert(lexer != NULL);
     assert(tokens != NULL);
 
@@ -256,9 +256,9 @@ EXTERN_C bool CJSON_Lexer_finalize(struct CJSON_Lexer *const lexer, struct CJSON
 
             assert(container->type == CJSON_TOKEN_LCURLY || container->type == CJSON_TOKEN_LBRACKET);
             if(container->type == CJSON_TOKEN_LCURLY) {
-                tokens->counter.object_capacities += MAX(container->length, CJSON_OBJECT_MINIMUM_CAPACITY);
+                tokens->counter.object_elements += MAX(container->length, CJSON_OBJECT_MINIMUM_CAPACITY);
             } else {
-                tokens->counter.array_counts += MAX(container->length, CJSON_ARRAY_MINIMUM_CAPACITY);
+                tokens->counter.array_elements += MAX(container->length, CJSON_ARRAY_MINIMUM_CAPACITY);
             }
 
             continue;
@@ -304,7 +304,7 @@ EXTERN_C void CJSON_Lexer_free(struct CJSON_Lexer *const lexer) {
     lexer->position = 0U;
 }
 
-EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens, struct CJSON_Token *const token) {
+EXTERN_C enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens, struct CJSON_Token *const token) {
     assert(lexer != NULL);
     assert(token != NULL);
 
@@ -313,7 +313,9 @@ EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON
     if(lexer->position == lexer->length) {
         token->type = CJSON_TOKEN_DONE;
         token->length = 0U;
-        return false;
+        return CJSON_Lexer_count_containers_elements(lexer, tokens) 
+            ? CJSON_LEXER_ERROR_DONE
+            : CJSON_LEXER_ERROR_MEMORY;
     }
     
     token->value = lexer->data + lexer->position;
@@ -349,7 +351,7 @@ EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON
     }
     case '"': {
         if(!CJSON_Lexer_read_string(lexer, token)) {
-            return false;
+            return CJSON_LEXER_ERROR_TOKEN;
         }
         assert(token->length >= 2U);
         tokens->counter.string++;
@@ -368,7 +370,7 @@ EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON
     case '8':
     case '9': {
         if(!CJSON_Lexer_read_number(lexer, token)) {
-            return false;
+             return CJSON_LEXER_ERROR_TOKEN;
         }
         assert(token->length >= 1U);
         tokens->counter.number++;
@@ -377,7 +379,7 @@ EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON
     default: {
         if(!CJSON_Lexer_read_keyword(lexer, token)) {
             CJSON_Lexer_read_invalid_token(lexer, token);
-            return false;
+            return CJSON_LEXER_ERROR_TOKEN;
         }
         assert(token->length >= 4U);
         tokens->counter.keyword++;
@@ -387,5 +389,5 @@ EXTERN_C bool CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON
     
     lexer->position += token->length;
 
-    return true;
+    return CJSON_LEXER_ERROR_NONE;
 }

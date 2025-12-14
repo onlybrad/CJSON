@@ -36,8 +36,8 @@ EXTERN_C bool CJSON_Tokens_init(struct CJSON_Tokens *const tokens, const unsigne
     tokens->counter.keyword           = 0U;
     tokens->counter.chars             = 0U;
     tokens->counter.comma             = 0U;
-    tokens->counter.object_capacities = 0U;
-    tokens->counter.array_counts      = 0U;
+    tokens->counter.object_elements = 0U;
+    tokens->counter.array_elements      = 0U;
     tokens->capacity                  = 0U;
     tokens->count                     = 0U;
     

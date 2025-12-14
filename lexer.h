@@ -10,6 +10,13 @@ extern "C" {
 #include "tokens.h"
 #include "stack.h"
 
+enum CJSON_Lexer_Error {
+    CJSON_LEXER_ERROR_NONE,
+    CJSON_LEXER_ERROR_TOKEN,
+    CJSON_LEXER_ERROR_MEMORY,
+    CJSON_LEXER_ERROR_DONE
+};
+
 struct CJSON_Lexer {
     struct CJSON_Stack stack;
     const char        *data;
@@ -19,8 +26,7 @@ struct CJSON_Lexer {
 
 void CJSON_Lexer_init(struct CJSON_Lexer*, const char *data, unsigned length);
 void CJSON_Lexer_free(struct CJSON_Lexer*);
-bool CJSON_Lexer_tokenize(struct CJSON_Lexer*, struct CJSON_Tokens*, struct CJSON_Token*);
-bool CJSON_Lexer_finalize(struct CJSON_Lexer*, struct CJSON_Tokens*);
+enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer*, struct CJSON_Tokens*, struct CJSON_Token*);
 
 #endif
 
