@@ -802,7 +802,7 @@ EXTERN_C bool CJSON_set_string(struct CJSON *const json, struct CJSON_Root *cons
 
 EXTERN_C void CJSON_set_float64(struct CJSON *const json, const double value) {
     assert(json != NULL);
-
+    
     json->type         = CJSON_FLOAT64;
     json->data.float64 = value;
 }
@@ -825,6 +825,10 @@ EXTERN_C void CJSON_set_object(struct CJSON *const json, const struct CJSON_Obje
     assert(json != NULL);
     assert(value != NULL);
 
+    if((void*)&json->data == (const void*)value) {
+        return;
+    }
+
     json->type        = CJSON_OBJECT;
     json->data.object = *value;
 }
@@ -832,6 +836,10 @@ EXTERN_C void CJSON_set_object(struct CJSON *const json, const struct CJSON_Obje
 EXTERN_C void CJSON_set_array(struct CJSON *const json, const struct CJSON_Array *const value) {
     assert(json != NULL);
     assert(value != NULL);
+
+    if((void*)&json->data == (const void*)value) {
+        return;
+    }
     
     json->type       = CJSON_ARRAY;
     json->data.array = *value;

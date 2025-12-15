@@ -277,6 +277,10 @@ EXTERN_C bool CJSON_Object_set_object(struct CJSON_Object *const object, struct 
     assert(key != NULL);
     assert(value != NULL);
 
+    if(object == value) {
+        return true;
+    }
+
     struct CJSON json;
     json.type        = CJSON_OBJECT;
     json.data.object = *value;
