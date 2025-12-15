@@ -599,7 +599,7 @@ int main(void) {
     if(success) {
         //The CJSON_Object struct has been shallow copied into the internal data array at index 10
     } else {
-        //this only happen if memory allocation fails when resizing the internal data array or copying the key
+        //this only happen if memory allocation fails when resizing the internal data array
     }
 
     CJSON_free(&root);
@@ -630,7 +630,7 @@ int main(void) {
     if(success) {
         //The CJSON_Object struct has been shallow copied into the internal data array and is the last element of the CJSON_Array struct
     } else {
-        //this only happen if memory allocation fails when resizing the internal data array or copying the key
+        //this only happen if memory allocation fails when resizing the internal data array
     }
 
     CJSON_free(&root);
