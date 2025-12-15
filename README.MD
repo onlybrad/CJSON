@@ -421,7 +421,7 @@ int main(void) {
     //...
 
     struct CJSON_Array array;
-    CJSON_Array_init(&array, root, 0U);
+    CJSON_Array_init(&array, &root, 0U);
 
     bool success;
     CJSON_Object_set_array(object, &root, "some-key", &array);
@@ -592,7 +592,7 @@ int main(void) {
     //...
 
     struct CJSON_Object object;
-    CJSON_Object_init(&object, root, 0U);
+    CJSON_Object_init(&object, &root, 0U);
 
     bool success;
     CJSON_Array_set_object(array, &root, 10U, &object);
