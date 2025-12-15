@@ -28,15 +28,15 @@
 #endif
 
 EXTERN_C CJSON_GET_RETURN_TYPE CJSON_GET_FUNCTION(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
-    assert(array != NULL);\
-    assert(success != NULL);\
-                            \
-    struct CJSON *const ret = CJSON_Array_get(array, index);\
-    if(ret == NULL || ret->type != CJSON_GET_TYPE) {\
-        *success = false;\
-        return 0;\
+    assert(array != NULL);
+    assert(success != NULL);
+
+    struct CJSON *const ret = CJSON_Array_get(array, index);
+    if(ret == NULL || ret->type != CJSON_GET_TYPE) {
+        *success = false;
+        return 0;
     }\
-    *success = true;\
+    *success = true;
 
 #ifdef CJSON_GET_RETURN_PTR
     return &ret->data.CJSON_GET_MEMBER;
