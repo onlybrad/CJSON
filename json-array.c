@@ -213,6 +213,10 @@ EXTERN_C bool CJSON_Array_set_array(struct CJSON_Array *const array, struct CJSO
     assert(root != NULL);
     assert(value != NULL);
 
+    if(array == value) {
+        return true;
+    }
+
     struct CJSON json;
     json.type       = CJSON_ARRAY;
     json.data.array = *value;

@@ -83,7 +83,7 @@ void CJSON_free      (struct CJSON_Root*);
 
 struct CJSON_Array  *CJSON_make_array   (struct CJSON*, struct CJSON_Root*);
 struct CJSON_Object *CJSON_make_object  (struct CJSON*, struct CJSON_Root*);
-const char          *CJSON_get_error    (const struct CJSON*);
+const char          *CJSON_get_error    (const struct CJSON_Root*);
 struct CJSON        *CJSON_get          (struct CJSON*, const char *query);
 const char          *CJSON_get_string   (struct CJSON*, const char *query, bool *success);
 double               CJSON_get_float64  (struct CJSON*, const char *query, bool *success);

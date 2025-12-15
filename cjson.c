@@ -612,14 +612,14 @@ EXTERN_C void CJSON_free(struct CJSON_Root *const root) {
     CJSON_Tokens_free(&root->tokens);
 }
 
-EXTERN_C const char *CJSON_get_error(const struct CJSON *const json) {
-    assert(json != NULL);
+EXTERN_C const char *CJSON_get_error(const struct CJSON_Root *const root) {
+    assert(root != NULL);
 
-    if(json->type != CJSON_ERROR) {
+    if(root->json.type != CJSON_ERROR) {
         return NULL;
     }
 
-    switch(json->data.error) {
+    switch(root->json.data.error) {
     case CJSON_ERROR_TOKEN:
         return "Token error";
     case CJSON_ERROR_STRING:

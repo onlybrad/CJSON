@@ -17,7 +17,7 @@ int main(void) {
     struct CJSON_Root root;
     const bool success = CJSON_parse(&root, (const char*)buffer.data, buffer.size);
     if(!success) {
-        fputs(CJSON_get_error(&root.json), stderr);
+        fputs(CJSON_get_error(&root), stderr);
         CJSON_Buffer_free(&buffer);
         return EXIT_FAILURE;
     }
