@@ -30,12 +30,12 @@ EXTERN_C CJSON_GET_RETURN_TYPE CJSON_GET_FUNCTION(const struct CJSON_Object *con
     assert(object != NULL);
     assert(key != NULL);
     assert(success != NULL);
-                            \
+
     struct CJSON *const ret = CJSON_Object_get(object, key);
     if(ret == NULL || ret->type != CJSON_GET_TYPE) {
         *success = false;
         return 0;
-    }\
+    }
     *success = true;
 
 #ifdef CJSON_GET_RETURN_PTR

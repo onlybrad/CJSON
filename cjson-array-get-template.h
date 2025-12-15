@@ -35,7 +35,7 @@ EXTERN_C CJSON_GET_RETURN_TYPE CJSON_GET_FUNCTION(const struct CJSON_Array *cons
     if(ret == NULL || ret->type != CJSON_GET_TYPE) {
         *success = false;
         return 0;
-    }\
+    }
     *success = true;
 
 #ifdef CJSON_GET_RETURN_PTR
