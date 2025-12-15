@@ -308,14 +308,14 @@ int main(void) {
 
 Available functions:
 
-CJSON_Object_get_string  => const char*
-CJSON_Object_get_float64 => double
-CJSON_Object_get_int64   => int64_t
-CJSON_Object_get_uint64  => uint64_t
-CJSON_Object_get_object  => struct CJSON_Object*
-CJSON_Object_get_array   => struct CJSON_Array*
-CJSON_Object_get_bool    => bool
-CJSON_Object_get_null    => void*
+- CJSON_Object_get_string  => const char*
+- CJSON_Object_get_float64 => double
+- CJSON_Object_get_int64   => int64_t
+- CJSON_Object_get_uint64  => uint64_t
+- CJSON_Object_get_object  => struct CJSON_Object*
+- CJSON_Object_get_array   => struct CJSON_Array*
+- CJSON_Object_get_bool    => bool
+- CJSON_Object_get_null    => void*
 **(this function should not be used, it always returns NULL. This function only exist to make the API consistant. use CJSON_Object_get then verify the type of the returning CJSON struct if you want to make sure a value is really null)**
 
 ```c
@@ -399,14 +399,14 @@ int main(void) {
 
 Available functions:
 
-CJSON_Object_set_string  => bool
-CJSON_Object_set_float64 => bool
-CJSON_Object_set_int64   => bool
-CJSON_Object_set_uint64  => bool
-CJSON_Object_set_object  => bool
-CJSON_Object_set_array   => bool
-CJSON_Object_set_bool    => bool
-CJSON_Object_set_null    => bool
+- CJSON_Object_set_string  => bool
+- CJSON_Object_set_float64 => bool
+- CJSON_Object_set_int64   => bool
+- CJSON_Object_set_uint64  => bool
+- CJSON_Object_set_object  => bool
+- CJSON_Object_set_array   => bool
+- CJSON_Object_set_bool    => bool
+- CJSON_Object_set_null    => bool
 
 ```c
 #include <cjson.h>
@@ -468,14 +468,14 @@ int main(void) {
 
 Available functions:
 
-CJSON_Array_get_string  => const char*
-CJSON_Array_get_float64 => double
-CJSON_Array_get_int64   => int64_t
-CJSON_Array_get_uint64  => uint64_t
-CJSON_Array_get_object  => struct CJSON_Object*
-CJSON_Array_get_array   => struct CJSON_Array*
-CJSON_Array_get_bool    => bool
-CJSON_Array_get_null    => void*
+- CJSON_Array_get_string  => const char*
+- CJSON_Array_get_float64 => double
+- CJSON_Array_get_int64   => int64_t
+- CJSON_Array_get_uint64  => uint64_t
+- CJSON_Array_get_object  => struct CJSON_Object*
+- CJSON_Array_get_array   => struct CJSON_Array*
+- CJSON_Array_get_bool    => bool
+- CJSON_Array_get_null    => void*
 **(this function should not be used, it always returns NULL. This function only exist to make the API consistant. use CJSON_Array_get then verify the type of the returning CJSON struct if you want to make sure a value is really null)**
 
 ```c
@@ -570,14 +570,14 @@ If the index is greater than the length of the array, all CJSON struct values be
 
 Available functions:
 
-CJSON_Array_set_string  => bool
-CJSON_Array_set_float64 => bool
-CJSON_Array_set_int64   => bool
-CJSON_Array_set_uint64  => bool
-CJSON_Array_set_object  => bool
-CJSON_Array_set_array   => bool
-CJSON_Array_set_bool    => bool
-CJSON_Array_set_null    => bool
+- CJSON_Array_set_string  => bool
+- CJSON_Array_set_float64 => bool
+- CJSON_Array_set_int64   => bool
+- CJSON_Array_set_uint64  => bool
+- CJSON_Array_set_object  => bool
+- CJSON_Array_set_array   => bool
+- CJSON_Array_set_bool    => bool
+- CJSON_Array_set_null    => bool
 
 ```c
 #include <cjson.h>
