@@ -381,9 +381,7 @@ int main(void) {
 
     //...
 
-    bool success;
-    CJSON_Object_set(object, &root, "some-key", some_value);
-    if(success) {
+    if(CJSON_Object_set(object, &root, "some-key", some_value)) {
         //The CJSON struct value has been shallow copied into the internal data array
     } else {
         //this only happen if memory allocation fails when resizing the internal data array or copying the key
@@ -423,9 +421,7 @@ int main(void) {
     struct CJSON_Array array;
     CJSON_Array_init(&array, &root, 0U);
 
-    bool success;
-    CJSON_Object_set_array(object, &root, "some-key", &array);
-    if(success) {
+    if(CJSON_Object_set_array(object, &root, "some-key", &array)) {
         //The CJSON_Array struct has been shallow copied into the internal data array
     } else {
         //this only happen if memory allocation fails when resizing the internal data array or copying the key
@@ -550,9 +546,7 @@ int main(void) {
 
     //...
 
-    bool success;
-    CJSON_Array_set(array, &root, 10U, some_value);
-    if(success) {
+    if(CJSON_Array_set(array, &root, 10U, some_value)) {
         //The CJSON struct value has been shallow copied into the internal data array at index 10
     } else {
         //this only happen if memory allocation fails when resizing the internal data array
@@ -594,9 +588,7 @@ int main(void) {
     struct CJSON_Object object;
     CJSON_Object_init(&object, &root, 0U);
 
-    bool success;
-    CJSON_Array_set_object(array, &root, 10U, &object);
-    if(success) {
+    if(CJSON_Array_set_object(array, &root, 10U, &object)) {
         //The CJSON_Object struct has been shallow copied into the internal data array at index 10
     } else {
         //this only happen if memory allocation fails when resizing the internal data array
@@ -625,9 +617,7 @@ int main(void) {
     struct CJSON number;
     CJSON_set_uint64(&number, 1024U);
 
-    bool success;
-    CJSON_Array_push(array, &root, &number);
-    if(success) {
+    if(CJSON_Array_push(array, &root, &number)) {
         //The CJSON_Object struct has been shallow copied into the internal data array and is the last element of the CJSON_Array struct
     } else {
         //this only happen if memory allocation fails when resizing the internal data array
