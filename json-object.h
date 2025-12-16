@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef CJSON_OBJECT_H
 #define CJSON_OBJECT_H
 
@@ -35,4 +39,8 @@ bool                 CJSON_Object_set_array  (struct CJSON_Object*, struct CJSON
 bool                 CJSON_Object_set_null   (struct CJSON_Object*, struct CJSON_Root*, const char *key);
 bool                 CJSON_Object_set_bool   (struct CJSON_Object*, struct CJSON_Root*, const char *key, bool);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

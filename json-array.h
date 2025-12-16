@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef CJSON_ARRAY_H
 #define CJSON_ARRAY_H
 
@@ -35,4 +39,8 @@ bool                 CJSON_Array_set_object (struct CJSON_Array*, struct CJSON_R
 bool                 CJSON_Array_set_null   (struct CJSON_Array*, struct CJSON_Root*, unsigned index);
 bool                 CJSON_Array_set_bool   (struct CJSON_Array*, struct CJSON_Root*, unsigned index, bool);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
