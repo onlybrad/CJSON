@@ -39,10 +39,10 @@ EXTERN_C CJSON_GET_RETURN_TYPE CJSON_GET_FUNCTION(const struct CJSON_Array *cons
     *success = true;
 
 #ifdef CJSON_GET_RETURN_PTR
-    return &ret->data.CJSON_GET_MEMBER;
+    return &ret->value.CJSON_GET_MEMBER;
 #undef CJSON_GET_RETURN_PTR
 #else
-    return ret->data.CJSON_GET_MEMBER;
+    return ret->value.CJSON_GET_MEMBER;
 #endif
 }
 

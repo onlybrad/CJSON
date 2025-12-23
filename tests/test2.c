@@ -14,10 +14,10 @@ int main(void) {
     }
 
     const unsigned long long start = usec_timestamp();
-    struct CJSON_Root root;
-    const bool success = CJSON_parse(&root, (const char*)buffer.data, buffer.size);
+    struct CJSON_Parser parser;
+    const bool success = CJSON_parse(&parser, (const char*)buffer.data, buffer.size);
     if(!success) {
-        fputs(CJSON_get_error(&root), stderr);
+        fputs(CJSON_get_error(&parser), stderr);
         CJSON_Buffer_free(&buffer);
         return EXIT_FAILURE;
     }
@@ -26,7 +26,7 @@ int main(void) {
     printf("Execution time: %llu\n", end - start);
 
     CJSON_Buffer_free(&buffer);
-    CJSON_free(&root);
+    CJSON_Parser_free(&parser);
     
 #ifndef NDEBUG
     const struct CJSON_AllocationStats *allocation_stats = CJSON_get_allocation_stats();

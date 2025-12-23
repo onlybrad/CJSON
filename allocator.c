@@ -67,6 +67,8 @@ const struct CJSON_AllocationStats *CJSON_get_allocation_stats(void) {
 #endif
 
 static struct CJSON_ArenaNode *CJSON_ArenaNode_new(const unsigned size) {
+    assert(size > 0);
+
     struct CJSON_ArenaNode *const node = (struct CJSON_ArenaNode *)CJSON_CALLOC(sizeof(*node) + (size_t)size, sizeof(unsigned char));
     if(node == NULL) {
         return NULL;
@@ -79,12 +81,59 @@ static struct CJSON_ArenaNode *CJSON_ArenaNode_new(const unsigned size) {
     return node;
 }
 
-EXTERN_C bool CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned size, const unsigned max_nodes, const char *const name) {
+static bool CJSON_Arena_create_next_node(struct CJSON_Arena *const arena, const unsigned size) {
+    assert(arena != NULL);
+    assert(size > 0);
+
+    unsigned node_size = arena->current->size;
+    if(node_size < size) {
+        if(node_size > UINT_MAX / 2U) {
+            node_size = size;
+        } else do {
+            node_size *= 2U;
+        } while(node_size < size);
+    }
+
+    struct CJSON_ArenaNode *const current = arena->current;
+    struct CJSON_ArenaNode *const next    = current->next;
+    if(next == NULL) {
+        if(arena->node_count == arena->node_max) {
+            return false;
+        }
+
+        if((current->next = CJSON_ArenaNode_new(node_size)) != NULL) {
+            arena->current = current->next;
+            arena->node_count++;
+            return true;
+        }
+
+        return false;
+    }
+
+    if(next->size < size) {
+        struct CJSON_ArenaNode *const next_next = next->next;
+        CJSON_FREE(next);
+
+        if((current->next = CJSON_ArenaNode_new(node_size)) != NULL) {
+            current->next->next = next_next;
+            arena->current      = current->next;
+            return true;
+        }
+
+        current->next = next_next;
+        arena->node_count--;
+        return false;
+    }
+
+    return true;
+}
+
+EXTERN_C bool CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned size, const unsigned node_max, const char *const name) {
     assert(arena != NULL);
     assert(size > 0);
 
     arena->node_count = 1U;
-    arena->max_nodes  = max_nodes;
+    arena->node_max   = node_max;
     arena->head       = CJSON_ArenaNode_new(size);
     arena->current    = arena->head;
 
@@ -101,7 +150,7 @@ EXTERN_C void CJSON_Arena_zero(struct CJSON_Arena *const arena) {
     assert(arena != NULL);
     
     arena->node_count  = 0U;
-    arena->max_nodes   = 0U;
+    arena->node_max   = 0U;
     arena->head        = NULL;
     arena->current     = NULL;
 #ifndef NDEBUG
@@ -113,7 +162,7 @@ EXTERN_C void CJSON_Arena_free(struct CJSON_Arena *const arena) {
     assert(arena != NULL);
 
     arena->current    = NULL;
-    arena->max_nodes  = CJSON_ARENA_INFINITE_NODES;
+    arena->node_max  = CJSON_ARENA_INFINITE_NODES;
     arena->node_count = 1U;
     
     struct CJSON_ArenaNode *current = arena->head;
@@ -146,34 +195,12 @@ EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned
     unsigned padding              = (unsigned)(aligned_address - start_address);
 
     if(arena->current->offset + padding + size > arena->current->size) {
-        struct CJSON_ArenaNode *next = arena->current->next;
-
-        if(next == NULL) {
-            if(arena->node_count == arena->max_nodes) {
-                return NULL;
-            }
-
-            unsigned node_size = arena->current->size;
-            if(node_size < size) {
-                if(node_size > UINT_MAX / 2U) {
-                    node_size = size;
-                } else do {
-                    node_size *= 2U;
-                } while(node_size < size);
-            } 
-
-            if((next = CJSON_ArenaNode_new(node_size)) == NULL) {
-                return NULL;
-            }
-
-            arena->node_count++;
-            arena->current->next = next;
+        if(!CJSON_Arena_create_next_node(arena, size)) {
+            return NULL;
         }
 
-        aligned_address = (uintptr_t)(CJSON_GET_DATA(next));
+        aligned_address = (uintptr_t)(CJSON_GET_DATA(arena->current));
         padding         = 0U;
-        next->offset    = 0U;
-        arena->current  = next;
     }
 
     arena->current->offset += padding + size;

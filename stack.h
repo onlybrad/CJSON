@@ -2,8 +2,10 @@
 extern "C" {
 #endif
 
-#ifndef CJSON_UNSAFESTACK_H
-#define CJSON_UNSAFESTACK_H
+#ifndef CJSON_STACK_H
+#define CJSON_STACK_H
+
+#define CJSON_STACK_MINIMUM_CAPACITY 8U
 
 #include <stdbool.h>
 
@@ -13,7 +15,7 @@ struct CJSON_Stack {
               capacity;
 };
 
-bool  CJSON_Stack_init(struct CJSON_Stack*, unsigned capacity);
+void  CJSON_Stack_init(struct CJSON_Stack*);
 void  CJSON_Stack_free(struct CJSON_Stack*);
 bool  CJSON_Stack_reserve(struct CJSON_Stack*, unsigned capacity);
 void *CJSON_Stack_peek(const struct CJSON_Stack*, bool *success);

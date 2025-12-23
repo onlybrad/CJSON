@@ -5,37 +5,27 @@
 
 #define CJSON_STACK_MINIMUM_CAPACITY 8U
 
-EXTERN_C bool CJSON_Stack_init(struct CJSON_Stack *const stack, const unsigned capacity) {
+EXTERN_C void CJSON_Stack_init(struct CJSON_Stack *const stack) {
     assert(stack != NULL);
 
     stack->count    = 0U;
-    stack->capacity = capacity;
+    stack->capacity = 0U;
     stack->data     = NULL;
-
-    if(capacity == 0U) {
-        stack->data = NULL;
-        return true;
-    }
-
-    if(!CJSON_Stack_reserve(stack, capacity)) {
-        stack->capacity = 0U;
-        return false;
-    }
-    
-    return true;
 }
 
 EXTERN_C void CJSON_Stack_free(struct CJSON_Stack *const stack) {
     assert(stack != NULL);
 
     CJSON_FREE(stack->data);
-    stack->data     = NULL;
-    stack->capacity = 0U;
-    stack->count    = 0U;
+    CJSON_Stack_init(stack);
 }
 
 EXTERN_C bool CJSON_Stack_reserve(struct CJSON_Stack *const stack, unsigned capacity) {
     assert(stack != NULL);
+
+    if(capacity < CJSON_STACK_MINIMUM_CAPACITY) {
+        capacity = CJSON_STACK_MINIMUM_CAPACITY;
+    }
 
     if(capacity <= stack->capacity) {
         return true;

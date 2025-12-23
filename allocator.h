@@ -29,7 +29,7 @@ struct CJSON_Arena {
     struct CJSON_ArenaNode *head,
                            *current;
     unsigned                node_count,
-                            max_nodes;
+                            node_max;
 #ifndef NDEBUG
     const char             *name;
 #endif
@@ -37,8 +37,8 @@ struct CJSON_Arena {
 
 #define CJSON_ARENA_ALLOC(ARENA, COUNT, TYPE) (TYPE*)CJSON_Arena_alloc(ARENA, (COUNT) * sizeof(TYPE), CJSON_ALIGNOF(TYPE))
 
-void  CJSON_Arena_zero(struct CJSON_Arena*);
-bool  CJSON_Arena_init  (struct CJSON_Arena*, unsigned size, unsigned max_nodes, const char *name);
+void  CJSON_Arena_zero  (struct CJSON_Arena*);
+bool  CJSON_Arena_init  (struct CJSON_Arena*, unsigned size, unsigned node_max, const char *name);
 void  CJSON_Arena_free  (struct CJSON_Arena*);
 void  CJSON_Arena_reset (struct CJSON_Arena*);
 void *CJSON_Arena_alloc (struct CJSON_Arena*, unsigned size, unsigned alignment);

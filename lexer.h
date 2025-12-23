@@ -18,14 +18,12 @@ enum CJSON_Lexer_Error {
 };
 
 struct CJSON_Lexer {
-    struct CJSON_Stack stack;
-    const char        *data;
-    unsigned           length,
-                       position;
+    const char *data;
+    unsigned    length,
+                position;
 };
 
 void CJSON_Lexer_init(struct CJSON_Lexer*, const char *data, unsigned length);
-void CJSON_Lexer_free(struct CJSON_Lexer*);
 enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer*, struct CJSON_Tokens*, struct CJSON_Token*);
 
 #endif

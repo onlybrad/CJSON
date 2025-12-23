@@ -3,8 +3,8 @@
 #include "lexer.h"
 #include "token.h"
 #include "util.h"
-#include "json-array.h"
-#include "json-object.h"
+#include "array.h"
+#include "object.h"
 
 static void CJSON_Lexer_skip_whitespace(struct CJSON_Lexer *const lexer) {
     assert(lexer != NULL);
@@ -231,7 +231,9 @@ static bool CJSON_Lexer_count_containers_elements(struct CJSON_Lexer *const lexe
     assert(lexer != NULL);
     assert(tokens != NULL);
 
-    if(!CJSON_Stack_reserve(&lexer->stack, tokens->counter.object + tokens->counter.array)) {
+    struct CJSON_Stack stack;
+    CJSON_Stack_init(&stack);
+    if(!CJSON_Stack_reserve(&stack, tokens->counter.object + tokens->counter.array)) {
         return false;
     }
 
@@ -244,13 +246,14 @@ static bool CJSON_Lexer_count_containers_elements(struct CJSON_Lexer *const lexe
         switch(token->type) {
         case CJSON_TOKEN_LCURLY:
         case CJSON_TOKEN_LBRACKET:
-            CJSON_Stack_unsafe_push(&lexer->stack, token);
+            CJSON_Stack_unsafe_push(&stack, token);
             continue;
             
         case CJSON_TOKEN_RCURLY:
         case CJSON_TOKEN_RBRACKET:
-            container = (struct CJSON_Token*)CJSON_Stack_pop(&lexer->stack, &success);
+            container = (struct CJSON_Token*)CJSON_Stack_pop(&stack, &success);
             if(!success) {
+                CJSON_Stack_free(&stack);
                 return false;
             }
 
@@ -264,8 +267,9 @@ static bool CJSON_Lexer_count_containers_elements(struct CJSON_Lexer *const lexe
             continue;
 
         case CJSON_TOKEN_COMMA:
-            container = (struct CJSON_Token*)CJSON_Stack_peek(&lexer->stack, &success);
+            container = (struct CJSON_Token*)CJSON_Stack_peek(&stack, &success);
             if(!success) {
+                CJSON_Stack_free(&stack);
                 return false;
             }
 
@@ -279,6 +283,7 @@ static bool CJSON_Lexer_count_containers_elements(struct CJSON_Lexer *const lexe
         }
     }
 
+    CJSON_Stack_free(&stack);
     return true;
 }
 
@@ -287,20 +292,8 @@ EXTERN_C void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *cons
     assert(data != NULL);
     assert(length > 0U);
 
-    CJSON_Stack_init(&lexer->stack, 0U);
-
     lexer->data     = data;
     lexer->length   = length;
-    lexer->position = 0U;
-}
-
-EXTERN_C void CJSON_Lexer_free(struct CJSON_Lexer *const lexer) {
-    assert(lexer != NULL);
-    
-    CJSON_Stack_free(&lexer->stack);
-
-    lexer->data     = NULL;
-    lexer->length   = 0U;
     lexer->position = 0U;
 }
 

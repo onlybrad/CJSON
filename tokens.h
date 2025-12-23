@@ -2,9 +2,10 @@
 extern "C" {
 #endif
 
-
 #ifndef CJSON_Tokens_H
 #define CJSON_Tokens_H
+
+#define CJSON_TOKENS_MINIMUM_CAPACITY 8U
 
 #include <stdbool.h>
 #include "token.h"
@@ -27,7 +28,8 @@ struct CJSON_Tokens {
              capacity;
 };
 
-bool CJSON_Tokens_init(struct CJSON_Tokens *tokens, unsigned capacity);
+void CJSON_Tokens_init(struct CJSON_Tokens *tokens);
+bool CJSON_Tokens_reserve(struct CJSON_Tokens *tokens, unsigned capacity);
 void CJSON_Tokens_free(struct CJSON_Tokens *tokens);
 struct CJSON_Token *CJSON_Tokens_next(struct CJSON_Tokens *tokens);
 

@@ -50,15 +50,15 @@ This will create a release build of the static library as cjson.a, link your pro
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
-    if(!CJSON_parse_file(&root, "path/to/file")) {
+    struct CJSON_Root parser;
+    if(!CJSON_parse_file(&parser, "path/to/file")) {
         return 1;
     }
 
     //...
 
     //call CJSON_free to deallocate all the resources used by the library
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -75,7 +75,7 @@ int main(void) {
         "\"key2\": \"value\""
     "}";
 
-    if(!CJSON_parse(&root, json_example, (unsigned)(sizeof(json_example)) - 1U)) {
+    if(!CJSON_parse(&parser, json_example, (unsigned)(sizeof(json_example)) - 1U)) {
         return 1;
     }
 
@@ -83,7 +83,7 @@ int main(void) {
 
     
     //call CJSON_free to deallocate all the resources used by the library
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -97,43 +97,43 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
-    switch(root.json->type) {
+    switch(parser.json->type) {
     case CJSON_OBJECT:
-        const struct CJSON_Object *const object = &root.json->data.object;
+        const struct CJSON_Object *const object = &parser.json->data.object;
         break;
     case CJSON_ARRAY:
-        const struct CJSON_Object *const array = &root.json->data.array;
+        const struct CJSON_Object *const array = &parser.json->data.array;
         break;
     case CJSON_STRING:
-        const struct CJSON_String *const string = &root.json->data.string;
+        const struct CJSON_String *const string = &parser.json->data.string;
         const char *const c_string   = string->chars;
         const unsigned length       = string->length;
         break;
     case CJSON_FLOAT64:
-        const double float64 = root.json->data.float64;
+        const double float64 = parser.json->data.float64;
         break;
     case CJSON_INT64:
-        const int64_t int64 = root.json->data.int64;
+        const int64_t int64 = parser.json->data.int64;
         break;
     case CJSON_UINT64:
-        const int64_t uint64 = root.json->data.uint64;
+        const int64_t uint64 = parser.json->data.uint64;
         break;
     case CJSON_BOOL:
-        const bool boolean = root.json->data.boolean;
+        const bool boolean = parser.json->data.boolean;
         break;
     case CJSON_NULL:
-        const void *const null = root.json->data.null;
+        const void *const null = parser.json->data.null;
         break;
     case CJSON_ERROR:
-        const enum CJSON_Error error = root.json->data.error;
+        const enum CJSON_Error error = parser.json->data.error;
         break;
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -159,18 +159,18 @@ example:
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
-    const struct CJSON *const my_value = CJSON_get(&root->json, ".key1.innerKey");
+    const struct CJSON *const my_value = CJSON_get(&parser->json, ".key1.innerKey");
     if(my_value != NULL) {
-        //if my_value is not NULL then the CJSON struct at the root has this form: {"key1": {"innerKey": my_value}}
+        //if my_value is not NULL then the CJSON struct at the parser has this form: {"key1": {"innerKey": my_value}}
         
         //...
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -194,15 +194,15 @@ Aailable functions:
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
     bool success;
-    const struct CJSON_Array *const my_array = CJSON_get_array(&root->json, ".someKey.innerKey", &success);
+    const struct CJSON_Array *const my_array = CJSON_get_array(&parser->json, ".someKey.innerKey", &success);
     if(success) {
         //if success is true
-        //   the CJSON struct at the root has this form: {"key1": {"innerKey": my_value}}
+        //   the CJSON struct at the parser has this form: {"key1": {"innerKey": my_value}}
         //   the type of the underlying CJSON struct is CJSON_ARRAY. my_array is not NULL.
 
         //...
@@ -211,7 +211,7 @@ int main(void) {
         //numerical types will be equal to 0, bool will be equal to false, null is always NULL
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -234,23 +234,23 @@ Available functions:
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
     struct CJSON_Array array;
-    CJSON_Array_init(&array, &root, 0U);
+    CJSON_Array_init(&array);
 
     //The CJSON_Array struct will be shallow copied by the CJSON_set_array function
-    //The root is now "[]"
-    CJSON_set_array(&root->json, &array);
+    //The parser is now "[]"
+    CJSON_set_array(&parser->json, &array);
 
-    //The root is now "true"
-    CJSON_set_bool(&root->json, true);
+    //The parser is now "true"
+    CJSON_set_bool(&parser->json, true);
     
     //..
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -265,10 +265,10 @@ use the CJSON_get_error function to get the error as a statically allocated c-st
 #include <stdio.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
-    if(!CJSON_parse(&root, "/some/path/to/file.json")) {
-        fputs(CJSON_get_error(&root), stderr);
+    if(!CJSON_parse(&parser, "/some/path/to/file.json")) {
+        fputs(CJSON_get_error(&parser), stderr);
         return 1;
     }
 
@@ -285,7 +285,7 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
@@ -298,7 +298,7 @@ int main(void) {
         //if some_value is not NULL then the CJSON_Object struct contains a key "some-key"
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -322,7 +322,7 @@ Available functions:
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
@@ -339,7 +339,7 @@ int main(void) {
         //numerical types will be equal to 0, bool will be equal to false, null is always NULL
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -350,7 +350,7 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
@@ -360,7 +360,7 @@ int main(void) {
 
     CJSON_Object_delete(object, "some-key");
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -372,7 +372,7 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
@@ -381,13 +381,13 @@ int main(void) {
 
     //...
 
-    if(CJSON_Object_set(object, &root, "some-key", some_value)) {
+    if(CJSON_Object_set(object, &parser, "some-key", some_value)) {
         //The CJSON struct value has been shallow copied into the internal data array
     } else {
         //this only happen if memory allocation fails when resizing the internal data array or copying the key
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -410,7 +410,7 @@ Available functions:
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
@@ -419,15 +419,15 @@ int main(void) {
     //...
 
     struct CJSON_Array array;
-    CJSON_Array_init(&array, &root, 0U);
+    CJSON_Array_init(&array);
 
-    if(CJSON_Object_set_array(object, &root, "some-key", &array)) {
+    if(CJSON_Object_set_array(object, &parser, "some-key", &array)) {
         //The CJSON_Array struct has been shallow copied into the internal data array
     } else {
         //this only happen if memory allocation fails when resizing the internal data array or copying the key
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -441,7 +441,7 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
@@ -454,7 +454,7 @@ int main(void) {
         //if some_value is not NULL then the CJSON_Array struct has a value at index 10.
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -478,7 +478,7 @@ Available functions:
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
@@ -495,7 +495,7 @@ int main(void) {
         //numerical types will be equal to 0, bool will be equal to false, null is always NULL
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -509,7 +509,7 @@ use the "count" member to access the length of the CJSON_Array struct, and "valu
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
@@ -523,7 +523,7 @@ int main(void) {
         //...
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -537,7 +537,7 @@ If the index is greater than the length of the array, all CJSON struct values be
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
@@ -546,13 +546,13 @@ int main(void) {
 
     //...
 
-    if(CJSON_Array_set(array, &root, 10U, some_value)) {
+    if(CJSON_Array_set(array, &parser, 10U, some_value)) {
         //The CJSON struct value has been shallow copied into the internal data array at index 10
     } else {
         //this only happen if memory allocation fails when resizing the internal data array
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -577,7 +577,7 @@ Available functions:
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
@@ -586,15 +586,15 @@ int main(void) {
     //...
 
     struct CJSON_Object object;
-    CJSON_Object_init(&object, &root, 0U);
+    CJSON_Object_init(&object);
 
-    if(CJSON_Array_set_object(array, &root, 10U, &object)) {
+    if(CJSON_Array_set_object(array, &parser, 10U, &object)) {
         //The CJSON_Object struct has been shallow copied into the internal data array at index 10
     } else {
         //this only happen if memory allocation fails when resizing the internal data array
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
@@ -606,7 +606,7 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root root;
+    struct CJSON_Root parser;
 
     //...
 
@@ -617,13 +617,13 @@ int main(void) {
     struct CJSON number;
     CJSON_set_uint64(&number, 1024U);
 
-    if(CJSON_Array_push(array, &root, &number)) {
+    if(CJSON_Array_push(array, &parser, &number)) {
         //The CJSON_Object struct has been shallow copied into the internal data array and is the last element of the CJSON_Array struct
     } else {
         //this only happen if memory allocation fails when resizing the internal data array
     }
 
-    CJSON_free(&root);
+    CJSON_free(&parser);
 
     return 0;
 }
