@@ -128,14 +128,13 @@ static bool CJSON_Arena_create_next_node(struct CJSON_Arena *const arena, const 
     return true;
 }
 
-EXTERN_C bool CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned size, const unsigned node_max, const char *const name) {
+EXTERN_C void CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned node_max, const char *const name) {
     assert(arena != NULL);
-    assert(size > 0);
 
-    arena->node_count = 1U;
+    arena->node_count = 0U;
     arena->node_max   = node_max;
-    arena->head       = CJSON_ArenaNode_new(size);
-    arena->current    = arena->head;
+    arena->head       = NULL;
+    arena->current    = NULL;
 
 #ifndef NDEBUG
     arena->name = name;
@@ -143,27 +142,31 @@ EXTERN_C bool CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned s
     (void)name;
 #endif
 
-    return arena->head != NULL;
 }
 
-EXTERN_C void CJSON_Arena_zero(struct CJSON_Arena *const arena) {
+EXTERN_C bool CJSON_Arena_create_node(struct CJSON_Arena *const arena, unsigned size) {
     assert(arena != NULL);
-    
-    arena->node_count  = 0U;
-    arena->node_max   = 0U;
-    arena->head        = NULL;
-    arena->current     = NULL;
-#ifndef NDEBUG
-    arena->name        = NULL;
-#endif
+    assert(size > 0U);
+
+    if(arena->head != NULL) {
+        return true;
+    }
+
+    if(size < CJSON_ARENA_MINIMUM_SIZE) {
+        size = CJSON_ARENA_MINIMUM_SIZE;
+    }
+
+    arena->current = arena->head = CJSON_ArenaNode_new(size);
+
+    if(arena->head != NULL) {
+        arena->node_count = 1U;
+    }
+
+    return arena->head != NULL;
 }
 
 EXTERN_C void CJSON_Arena_free(struct CJSON_Arena *const arena) {
     assert(arena != NULL);
-
-    arena->current    = NULL;
-    arena->node_max  = CJSON_ARENA_INFINITE_NODES;
-    arena->node_count = 1U;
     
     struct CJSON_ArenaNode *current = arena->head;
     arena->head = NULL;
@@ -172,6 +175,12 @@ EXTERN_C void CJSON_Arena_free(struct CJSON_Arena *const arena) {
         CJSON_FREE(current);
         current = next;
     }
+
+#ifndef NDEBUG
+    CJSON_Arena_init(arena, arena->node_max, arena->name);
+#else
+    CJSON_Arena_init(arena, arena->node_max, NULL);
+#endif
 }
 
 EXTERN_C void CJSON_Arena_reset(struct CJSON_Arena *const arena) {
@@ -189,6 +198,8 @@ EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned
     if(alignment == 0) {
         alignment = CJSON_ALIGNOF(uintmax_t);
     }
+
+    CJSON_Arena_create_node(arena, size);
 
     const uintptr_t start_address = (uintptr_t)(CJSON_GET_DATA(arena->current) + arena->current->offset);
     uintptr_t aligned_address     = (start_address + ((uintptr_t)alignment - 1U)) & ~((uintptr_t)alignment - 1U);

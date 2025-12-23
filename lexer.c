@@ -227,8 +227,7 @@ static void CJSON_Lexer_read_invalid_token(struct CJSON_Lexer *const lexer, stru
     token->length = i - position - 1U;
 }
 
-static bool CJSON_Lexer_count_containers_elements(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens) {
-    assert(lexer != NULL);
+static bool CJSON_count_containers_elements(struct CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
     struct CJSON_Stack stack;
@@ -306,7 +305,7 @@ EXTERN_C enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer *const l
     if(lexer->position == lexer->length) {
         token->type = CJSON_TOKEN_DONE;
         token->length = 0U;
-        return CJSON_Lexer_count_containers_elements(lexer, tokens) 
+        return CJSON_count_containers_elements(tokens) 
             ? CJSON_LEXER_ERROR_DONE
             : CJSON_LEXER_ERROR_MEMORY;
     }

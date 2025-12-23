@@ -9,6 +9,7 @@ extern "C" {
 #include <stdlib.h>
 
 #define CJSON_ARENA_INFINITE_NODES 0U
+#define CJSON_ARENA_MINIMUM_SIZE   1024U
 
 #if defined(__GNUC__) || defined(__clang__)
 #   define CJSON_ALIGNOF(T) __alignof__(T)
@@ -37,12 +38,12 @@ struct CJSON_Arena {
 
 #define CJSON_ARENA_ALLOC(ARENA, COUNT, TYPE) (TYPE*)CJSON_Arena_alloc(ARENA, (COUNT) * sizeof(TYPE), CJSON_ALIGNOF(TYPE))
 
-void  CJSON_Arena_zero  (struct CJSON_Arena*);
-bool  CJSON_Arena_init  (struct CJSON_Arena*, unsigned size, unsigned node_max, const char *name);
-void  CJSON_Arena_free  (struct CJSON_Arena*);
-void  CJSON_Arena_reset (struct CJSON_Arena*);
-void *CJSON_Arena_alloc (struct CJSON_Arena*, unsigned size, unsigned alignment);
-char *CJSON_Arena_strdup(struct CJSON_Arena*, const char *str, unsigned *length);
+void  CJSON_Arena_init       (struct CJSON_Arena*, unsigned node_max, const char *name);
+bool  CJSON_Arena_create_node(struct CJSON_Arena*, unsigned size);
+void  CJSON_Arena_free       (struct CJSON_Arena*);
+void  CJSON_Arena_reset      (struct CJSON_Arena*);
+void *CJSON_Arena_alloc      (struct CJSON_Arena*, unsigned size, unsigned alignment);
+char *CJSON_Arena_strdup     (struct CJSON_Arena*, const char *str, unsigned *length);
 
 #ifndef NDEBUG
 

@@ -426,7 +426,7 @@ static void test_duplicate_keys(void) {
 static void test_create_string(void) {
     const char *const value = "test";
     struct CJSON_Parser parser;
-    CJSON_Parser_init(&parser);
+    assert(CJSON_Parser_init(&parser));
     CJSON_set_string(&parser.json, &parser, value);
     assert(parser.json.type == CJSON_STRING);
     assert(strcmp(parser.json.value.string.chars, value) == 0);
@@ -437,34 +437,34 @@ static void test_create_string(void) {
 static void test_create_primitives(void) {
     const int64_t value1 = -25000000000LL;
     struct CJSON_Parser parser;
-    CJSON_Parser_init(&parser);
+    assert(CJSON_Parser_init(&parser));
     CJSON_set_int64(&parser.json, value1);
     assert(parser.json.type == CJSON_INT64);
     assert(parser.json.value.int64 == value1);
     CJSON_Parser_free(&parser);
 
-    CJSON_Parser_init(&parser);
+    assert(CJSON_Parser_init(&parser));
     const uint64_t value2 = 25000000000ULL;
     CJSON_set_uint64(&parser.json, value2);
     assert(parser.json.type == CJSON_UINT64);
     assert(parser.json.value.uint64 == value2);
     CJSON_Parser_free(&parser);
 
-    CJSON_Parser_init(&parser);
+    assert(CJSON_Parser_init(&parser));
     const double value3 = 25000000000.50;
     CJSON_set_float64(&parser.json, value3);
     assert(parser.json.type == CJSON_FLOAT64);
     assert(parser.json.value.float64 == value3);
     CJSON_Parser_free(&parser);
 
-    CJSON_Parser_init(&parser);
+    assert(CJSON_Parser_init(&parser));
     const bool value4 = true;
     CJSON_set_bool(&parser.json, value4);
     assert(parser.json.type == CJSON_BOOL);
     assert(parser.json.value.boolean);
     CJSON_Parser_free(&parser);
 
-    CJSON_Parser_init(&parser);
+    assert(CJSON_Parser_init(&parser));
     CJSON_set_null(&parser.json);
     assert(parser.json.type == CJSON_NULL);
     assert(parser.json.value.null == NULL);
@@ -473,7 +473,7 @@ static void test_create_primitives(void) {
 
 static void test_create_array(void) {
     struct CJSON_Parser parser;
-    CJSON_Parser_init(&parser);
+    assert(CJSON_Parser_init(&parser));
     struct CJSON_Array *const array1 = CJSON_make_array(&parser.json, &parser);
     assert(parser.json.type == CJSON_ARRAY);
     assert(&parser.json.value.array == array1);
@@ -504,7 +504,7 @@ static void test_create_array(void) {
 
 static void test_create_object(void) {
     struct CJSON_Parser parser;
-    CJSON_Parser_init(&parser);
+    assert(CJSON_Parser_init(&parser));
     struct CJSON_Object *const object1 = CJSON_make_object(&parser.json, &parser);
     assert(parser.json.type == CJSON_OBJECT);
     assert(&parser.json.value.object == object1);
