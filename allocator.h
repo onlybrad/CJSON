@@ -43,6 +43,7 @@ bool  CJSON_Arena_create_node(struct CJSON_Arena*, unsigned size);
 void  CJSON_Arena_free       (struct CJSON_Arena*);
 void  CJSON_Arena_reset      (struct CJSON_Arena*);
 void *CJSON_Arena_alloc      (struct CJSON_Arena*, unsigned size, unsigned alignment);
+bool  CJSON_Arena_reserve    (struct CJSON_Arena*, unsigned size, unsigned alignment);
 char *CJSON_Arena_strdup     (struct CJSON_Arena*, const char *str, unsigned *length);
 
 #ifndef NDEBUG

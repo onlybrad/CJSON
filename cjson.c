@@ -451,6 +451,25 @@ static bool CJSON_parse_tokens(struct CJSON_Parser *const parser, struct CJSON *
     return false;
 }
 
+static bool CJSON_reserve_arenas(struct CJSON_Parser *const parser, const unsigned sizes[3]) {
+    assert(parser != NULL);
+    assert(sizes != NULL);
+
+    if(!CJSON_Arena_reserve(&parser->object_arena, sizes[0], CJSON_ALIGNOF(struct CJSON_KV))) {
+        return false;
+    }
+
+    if(!CJSON_Arena_reserve(&parser->array_arena, sizes[1], CJSON_ALIGNOF(struct CJSON))) {
+        return false;
+    }
+
+    if(!CJSON_Arena_reserve(&parser->string_arena, sizes[2], CJSON_ALIGNOF(char))) {
+        return false;
+    }
+
+    return true;
+}
+
 static bool CJSON_init_arenas(struct CJSON_Parser *const parser, const unsigned sizes[3]) {
     assert(parser != NULL);
     assert(sizes != NULL);
@@ -584,7 +603,14 @@ EXTERN_C bool CJSON_parse(struct CJSON_Parser *const parser, const char *const d
         parser->tokens.counter.array_elements  * (unsigned)sizeof(struct CJSON),
         parser->tokens.counter.chars           * (unsigned)sizeof(char)
     };
-    if(!CJSON_init_arenas(parser, arena_sizes)) {
+
+    if(parser->object_arena.head != NULL) {
+        if(!CJSON_reserve_arenas(parser, arena_sizes)) {
+            parser->json.value.error = CJSON_ERROR_MEMORY;
+            parser->json.type        = CJSON_ERROR;
+            return false;
+        }
+    } else if(!CJSON_init_arenas(parser, arena_sizes)) {
         parser->json.value.error = CJSON_ERROR_MEMORY;
         parser->json.type        = CJSON_ERROR;
         return false;

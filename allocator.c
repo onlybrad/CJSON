@@ -199,7 +199,9 @@ EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned
         alignment = CJSON_ALIGNOF(uintmax_t);
     }
 
-    CJSON_Arena_create_node(arena, size);
+    if(!CJSON_Arena_create_node(arena, size)) {
+        return NULL;
+    }
 
     const uintptr_t start_address = (uintptr_t)(CJSON_GET_DATA(arena->current) + arena->current->offset);
     uintptr_t aligned_address     = (start_address + ((uintptr_t)alignment - 1U)) & ~((uintptr_t)alignment - 1U);
@@ -217,6 +219,32 @@ EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned
     arena->current->offset += padding + size;
     return (void*)aligned_address;
 }
+
+bool CJSON_Arena_reserve(struct CJSON_Arena *const arena, const unsigned size, unsigned alignment) {
+    assert(arena != NULL);
+    assert(size > 0U);
+    assert((alignment & (alignment - 1U)) == 0U);
+
+    
+    if(alignment == 0) {
+        alignment = CJSON_ALIGNOF(uintmax_t);
+    }
+
+    if(!CJSON_Arena_create_node(arena, size)) {
+        return NULL;
+    }
+
+    const uintptr_t start_address = (uintptr_t)(CJSON_GET_DATA(arena->current) + arena->current->offset);
+    uintptr_t aligned_address     = (start_address + ((uintptr_t)alignment - 1U)) & ~((uintptr_t)alignment - 1U);
+    unsigned padding              = (unsigned)(aligned_address - start_address);
+
+    if(arena->current->offset + padding + size <= arena->current->size) {
+        return true;
+    }
+
+    return CJSON_Arena_create_next_node(arena, size);
+}
+
 
 EXTERN_C char *CJSON_Arena_strdup(struct CJSON_Arena *const arena, const char *const str, unsigned *const length) {
     assert(arena != NULL);
