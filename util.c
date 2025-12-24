@@ -1,5 +1,8 @@
 #include "util.h"
 
+#if defined(__MINGW32__) || !defined(_WIN32)
+    #include <sys/time.h>
+#endif
 #ifdef _WIN32
     #include <windows.h>
 #else
@@ -304,7 +307,11 @@ EXTERN_C enum CJSON_UtilError file_get_contents(const char *const path, struct C
 }
 
 EXTERN_C unsigned long long usec_timestamp(void) {
-#ifdef _WIN32
+#if defined(__MINGW32__) || !defined(_WIN32)
+    struct timeval current_time;
+    gettimeofday(&current_time, NULL);
+    return (unsigned long long)(current_time.tv_sec * 1000000L + current_time.tv_usec);
+#elif defined(_WIN32)
     FILETIME ft;
     GetSystemTimeAsFileTime(&ft);
     unsigned long long tt = ft.dwHighDateTime;
@@ -314,8 +321,7 @@ EXTERN_C unsigned long long usec_timestamp(void) {
     tt -= 11644473600000000ULL;
     return tt;
 #else
-    struct timeval current_time;
-    gettimeofday(&current_time, NULL);
-    return (unsigned long long)(current_time.tv_sec * 1000000L + current_time.tv_usec);
+    #error "Unknown platform. Missing implementation for usec_timestamp."
+
 #endif
 }
