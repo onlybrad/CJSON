@@ -1,3 +1,5 @@
+#include "util.h"
+
 #ifdef _WIN32
     #include <windows.h>
 #else
@@ -7,52 +9,29 @@
 #include <errno.h>
 #include <assert.h>
 #include <string.h>
-#include "util.h"
+
 #include "allocator.h"
 
-EXTERN_C unsigned next_power_of_2(unsigned num) {
-    if (num == 0U) {
-        return 1U;
-    }
-
-    num--;
-    num |= num >> 1U;
-    num |= num >> 2U;
-    num |= num >> 4U;
-    num |= num >> 8U;
-    num |= num >> 16U;
-
-    return num + 1;
+static int CJSON_fseek(FILE *const file, const int64_t offset, const int origin) {
+#ifdef _WIN32
+    return _fseeki64(file, (__int64)offset, origin);
+#elif LONG_MAX < LLONG_MAX
+    return fseeko(file, (off_t)offset, origin);
+#else
+    return fseek(file, (long)offset, origin);
+#endif
 }
 
-EXTERN_C unsigned previous_power_of_2(unsigned num) {
-    if (num == 0U) {
-        return 1U;
-    }
-
-    num  |= num >> 1U;
-    num  |= num >> 2U;
-    num  |= num >> 4U;
-    num  |= num >> 8U;
-    num  |= num >> 16U;
-    
-    return num - (num >> 1U);
+static int64_t CJSON_ftell(FILE *const file) {
+#ifdef _WIN32
+    return (int64_t)_ftelli64(file);
+#elif LONG_MAX < LLONG_MAX
+    return (int64_t)ftello(file);
+#else
+    return (int64_t)ftell(file);
+#endif    
 }
 
-EXTERN_C unsigned closest_power_of_2(unsigned num) {
-    if(num == 0U) {
-        return 1U;
-    }
-
-    const unsigned up   = next_power_of_2(num);
-    const unsigned down = previous_power_of_2(num);
-
-    if(num - down < up - num) {
-        return down;
-    }
-
-    return up;
-}
 
 EXTERN_C bool is_whitespace(const char c) {
     switch(c) {
@@ -245,7 +224,7 @@ EXTERN_C void CJSON_Buffer_free(struct CJSON_Buffer *const buffer) {
 
 EXTERN_C enum CJSON_UtilError file_get_contents(const char *const path, struct CJSON_Buffer *const buffer) {
     assert(path != NULL);
-    assert(strlen(path) > 0);
+    assert(path[0] != '\0');
 
     buffer->data = NULL;
     buffer->size = 0U;
@@ -270,7 +249,7 @@ EXTERN_C enum CJSON_UtilError file_get_contents(const char *const path, struct C
     FILE *const file = fopen(path, "rb");
 #endif
     enum CJSON_UtilError error;
-    long length;
+    int64_t length;
 
     do {
         if(file == NULL) {
@@ -278,13 +257,13 @@ EXTERN_C enum CJSON_UtilError file_get_contents(const char *const path, struct C
             break;
         }
 
-        if(fseek(file, 0, SEEK_END) != 0) {
+        if(CJSON_fseek(file, 0, SEEK_END) != 0) {
             error = CJSON_UTIL_ERROR_FSEEK;
             break;
         }
 
-        length = ftell(file);
-        if(length == -1L) {
+        length = CJSON_ftell(file);
+        if(length == -1) {
             error = CJSON_UTIL_ERROR_FTELL;
             break;
         }
@@ -294,7 +273,7 @@ EXTERN_C enum CJSON_UtilError file_get_contents(const char *const path, struct C
             break;
         }
 
-        if(fseek(file, 0, SEEK_SET) != 0) {
+        if(CJSON_fseek(file, 0, SEEK_SET) != 0) {
             error = CJSON_UTIL_ERROR_FSEEK;
             break;
         }

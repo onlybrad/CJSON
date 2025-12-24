@@ -5,6 +5,11 @@ extern "C" {
 #ifndef CJSON_UTIL_H
 #define CJSON_UTIL_H
 
+#ifndef _WIN32
+    #define _FILE_OFFSET_BITS 64
+    #include <unistd.h>
+#endif
+
 enum CJSON_UtilError {
     CJSON_UTIL_ERROR_NONE,
     CJSON_UTIL_ERROR_WIN32API,
@@ -56,9 +61,6 @@ struct CJSON_Buffer {
 
 #define UNSIGNED_MAX_LENGTH 10U
 
-unsigned           next_power_of_2     (unsigned num);
-unsigned           previous_power_of_2 (unsigned num);
-unsigned           closest_power_of_2  (unsigned num);
 bool               is_whitespace       (char c);
 bool               is_delimiter        (char c);
 bool               is_digit            (char c);
