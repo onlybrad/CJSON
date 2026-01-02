@@ -50,7 +50,9 @@ This will create a release build of the static library as cjson.a, link your pro
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
+    struct CJSON_Parser parser;
+    //call CJSON_parse_init to initialize the struct in a valid state for parsing
+    CJSON_parse_init(&parser);
     if(!CJSON_parse_file(&parser, "path/to/file")) {
         return 1;
     }
@@ -75,6 +77,8 @@ int main(void) {
         "\"key2\": \"value\""
     "}";
 
+    struct CJSON_Parser parser;
+    CJSON_parse_init(&parser);
     if(!CJSON_parse(&parser, json_example, (unsigned)(sizeof(json_example)) - 1U)) {
         return 1;
     }
@@ -97,8 +101,6 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     switch(parser.json->type) {
@@ -159,8 +161,6 @@ example:
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     const struct CJSON *const my_value = CJSON_get(&parser->json, ".key1.innerKey");
@@ -188,14 +188,11 @@ Aailable functions:
 - CJSON_get_uint64  => uint64_t
 - CJSON_get_bool    => bool
 - CJSON_get_null    => void* (NULL) 
-**(this function should not be used, it always returns NULL. This function only exist to make the API consistant. use CJSON_get then verify the type of the returning CJSON struct if you want to make sure a value is really null)**
 
 ```c
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     bool success;
@@ -234,8 +231,6 @@ Available functions:
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON_Array array;
@@ -265,7 +260,7 @@ use the CJSON_get_error function to get the error as a statically allocated c-st
 #include <stdio.h>
 
 int main(void) {
-    struct CJSON_Root parser;
+    struct CJSON_Parser parser;
 
     if(!CJSON_parse(&parser, "/some/path/to/file.json")) {
         fputs(CJSON_get_error(&parser), stderr);
@@ -285,8 +280,6 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON_Object *object;
@@ -316,14 +309,11 @@ Available functions:
 - CJSON_Object_get_array   => struct CJSON_Array*
 - CJSON_Object_get_bool    => bool
 - CJSON_Object_get_null    => void*
-**(this function should not be used, it always returns NULL. This function only exist to make the API consistant. use CJSON_Object_get then verify the type of the returning CJSON struct if you want to make sure a value is really null)**
 
 ```c
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON_Object *object;
@@ -350,8 +340,6 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON_Object *object;
@@ -372,8 +360,6 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON        *some_value;
@@ -410,8 +396,6 @@ Available functions:
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON_Object *object;
@@ -441,8 +425,6 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON_Array *array;
@@ -472,14 +454,11 @@ Available functions:
 - CJSON_Array_get_array   => struct CJSON_Array*
 - CJSON_Array_get_bool    => bool
 - CJSON_Array_get_null    => void*
-**(this function should not be used, it always returns NULL. This function only exist to make the API consistant. use CJSON_Array_get then verify the type of the returning CJSON struct if you want to make sure a value is really null)**
 
 ```c
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON_Array *array;
@@ -509,8 +488,6 @@ use the "count" member to access the length of the CJSON_Array struct, and "valu
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON_Array *array;
@@ -537,8 +514,6 @@ If the index is greater than the length of the array, all CJSON struct values be
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON       *some_value;
@@ -577,8 +552,6 @@ Available functions:
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON_Array *array;
@@ -606,8 +579,6 @@ int main(void) {
 #include <cjson.h>
 
 int main(void) {
-    struct CJSON_Root parser;
-
     //...
 
     struct CJSON_Array *array;

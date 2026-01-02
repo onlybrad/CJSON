@@ -13,17 +13,6 @@ extern "C" {
 struct CJSON_Tokens {
     struct CJSON_Token *data,
                        *current_token;
-    struct CJSON_Token_Stats {
-        unsigned string,
-                 number,
-                 array,
-                 object,
-                 keyword,
-                 comma,
-                 chars,
-                 array_elements,
-                 object_elements;
-    } counter;
     unsigned count,
              capacity;
 };

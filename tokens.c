@@ -8,19 +8,10 @@
 EXTERN_C void CJSON_Tokens_init(struct CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
-    tokens->data                      = NULL;
-    tokens->current_token             = NULL;
-    tokens->counter.object            = 0U;
-    tokens->counter.array             = 0U;
-    tokens->counter.number            = 0U;
-    tokens->counter.string            = 0U;
-    tokens->counter.keyword           = 0U;
-    tokens->counter.chars             = 0U;
-    tokens->counter.comma             = 0U;
-    tokens->counter.object_elements   = 0U;
-    tokens->counter.array_elements    = 0U;
-    tokens->capacity                  = 0U;
-    tokens->count                     = 0U;
+    tokens->data          = NULL;
+    tokens->current_token = NULL;
+    tokens->capacity      = 0U;
+    tokens->count         = 0U;
 }
 
 EXTERN_C bool CJSON_Tokens_reserve(struct CJSON_Tokens *const tokens, unsigned capacity) {

@@ -15,8 +15,8 @@ int main(void) {
 
     const unsigned long long start = usec_timestamp();
     struct CJSON_Parser parser;
-    const bool success = CJSON_parse(&parser, (const char*)buffer.data, buffer.size);
-    if(!success) {
+    CJSON_parse_init(&parser);
+    if(!CJSON_parse(&parser, (const char*)buffer.data, buffer.size)) {
         fputs(CJSON_get_error(&parser), stderr);
         CJSON_Buffer_free(&buffer);
         return EXIT_FAILURE;
@@ -26,7 +26,7 @@ int main(void) {
     printf("Execution time: %llu\n", end - start);
 
     CJSON_Buffer_free(&buffer);
-    CJSON_Parser_free(&parser);
+    CJSON_free(&parser);
     
 #ifndef NDEBUG
     const struct CJSON_AllocationStats *allocation_stats = CJSON_get_allocation_stats();

@@ -64,6 +64,17 @@ struct CJSON {
 };
 
 struct CJSON_Parser {
+    struct CJSON_Counters {
+        unsigned string,
+                 number,
+                 array,
+                 object,
+                 keyword,
+                 comma,
+                 chars,
+                 array_elements,
+                 object_elements;
+    } counters;
     struct CJSON        json;
     struct CJSON_Tokens tokens;
     struct CJSON_Arena  array_arena,
@@ -76,10 +87,11 @@ struct CJSON_KV {
     struct CJSON value;
 };
 
-bool CJSON_Parser_init(struct CJSON_Parser*);
-void CJSON_Parser_free(struct CJSON_Parser*);
-bool CJSON_parse      (struct CJSON_Parser*, const char *data, unsigned length);
-bool CJSON_parse_file (struct CJSON_Parser*, const char *path);
+bool CJSON_empty_init(struct CJSON_Parser*);
+void CJSON_free      (struct CJSON_Parser*);
+void CJSON_parse_init(struct CJSON_Parser*);
+bool CJSON_parse     (struct CJSON_Parser*, const char *data, unsigned length);
+bool CJSON_parse_file(struct CJSON_Parser*, const char *path);
 
 struct CJSON_Array  *CJSON_make_array   (struct CJSON*, struct CJSON_Parser*);
 struct CJSON_Object *CJSON_make_object  (struct CJSON*, struct CJSON_Parser*);

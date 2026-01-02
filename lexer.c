@@ -3,6 +3,7 @@
 #include "lexer.h"
 #include "token.h"
 #include "util.h"
+#include "cjson.h"
 #include "array.h"
 #include "object.h"
 
@@ -227,18 +228,18 @@ static void CJSON_Lexer_read_invalid_token(struct CJSON_Lexer *const lexer, stru
     token->length = i - position - 1U;
 }
 
-static bool CJSON_count_containers_elements(struct CJSON_Tokens *const tokens) {
-    assert(tokens != NULL);
+static bool CJSON_count_containers_elements(struct CJSON_Parser *const parser) {
+    assert(parser != NULL);
 
     struct CJSON_Stack stack;
     CJSON_Stack_init(&stack);
-    if(!CJSON_Stack_reserve(&stack, tokens->counter.object + tokens->counter.array)) {
+    if(!CJSON_Stack_reserve(&stack, parser->counters.object + parser->counters.array)) {
         return false;
     }
 
     bool success;
-    const struct CJSON_Token *const last_token = tokens->data + tokens->count - 1;
-    for(struct CJSON_Token *token = tokens->data, *container;
+    const struct CJSON_Token *const last_token = parser->tokens.data + parser->tokens.count - 1;
+    for(struct CJSON_Token *token = parser->tokens.data, *container;
         token != last_token + 1; 
         token++
     ) {
@@ -258,9 +259,9 @@ static bool CJSON_count_containers_elements(struct CJSON_Tokens *const tokens) {
 
             assert(container->type == CJSON_TOKEN_LCURLY || container->type == CJSON_TOKEN_LBRACKET);
             if(container->type == CJSON_TOKEN_LCURLY) {
-                tokens->counter.object_elements += MAX(container->length, CJSON_OBJECT_MINIMUM_CAPACITY);
+                parser->counters.object_elements += MAX(container->length, CJSON_OBJECT_MINIMUM_CAPACITY);
             } else {
-                tokens->counter.array_elements += MAX(container->length, CJSON_ARRAY_MINIMUM_CAPACITY);
+                parser->counters.array_elements += MAX(container->length, CJSON_ARRAY_MINIMUM_CAPACITY);
             }
 
             continue;
@@ -296,90 +297,97 @@ EXTERN_C void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *cons
     lexer->position = 0U;
 }
 
-EXTERN_C enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens, struct CJSON_Token *const token) {
+EXTERN_C enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Parser *const parser) {
     assert(lexer != NULL);
-    assert(token != NULL);
+    assert(parser != NULL);
 
-    CJSON_Lexer_skip_whitespace(lexer);
+    while(lexer->position < lexer->length) {
+        CJSON_Lexer_skip_whitespace(lexer);
 
-    if(lexer->position == lexer->length) {
-        token->type = CJSON_TOKEN_DONE;
-        token->length = 0U;
-        return CJSON_count_containers_elements(tokens) 
-            ? CJSON_LEXER_ERROR_DONE
-            : CJSON_LEXER_ERROR_MEMORY;
-    }
-    
-    token->value = lexer->data + lexer->position;
-    
-    switch(*token->value) {
-    case '{':
-        token->length = 1U;
-        token->type   = CJSON_TOKEN_LCURLY;
-        break;
-    case '}':
-        token->length = 1U;
-        token->type   = CJSON_TOKEN_RCURLY;
-        tokens->counter.object++;
-        break;
-    case '[':
-        token->length = 1U;
-        token->type   = CJSON_TOKEN_LBRACKET;
-        break;
-    case ']':
-        token->length = 1U;
-        token->type   = CJSON_TOKEN_RBRACKET;
-        tokens->counter.array++;
-        break;
-    case ':':
-        token->length = 1U;
-        token->type   = CJSON_TOKEN_COLON;
-        break;
-    case ',': {
-        token->length = 1U;
-        token->type   = CJSON_TOKEN_COMMA;
-        tokens->counter.comma++;
-        break;
-    }
-    case '"': {
-        if(!CJSON_Lexer_read_string(lexer, token)) {
-            return CJSON_LEXER_ERROR_TOKEN;
+        struct CJSON_Token *token = CJSON_Tokens_next(&parser->tokens);
+        if(token == NULL) {
+            return CJSON_LEXER_ERROR_MEMORY;
         }
-        assert(token->length >= 2U);
-        tokens->counter.string++;
-        tokens->counter.chars += token->length - 1U;
-        break;
-    }
-    case '-':
-    case '0':
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9': {
-        if(!CJSON_Lexer_read_number(lexer, token)) {
-             return CJSON_LEXER_ERROR_TOKEN;
-        }
-        assert(token->length >= 1U);
-        tokens->counter.number++;
-        break;
-    }
-    default: {
-        if(!CJSON_Lexer_read_keyword(lexer, token)) {
-            CJSON_Lexer_read_invalid_token(lexer, token);
-            return CJSON_LEXER_ERROR_TOKEN;
-        }
-        assert(token->length >= 4U);
-        tokens->counter.keyword++;
-        break;
-    }
-    }
-    
-    lexer->position += token->length;
 
-    return CJSON_LEXER_ERROR_NONE;
+        token->value = lexer->data + lexer->position;
+        switch(*token->value) {
+        case '{':
+            token->length = 1U;
+            token->type   = CJSON_TOKEN_LCURLY;
+            break;
+        case '}':
+            token->length = 1U;
+            token->type   = CJSON_TOKEN_RCURLY;
+            parser->counters.object++;
+            break;
+        case '[':
+            token->length = 1U;
+            token->type   = CJSON_TOKEN_LBRACKET;
+            break;
+        case ']':
+            token->length = 1U;
+            token->type   = CJSON_TOKEN_RBRACKET;
+            parser->counters.array++;
+            break;
+        case ':':
+            token->length = 1U;
+            token->type   = CJSON_TOKEN_COLON;
+            break;
+        case ',': {
+            token->length = 1U;
+            token->type   = CJSON_TOKEN_COMMA;
+            parser->counters.comma++;
+            break;
+        }
+        case '"': {
+            if(!CJSON_Lexer_read_string(lexer, token)) {
+                return CJSON_LEXER_ERROR_TOKEN;
+            }
+            assert(token->length >= 2U);
+            parser->counters.string++;
+            parser->counters.chars += token->length - 1U;
+            break;
+        }
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9': {
+            if(!CJSON_Lexer_read_number(lexer, token)) {
+                return CJSON_LEXER_ERROR_TOKEN;
+            }
+            assert(token->length >= 1U);
+            parser->counters.number++;
+            break;
+        }
+        default: {
+            if(!CJSON_Lexer_read_keyword(lexer, token)) {
+                CJSON_Lexer_read_invalid_token(lexer, token);
+                return CJSON_LEXER_ERROR_TOKEN;
+            }
+            assert(token->length >= 4U);
+            parser->counters.keyword++;
+            break;
+        }
+        }
+        
+        lexer->position += token->length;
+    }
+
+    struct CJSON_Token *token = CJSON_Tokens_next(&parser->tokens);
+    if(token == NULL) {
+        return CJSON_LEXER_ERROR_MEMORY;
+    }
+
+    token->type = CJSON_TOKEN_DONE;
+    token->length = 0U;
+    return CJSON_count_containers_elements(parser)
+        ? CJSON_LEXER_ERROR_DONE
+        : CJSON_LEXER_ERROR_MEMORY;
 }
