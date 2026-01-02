@@ -63,23 +63,25 @@ struct CJSON {
     union CJSON_Value value;
 };
 
+struct CJSON_Counters {
+    unsigned string,
+             number,
+             array,
+             object,
+             keyword,
+             comma,
+             chars,
+             array_elements,
+             object_elements;
+};
+
 struct CJSON_Parser {
-    struct CJSON_Counters {
-        unsigned string,
-                 number,
-                 array,
-                 object,
-                 keyword,
-                 comma,
-                 chars,
-                 array_elements,
-                 object_elements;
-    } counters;
-    struct CJSON        json;
-    struct CJSON_Tokens tokens;
-    struct CJSON_Arena  array_arena,
-                        object_arena,
-                        string_arena;
+    struct CJSON_Counters counters;
+    struct CJSON          json;
+    struct CJSON_Tokens   tokens;
+    struct CJSON_Arena    array_arena,
+                          object_arena,
+                          string_arena;
 };
 
 struct CJSON_KV {

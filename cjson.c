@@ -503,21 +503,27 @@ static bool CJSON_init_arenas(struct CJSON_Parser *const parser, const unsigned 
     return true;
 }
 
+static void CJSON_Counters_init(struct CJSON_Counters *const counters) {
+    assert(counters != NULL);
+
+    counters->object          = 0U;
+    counters->array           = 0U;
+    counters->number          = 0U;
+    counters->string          = 0U;
+    counters->keyword         = 0U;
+    counters->chars           = 0U;
+    counters->comma           = 0U;
+    counters->object_elements = 0U;
+    counters->array_elements  = 0U;
+}
+
 static void CJSON_common_init(struct CJSON_Parser *const parser) {
     assert(parser != NULL);
 
     parser->json.type                  = CJSON_NULL;
     parser->json.value.null            = NULL;
-    parser->counters.object            = 0U;
-    parser->counters.array             = 0U;
-    parser->counters.number            = 0U;
-    parser->counters.string            = 0U;
-    parser->counters.keyword           = 0U;
-    parser->counters.chars             = 0U;
-    parser->counters.comma             = 0U;
-    parser->counters.object_elements   = 0U;
-    parser->counters.array_elements    = 0U;
 
+    CJSON_Counters_init(&parser->counters);
     CJSON_Arena_init(&parser->object_arena, CJSON_DEFAULT_ARENA_NODE_MAX, "Object Arena");
     CJSON_Arena_init(&parser->array_arena, CJSON_DEFAULT_ARENA_NODE_MAX, "Array Arena");
     CJSON_Arena_init(&parser->string_arena, CJSON_DEFAULT_ARENA_NODE_MAX, "String Arena");
@@ -579,9 +585,11 @@ EXTERN_C bool CJSON_parse(struct CJSON_Parser *const parser, const char *const d
     assert(data != NULL);
     assert(length > 0U);
 
+    CJSON_Counters_init(&parser->counters);
+
     struct CJSON_Lexer lexer;
     CJSON_Lexer_init(&lexer, data, length);
-    
+
     if(parser->tokens.data == NULL) {
         CJSON_Tokens_init(&parser->tokens);
     } else {
