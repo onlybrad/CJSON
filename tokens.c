@@ -37,6 +37,13 @@ EXTERN_C bool CJSON_Tokens_reserve(struct CJSON_Tokens *const tokens, unsigned c
     return true;
 }
 
+void CJSON_Tokens_reset(struct CJSON_Tokens *const tokens) {
+    assert(tokens != NULL);
+
+    tokens->count         = 0U;
+    tokens->current_token = tokens->data;
+}
+
 EXTERN_C void CJSON_Tokens_free(struct CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 

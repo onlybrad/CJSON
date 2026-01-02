@@ -18,8 +18,9 @@ struct CJSON_Tokens {
 };
 
 void CJSON_Tokens_init(struct CJSON_Tokens *tokens);
-bool CJSON_Tokens_reserve(struct CJSON_Tokens *tokens, unsigned capacity);
 void CJSON_Tokens_free(struct CJSON_Tokens *tokens);
+bool CJSON_Tokens_reserve(struct CJSON_Tokens *tokens, unsigned capacity);
+void CJSON_Tokens_reset(struct CJSON_Tokens *tokens);
 struct CJSON_Token *CJSON_Tokens_next(struct CJSON_Tokens *tokens);
 
 #endif

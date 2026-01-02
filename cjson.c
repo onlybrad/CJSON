@@ -585,7 +585,7 @@ EXTERN_C bool CJSON_parse(struct CJSON_Parser *const parser, const char *const d
     if(parser->tokens.data == NULL) {
         CJSON_Tokens_init(&parser->tokens);
     } else {
-        CJSON_Tokens_free(&parser->tokens);
+        CJSON_Tokens_reset(&parser->tokens);
     }
 
     if(!CJSON_Tokens_reserve(&parser->tokens, length / 2U)) {
