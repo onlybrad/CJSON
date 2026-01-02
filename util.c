@@ -314,14 +314,13 @@ EXTERN_C unsigned long long usec_timestamp(void) {
 #elif defined(_WIN32)
     FILETIME ft;
     GetSystemTimeAsFileTime(&ft);
-    unsigned long long tt = ft.dwHighDateTime;
+    unsigned long long tt = (unsigned long long)ft.dwHighDateTime;
     tt <<= 32ULL;
-    tt |= ft.dwLowDateTime;
+    tt |= (unsigned long long)ft.dwLowDateTime;
     tt /= 10ULL;
     tt -= 11644473600000000ULL;
     return tt;
 #else
     #error "Unknown platform. Missing implementation for usec_timestamp."
-
 #endif
 }

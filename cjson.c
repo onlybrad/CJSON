@@ -511,11 +511,10 @@ EXTERN_C bool CJSON_Parser_init(struct CJSON_Parser *const parser) {
     CJSON_Arena_init(&parser->array_arena, CJSON_DEFAULT_ARENA_NODE_MAX, "Array Arena");
     CJSON_Arena_init(&parser->string_arena, CJSON_DEFAULT_ARENA_NODE_MAX, "String Arena");
 
-    CJSON_Tokens_init(&parser->tokens);
-    if(!CJSON_Tokens_reserve(&parser->tokens, 0U)) {
-        parser->json.type        = CJSON_ERROR;
-        parser->json.value.error = CJSON_ERROR_MEMORY;
-        return false;
+    if(parser->object_arena.head == NULL) {
+        CJSON_Tokens_init(&parser->tokens);
+    } else {
+        CJSON_Tokens_free(&parser->tokens);
     }
 
     static const unsigned arena_default_sizes[] = {0U, 0U, 0U};
@@ -569,7 +568,12 @@ EXTERN_C bool CJSON_parse(struct CJSON_Parser *const parser, const char *const d
     struct CJSON_Lexer lexer;
     CJSON_Lexer_init(&lexer, data, length);
     
-    CJSON_Tokens_init(&parser->tokens);
+    if(parser->object_arena.head == NULL) {
+        CJSON_Tokens_init(&parser->tokens);
+    } else {
+        CJSON_Tokens_free(&parser->tokens);
+    }
+
     if(!CJSON_Tokens_reserve(&parser->tokens, length / 2U)) {
         parser->json.value.error = CJSON_ERROR_MEMORY;
         parser->json.type = CJSON_ERROR;
@@ -642,7 +646,7 @@ EXTERN_C bool CJSON_parse_file(struct CJSON_Parser *const parser, const char *co
 }
 
 EXTERN_C void CJSON_Parser_free(struct CJSON_Parser *const parser) {
-    parser->json.type      = CJSON_NULL;
+    parser->json.type       = CJSON_NULL;
     parser->json.value.null = NULL;
 
     CJSON_Arena_free(&parser->object_arena);
