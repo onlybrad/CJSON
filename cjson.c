@@ -585,8 +585,6 @@ EXTERN_C bool CJSON_parse(struct CJSON_Parser *const parser, const char *const d
     assert(data != NULL);
     assert(length > 0U);
 
-    CJSON_Counters_init(&parser->counters);
-
     struct CJSON_Lexer lexer;
     CJSON_Lexer_init(&lexer, data, length);
 
