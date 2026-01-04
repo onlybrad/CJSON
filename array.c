@@ -43,7 +43,9 @@ EXTERN_C struct CJSON *CJSON_Array_next(struct CJSON_Array *const array, struct 
     assert(parser != NULL);
 
     if(array->count == array->capacity) {
-        if(!CJSON_Array_reserve(array, parser, array->capacity * 2)) {
+        bool success;
+        const unsigned new_capacity = safe_unsigned_mult(array->capacity, 2U, &success);
+        if(!success || !CJSON_Array_reserve(array, parser, new_capacity)) {
             return NULL;
         }
     }
@@ -68,7 +70,11 @@ EXTERN_C bool CJSON_Array_set(struct CJSON_Array *const array, struct CJSON_Pars
     if(index >= array->capacity) {
         unsigned capacity = array->capacity == 0 ? CJSON_ARRAY_MINIMUM_CAPACITY : array->capacity;
         while(index >= capacity) {
-            capacity *= 2U;
+            bool success;
+            capacity = safe_unsigned_mult(capacity, 2U, &success);
+            if(!success) {
+                return false;
+            }
         }
 
         if(!CJSON_Array_reserve(array, parser, capacity)) {
