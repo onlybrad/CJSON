@@ -323,17 +323,29 @@ static void test_comments(void) {
 }
 
 static void test_deep_nesting(void) {
-    const char deep_nesting[] = "{\"key1\": {\"key2\": {\"key3\": {\"key4\": {\"key5\": \"value\"}}}}}";
+    const char deep_nesting[] = "{\"key1\": {\"key2\": {\"key3\": {\"key4\": {\"key5\": [0, 1, 2, 3, 4, \"value\"]}}}}}";
     
     struct CJSON_Parser parser;
     CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, deep_nesting, sizeof(deep_nesting) - 1));
     assert(parser.json.type == CJSON_OBJECT);
 
-    const char *const value = CJSON_get_string(&parser.json, "key1.key2.key3.key4.key5", &success);
+    const char *value = CJSON_get_string(&parser.json, "key1.key2.key3.key4.key5[5]", &success);
     assert(success);
     assert(strcmp(value, "value") == 0);
 
+    struct CJSON_QueryBuilder query_builder = CJSON_get_query_builder(&parser.json);
+    CJSON_QueryBuilder_key(&query_builder, "key1");
+    CJSON_QueryBuilder_key(&query_builder, "key2");
+    CJSON_QueryBuilder_key(&query_builder, "key3");
+    CJSON_QueryBuilder_key(&query_builder, "key4");
+    CJSON_QueryBuilder_key(&query_builder, "key5");
+    CJSON_QueryBuilder_index(&query_builder, 5U);
+    assert(query_builder.json != NULL);
+    assert(query_builder.json->type == CJSON_STRING);
+    value = query_builder.json->value.string.chars;
+    assert(strcmp(value, "value") == 0);
+    
     CJSON_Parser_free(&parser);
 }
 

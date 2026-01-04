@@ -146,7 +146,7 @@ int main(void) {
 
 ### Query a Specific Value.
 
-The query is a c-string that ressembles the way you would access a value inside an object or an array in javascript. 
+The query is a c-string that ressembles the way you would access a value inside an object or an array in javascript.
 
 Object keys must start with a dot (if it's the first character, it can be omitted) and can have any valid json character. Example: .some-key is allowed even though it's not allowed in javascript outside of brackets.
 
@@ -160,6 +160,8 @@ example:
 "some-key.some-array[10].someOtherKey" //equivalent
 ```
 
+ Or you can use the struct QueryBuilder.
+
 ```c
 #include <cjson.h>
 #include <stdlib.h>
@@ -167,9 +169,21 @@ example:
 int main(void) {
     //...
 
-    const struct CJSON *const my_value = CJSON_get(&parser->json, ".key1.innerKey");
+    //first way
+    const struct CJSON *const my_value = CJSON_get(&parser->json, ".key1.innerKey[5]");
     if(my_value != NULL) {
-        //if my_value is not NULL then the CJSON struct at the parser has this form: {"key1": {"innerKey": my_value}}
+        //if my_value is not NULL then the CJSON struct at the parser has this form: {"key1": {"innerKey": [...,...,...,...,...,my_value]}}
+        
+        //...
+    }
+
+    //second way
+    struct CJSON_QueryBuilder query_builder = CJSON_get_query_builder(&parser->json);
+    CJSON_QueryBuilder_key(&query_builder, "key1");
+    CJSON_QueryBuilder_key(&query_builder, "innerKey");
+    CJSON_QueryBuilder_index(&query_builder, 5U);
+    if(query_builder.json != NULL) {
+        //if my_value is not NULL then the CJSON struct at the parser has this form: {"key1": {"innerKey": [...,...,...,...,...,my_value]}}
         
         //...
     }
