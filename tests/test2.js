@@ -1,7 +1,8 @@
 const fs = require("fs");
+const path = require("path");
 
 function benchmarkJson() {
-    const data = fs.readFileSync("E:\\code\\c\\json\\tests\\really-big-json-file.json", {encoding: "utf-8"});
+    const data = fs.readFileSync(path.join(__dirname, "really-big-json-file.json"), {encoding: "utf-8"});
     const start = usec_timestamp();
     JSON.parse(data);
     const end = usec_timestamp();

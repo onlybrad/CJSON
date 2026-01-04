@@ -48,13 +48,14 @@ This will create a release build of the static library as cjson.a, link your pro
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     struct CJSON_Parser parser;
     //call CJSON_parse_init to initialize the struct in a valid state for parsing
     CJSON_parse_init(&parser);
     if(!CJSON_parse_file(&parser, "path/to/file")) {
-        return 1;
+        return EXIT_FAILURE;
     }
 
     //...
@@ -62,7 +63,7 @@ int main(void) {
     //call CJSON_free to deallocate all the resources used by the library
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -70,6 +71,7 @@ int main(void) {
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     const char json_example[] = "{"
@@ -80,7 +82,7 @@ int main(void) {
     struct CJSON_Parser parser;
     CJSON_parse_init(&parser);
     if(!CJSON_parse(&parser, json_example, (unsigned)(sizeof(json_example)) - 1U)) {
-        return 1;
+        return EXIT_FAILURE;
     }
 
     //...
@@ -89,7 +91,7 @@ int main(void) {
     //call CJSON_free to deallocate all the resources used by the library
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -99,6 +101,7 @@ int main(void) {
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -108,12 +111,12 @@ int main(void) {
         const struct CJSON_Object *const object = &parser.json->data.object;
         break;
     case CJSON_ARRAY:
-        const struct CJSON_Object *const array = &parser.json->data.array;
+        const struct CJSON_Array *const array = &parser.json->data.array;
         break;
     case CJSON_STRING:
         const struct CJSON_String *const string = &parser.json->data.string;
-        const char *const c_string   = string->chars;
-        const unsigned length       = string->length;
+        const char *const c_string              = string->chars;
+        const unsigned length                   = string->length;
         break;
     case CJSON_FLOAT64:
         const double float64 = parser.json->data.float64;
@@ -137,7 +140,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -159,6 +162,7 @@ example:
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -172,13 +176,13 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
 ### Query a Specific Value of a Specific Type.
 
-Aailable functions:
+Available functions:
 
 - CJSON_get_array   => CJSON_Array*
 - CJSON_get_object  => CJSON_Object*
@@ -191,6 +195,7 @@ Aailable functions:
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -210,7 +215,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -229,6 +234,7 @@ Available functions:
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -247,7 +253,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -257,19 +263,20 @@ use the CJSON_get_error function to get the error as a statically allocated c-st
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 int main(void) {
     struct CJSON_Parser parser;
 
-    if(!CJSON_parse(&parser, "/some/path/to/file.json")) {
+    if(!CJSON_parse_file(&parser, "/some/path/to/file.json")) {
         fputs(CJSON_get_error(&parser), stderr);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     //...
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 ### Struct CJSON_Object.
@@ -278,6 +285,7 @@ int main(void) {
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -293,7 +301,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -312,6 +320,7 @@ Available functions:
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -331,13 +340,14 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
 ### Delete a Key.
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -350,7 +360,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -358,6 +368,7 @@ int main(void) {
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -375,7 +386,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -394,6 +405,7 @@ Available functions:
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -413,7 +425,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -423,6 +435,7 @@ int main(void) {
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -438,7 +451,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -457,6 +470,7 @@ Available functions:
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -476,7 +490,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -486,6 +500,7 @@ use the "count" member to access the length of the CJSON_Array struct, and "valu
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -502,7 +517,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -512,6 +527,7 @@ If the index is greater than the length of the array, all CJSON struct values be
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -529,7 +545,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -550,6 +566,7 @@ Available functions:
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -569,7 +586,7 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```
 
@@ -577,6 +594,7 @@ int main(void) {
 
 ```c
 #include <cjson.h>
+#include <stdlib.h>
 
 int main(void) {
     //...
@@ -596,6 +614,6 @@ int main(void) {
 
     CJSON_free(&parser);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 ```

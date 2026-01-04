@@ -21,17 +21,16 @@ int main(void) {
         CJSON_Buffer_free(&buffer);
         return EXIT_FAILURE;
     }
-
     const unsigned long long end = usec_timestamp();
-    printf("Execution time: %llu\n", end - start);
+    printf("Parsing time: %llu microseconds\n", end - start);
 
     CJSON_Buffer_free(&buffer);
     CJSON_free(&parser);
     
 #ifndef NDEBUG
     const struct CJSON_AllocationStats *allocation_stats = CJSON_get_allocation_stats();
-    printf("times allocated on the heap    : %i\n", allocation_stats->allocated);
-    printf("times deallocated from the heap: %i\n", allocation_stats->deallocated);
+    printf("times allocated on the heap     : %i\n", allocation_stats->allocated);
+    printf("times deallocated from the heap : %i\n", allocation_stats->deallocated);
 #endif
 
     return EXIT_SUCCESS;
