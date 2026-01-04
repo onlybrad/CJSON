@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "../cjson.h"
 #include "../util.h"
@@ -16,7 +17,7 @@ int main(void) {
         return EXIT_FAILURE;
     }
 
-    const unsigned long long start = usec_timestamp();
+    const uint64_t start = usec_timestamp();
     struct CJSON_Parser parser;
     CJSON_Parser_parse_init(&parser);
     if(!CJSON_parse(&parser, (const char*)file_contents.data, file_contents.size)) {
@@ -24,8 +25,8 @@ int main(void) {
         CJSON_FileContents_free(&file_contents);
         return EXIT_FAILURE;
     }
-    const unsigned long long end = usec_timestamp();
-    printf("Parsing time: %llu microseconds\n", end - start);
+    const uint64_t end = usec_timestamp();
+    printf("Parsing time: %" PRIu64 " microseconds\n", end - start);
 
     CJSON_FileContents_free(&file_contents);
     CJSON_Parser_free(&parser);

@@ -72,12 +72,10 @@ EXTERN_C uint16_t hex_to_utf16(const char *const codepoint, bool *const success)
     const uint16_t ret = (uint16_t)strtoul(hex, &end_ptr, 16);
     if(end_ptr == hex || *end_ptr != '\0' || errno == ERANGE) {
         *success = false;
-
         return (uint16_t)0U;
     }
 
     *success = true;
-
     return ret;
 }
 
@@ -120,12 +118,10 @@ EXTERN_C double parse_float64(const char *const str, bool *const success) {
     const double ret = strtod(str, &end_ptr);
     if(end_ptr == str || *end_ptr != '\0' || errno == ERANGE) {
         *success = false;
-
         return 0.0;
     }
 
     *success = true;
-
     return ret;
 }
 
@@ -139,12 +135,10 @@ EXTERN_C long double parse_long_double(const char *const str, bool *const succes
     const long double ret = strtold(str, &end_ptr);
     if(end_ptr == str || *end_ptr != '\0' || errno == ERANGE) {
         *success = false;
-
         return 0.0L;
     }
 
     *success = true;
-
     return ret;
 }
 
@@ -158,12 +152,10 @@ EXTERN_C uint64_t parse_uint64(const char *const str, bool *const success) {
     const uint64_t ret = strtoull(str, &end_ptr, 10);
     if(end_ptr == str || *end_ptr != '\0' || errno == ERANGE) {
         *success = false;
-
         return (uint64_t)0;
     }
 
     *success = true;
-
     return ret;
 }
 
@@ -177,12 +169,10 @@ EXTERN_C int64_t parse_int64(const char *const str, bool *const success) {
     const int64_t ret = strtoll(str, &end_ptr, 10);
     if(end_ptr == str || *end_ptr != '\0' || errno == ERANGE) {
         *success = false;
-
         return (int64_t)0;
     }
 
     *success = true;
-    
     return ret;
 }
 
@@ -197,17 +187,17 @@ EXTERN_C void print_bytes(const void *const buffer, const size_t size) {
     printf("0x%02hhx]\n", ((const unsigned char*)buffer)[size - 1]);
 }
 
-EXTERN_C unsigned long long usec_timestamp(void) {
+EXTERN_C uint64_t usec_timestamp(void) {
 #if defined(__MINGW32__) || !defined(_WIN32)
     struct timeval current_time;
     gettimeofday(&current_time, NULL);
-    return (unsigned long long)(current_time.tv_sec * 1000000L + current_time.tv_usec);
+    return (uint64_t)(current_time.tv_sec * 1000000L + current_time.tv_usec);
 #else
     FILETIME ft;
     GetSystemTimeAsFileTime(&ft);
-    unsigned long long tt = (unsigned long long)ft.dwHighDateTime;
+    uint64_t tt = (uint64_t)ft.dwHighDateTime;
     tt <<= 32ULL;
-    tt |= (unsigned long long)ft.dwLowDateTime;
+    tt |= (uint64_t)ft.dwLowDateTime;
     tt /= 10ULL;
     tt -= 11644473600000000ULL;
     return tt;

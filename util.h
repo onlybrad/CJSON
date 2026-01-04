@@ -43,20 +43,18 @@ extern "C" {
 #define IS_VALID_2_BYTES_UTF16(CODEPOINT) (CODEPOINT < 0xD7FF || CODEPOINT >= 0xE000)
 #define IS_VALID_4_BYTES_UTF16(HIGH, LOW) (HIGH >= 0xD800 && HIGH <= 0xDBFF && LOW >= 0xDC00 && LOW <= 0xDFFF)
 
-#define UNSIGNED_MAX_LENGTH 10U
-
-bool               is_whitespace       (char c);
-bool               is_delimiter        (char c);
-bool               is_digit            (char c);
-uint16_t           hex_to_utf16        (const char *unicode, bool *success);
-unsigned           utf16_to_utf8_2bytes(char *destination, uint16_t codepoint);
-void               utf16_to_utf8_4bytes(char *destination, uint16_t high, uint16_t low);
-double             parse_float64       (const char *str, bool *success);
-long double        parse_long_double   (const char *str, bool *success);
-uint64_t           parse_uint64        (const char *str, bool *success);
-int64_t            parse_int64         (const char *str, bool *success);
-void               print_bytes         (const void *buffer, const size_t size);
-unsigned long long usec_timestamp      (void);
+bool        is_whitespace       (char c);
+bool        is_delimiter        (char c);
+bool        is_digit            (char c);
+uint16_t    hex_to_utf16        (const char *unicode, bool *success);
+unsigned    utf16_to_utf8_2bytes(char *destination, uint16_t codepoint);
+void        utf16_to_utf8_4bytes(char *destination, uint16_t high, uint16_t low);
+double      parse_float64       (const char *str, bool *success);
+long double parse_long_double   (const char *str, bool *success);
+uint64_t    parse_uint64        (const char *str, bool *success);
+int64_t     parse_int64         (const char *str, bool *success);
+void        print_bytes         (const void *buffer, const size_t size);
+uint64_t    usec_timestamp      (void);
 
 unsigned safe_unsigned_mult(unsigned a, unsigned b, bool *success);
 bool     check_unsigned_mult_overflow(unsigned a, unsigned b);

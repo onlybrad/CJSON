@@ -9,6 +9,8 @@
 #include "allocator.h"
 #include "util.h"
 
+#define UNSIGNED_MAX_LENGTH 10U
+
 EXTERN_C struct CJSON_Array *CJSON_make_array(struct CJSON *const json, struct CJSON_Parser *const parser) {
     assert(json != NULL);
     assert(parser != NULL);
