@@ -10,22 +10,6 @@ extern "C" {
     #include <unistd.h>
 #endif
 
-enum CJSON_UtilError {
-    CJSON_UTIL_ERROR_NONE,
-    CJSON_UTIL_ERROR_WIN32API,
-    CJSON_UTIL_ERROR_TOO_LARGE,
-    CJSON_UTIL_ERROR_MALLOC,
-    CJSON_UTIL_ERROR_FOPEN,
-    CJSON_UTIL_ERROR_FREAD,
-    CJSON_UTIL_ERROR_FSEEK,
-    CJSON_UTIL_ERROR_FTELL
-};
-
-struct CJSON_Buffer {
-    unsigned char *data;
-    unsigned       size;
-};
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -73,10 +57,6 @@ uint64_t           parse_uint64        (const char *str, bool *success);
 int64_t            parse_int64         (const char *str, bool *success);
 void               print_bytes         (const void *buffer, const size_t size);
 unsigned long long usec_timestamp      (void);
-
-void CJSON_Buffer_free(struct CJSON_Buffer*);
-
-enum CJSON_UtilError file_get_contents(const char *path, struct CJSON_Buffer*);
 
 #endif
 

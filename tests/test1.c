@@ -9,66 +9,66 @@ static bool success;
 static void test_empty_object(void) {
     const char empty_object[] = "{}";
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, empty_object, sizeof(empty_object) - 1));
     assert(parser.json.type == CJSON_OBJECT);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_empty_array(void) {
     const char empty_array[] = "[]";
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, empty_array, sizeof(empty_array) - 1));
     assert(parser.json.type == CJSON_ARRAY);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_primitive_values(void) {
     const char string[] = "\"\"";
     
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, string, sizeof(string) - 1));
     assert(parser.json.type == CJSON_STRING);
     assert(strcmp(parser.json.value.string.chars, "") == 0);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     const char int64[] = "-125";
     assert(CJSON_parse(&parser, int64, sizeof(int64) - 1));
     assert(parser.json.type == CJSON_INT64);
     assert(parser.json.value.int64 == -125);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     const char uint64[] = "2500";
     assert(CJSON_parse(&parser, uint64, sizeof(uint64) - 1));
     assert(parser.json.type == CJSON_UINT64);
     assert(parser.json.value.uint64 == 2500);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     const char true_value[] = "true";
     assert(CJSON_parse(&parser, true_value, sizeof(true_value) - 1));
     assert(parser.json.type == CJSON_BOOL);
     assert(parser.json.value.boolean);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     const char false_value[] = "false";
     assert(CJSON_parse(&parser, false_value, sizeof(false_value) - 1));
     assert(parser.json.type == CJSON_BOOL);
     assert(!parser.json.value.boolean);
-    CJSON_free(&parser); 
+    CJSON_Parser_free(&parser); 
 
     const char null_value[] = "null";
     assert(CJSON_parse(&parser, null_value, sizeof(null_value) - 1));
     assert(parser.json.type == CJSON_NULL);
     assert(parser.json.value.null == NULL);
-    CJSON_free(&parser);   
+    CJSON_Parser_free(&parser);   
 }
 
 static void test_key_value(void) {
     const char key_value[] = "{\"key\": \"value\"}";
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, key_value, sizeof(key_value) - 1));
     assert(parser.json.type == CJSON_OBJECT);
 
@@ -97,7 +97,7 @@ static void test_key_value(void) {
     assert(json->type == CJSON_STRING);
     assert(strcmp(json->value.string.chars, "value") == 0);   
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_nested_objects(void) {
@@ -107,7 +107,7 @@ static void test_nested_objects(void) {
     "}";
 
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, nested_objects, sizeof(nested_objects) - 1));
     assert(parser.json.type == CJSON_OBJECT);
 
@@ -127,7 +127,7 @@ static void test_nested_objects(void) {
     assert(success);
     assert(strcmp(value, "value") == 0);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_struct_array(void) {
@@ -137,7 +137,7 @@ static void test_struct_array(void) {
     "]";
 
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, struct_array, sizeof(struct_array) - 1));
     assert(parser.json.type == CJSON_ARRAY);
     assert(parser.json.value.array.count == 2U);
@@ -180,14 +180,14 @@ static void test_struct_array(void) {
     assert(success);
     assert(strcmp(value, "value2") == 0);
 
-    CJSON_free(&parser);  
+    CJSON_Parser_free(&parser);  
 }
 
 static void test_escaped_characters(void) {
     const char escaped_characters[] = "{\"key\": \"Line 1\\nLine 2\\\\\"}";
     
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, escaped_characters, sizeof(escaped_characters) - 1));
     assert(parser.json.type == CJSON_OBJECT);
 
@@ -195,14 +195,14 @@ static void test_escaped_characters(void) {
     assert(success);
     assert(value[6] == '\n');   
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_escaped_unicode(void) {
     const char escaped_characters[] = "{\"key\": \"Unicode test: \\u00A9\\u03A9\\uD840\\uDC00\"}";
 
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, escaped_characters, sizeof(escaped_characters) - 1));
     assert(parser.json.type == CJSON_OBJECT);
 
@@ -220,14 +220,14 @@ static void test_escaped_unicode(void) {
     assert(value[20] == -128);
     assert(value[21] == -128);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_bools(void) {
     const char escaped_characters[] = "{\"isTrue\": true, \"isFalse\": false}";
 
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, escaped_characters, sizeof(escaped_characters) - 1));
     assert(parser.json.type == CJSON_OBJECT);
 
@@ -252,14 +252,14 @@ static void test_bools(void) {
     assert(success);
     assert(!value);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_exponent(void) {
     const char exponent[] = "{\"largeNumber\": 1e15, \"negativeLarge\": -1e15}";
     
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, exponent, sizeof(exponent) - 1));
     assert(success);
     assert(parser.json.type == CJSON_OBJECT);
@@ -272,14 +272,14 @@ static void test_exponent(void) {
     assert(success);
     assert(negative_number == (int64_t)-1e15);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_null(void) {
     const char null_value[] = "{\"key\": null}";
     
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, null_value, sizeof(null_value) - 1));
     assert(parser.json.type == CJSON_OBJECT);
 
@@ -292,19 +292,19 @@ static void test_null(void) {
     assert(success);
     assert(null == NULL);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_missing_value(void) {
     const char missing_key[] = "{\"key1\": \"value1\", \"key2\": }";
 
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(!CJSON_parse(&parser, missing_key, sizeof(missing_key) - 1));
     assert(parser.json.type == CJSON_ERROR);
     assert(parser.json.value.error == CJSON_ERROR_OBJECT);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_comments(void) {
@@ -314,19 +314,19 @@ static void test_comments(void) {
     "}";
 
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(!CJSON_parse(&parser, comments, sizeof(comments) - 1));
     assert(parser.json.type == CJSON_ERROR);
     assert(parser.json.value.error == CJSON_ERROR_TOKEN);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_deep_nesting(void) {
     const char deep_nesting[] = "{\"key1\": {\"key2\": {\"key3\": {\"key4\": {\"key5\": \"value\"}}}}}";
     
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, deep_nesting, sizeof(deep_nesting) - 1));
     assert(parser.json.type == CJSON_OBJECT);
 
@@ -334,26 +334,26 @@ static void test_deep_nesting(void) {
     assert(success);
     assert(strcmp(value, "value") == 0);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_no_quotes_key(void) {
     const char no_quotes_key[] = "{ key: 1 }";
 
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(!CJSON_parse(&parser, no_quotes_key, sizeof(no_quotes_key) - 1));
     assert(parser.json.type == CJSON_ERROR);
     assert(parser.json.value.error == CJSON_ERROR_TOKEN);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_nested_arrays(void) {
     const char nested_arrays[] = "[[1, 2, [3, 4]], [5, 6]]";
 
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, nested_arrays, sizeof(nested_arrays) - 1));
     assert(parser.json.type == CJSON_ARRAY);
     assert(parser.json.value.array.count == 2U);
@@ -409,14 +409,14 @@ static void test_nested_arrays(void) {
     assert(level2_json->type == CJSON_UINT64);
     assert(level2_json->value.uint64 == 6U);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_duplicate_keys(void) {
     const char duplicate_keys[] = "{\"key\": \"value1\", \"key\": \"value2\"}";
     
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     assert(CJSON_parse(&parser, duplicate_keys, sizeof(duplicate_keys) - 1));
     assert(parser.json.type == CJSON_OBJECT);
 
@@ -424,64 +424,64 @@ static void test_duplicate_keys(void) {
     assert(success);
     assert(strcmp(value, "value2") == 0);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_create_string(void) {
     const char *const value = "test";
 
     struct CJSON_Parser parser;
-    assert(CJSON_empty_init(&parser));
+    assert(CJSON_Parser_init(&parser));
 
     CJSON_set_string(&parser.json, &parser, value);
     assert(parser.json.type == CJSON_STRING);
     assert(strcmp(parser.json.value.string.chars, value) == 0);
     assert(parser.json.value.string.chars != value);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_create_primitives(void) {
     const int64_t value1 = -25000000000LL;
 
     struct CJSON_Parser parser;
-    assert(CJSON_empty_init(&parser));
+    assert(CJSON_Parser_init(&parser));
 
     CJSON_set_int64(&parser.json, value1);
     assert(parser.json.type == CJSON_INT64);
     assert(parser.json.value.int64 == value1);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
-    assert(CJSON_empty_init(&parser));
+    assert(CJSON_Parser_init(&parser));
     const uint64_t value2 = 25000000000ULL;
     CJSON_set_uint64(&parser.json, value2);
     assert(parser.json.type == CJSON_UINT64);
     assert(parser.json.value.uint64 == value2);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
-    assert(CJSON_empty_init(&parser));
+    assert(CJSON_Parser_init(&parser));
     const double value3 = 25000000000.50;
     CJSON_set_float64(&parser.json, value3);
     assert(parser.json.type == CJSON_FLOAT64);
     assert(parser.json.value.float64 == value3);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
-    assert(CJSON_empty_init(&parser));
+    assert(CJSON_Parser_init(&parser));
     const bool value4 = true;
     CJSON_set_bool(&parser.json, value4);
     assert(parser.json.type == CJSON_BOOL);
     assert(parser.json.value.boolean);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
-    assert(CJSON_empty_init(&parser));
+    assert(CJSON_Parser_init(&parser));
     CJSON_set_null(&parser.json);
     assert(parser.json.type == CJSON_NULL);
     assert(parser.json.value.null == NULL);
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_create_array(void) {
     struct CJSON_Parser parser;
-    assert(CJSON_empty_init(&parser));
+    assert(CJSON_Parser_init(&parser));
 
     struct CJSON_Array *const array1 = CJSON_make_array(&parser.json, &parser);
     assert(parser.json.type == CJSON_ARRAY);
@@ -508,12 +508,12 @@ static void test_create_array(void) {
     assert(array1->values[2].type == CJSON_INT64);
     assert(array1->values[2].value.int64 == value3);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 static void test_create_object(void) {
     struct CJSON_Parser parser;
-    assert(CJSON_empty_init(&parser));
+    assert(CJSON_Parser_init(&parser));
     
     struct CJSON_Object *const object1 = CJSON_make_object(&parser.json, &parser);
     assert(parser.json.type == CJSON_OBJECT);
@@ -540,7 +540,7 @@ static void test_create_object(void) {
     assert(CJSON_Object_get_int64(object1, "key3", &success) == value3);
     assert(success);
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 }
 
 int main(void) {

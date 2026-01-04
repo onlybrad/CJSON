@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <stdlib.h>
+
 #include "stack.h"
 #include "util.h"
 #include "allocator.h"

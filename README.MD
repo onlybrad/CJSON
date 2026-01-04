@@ -52,16 +52,16 @@ This will create a release build of the static library as cjson.a, link your pro
 
 int main(void) {
     struct CJSON_Parser parser;
-    //call CJSON_parse_init to initialize the struct in a valid state for parsing
-    CJSON_parse_init(&parser);
+    //call CJSON_Parser_parse_init to initialize the struct in a valid state for parsing
+    CJSON_Parser_parse_init(&parser);
     if(!CJSON_parse_file(&parser, "path/to/file")) {
         return EXIT_FAILURE;
     }
 
     //...
 
-    //call CJSON_free to deallocate all the resources used by the library
-    CJSON_free(&parser);
+    //call CJSON_Parser_free to deallocate all the resources used by the library
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -80,7 +80,7 @@ int main(void) {
     "}";
 
     struct CJSON_Parser parser;
-    CJSON_parse_init(&parser);
+    CJSON_Parser_parse_init(&parser);
     if(!CJSON_parse(&parser, json_example, (unsigned)(sizeof(json_example)) - 1U)) {
         return EXIT_FAILURE;
     }
@@ -88,8 +88,8 @@ int main(void) {
     //...
 
     
-    //call CJSON_free to deallocate all the resources used by the library
-    CJSON_free(&parser);
+    //call CJSON_Parser_free to deallocate all the resources used by the library
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -138,7 +138,7 @@ int main(void) {
         break;
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -174,7 +174,7 @@ int main(void) {
         //...
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -213,7 +213,7 @@ int main(void) {
         //numerical types will be equal to 0, bool will be equal to false, null is always NULL
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -251,7 +251,7 @@ int main(void) {
     
     //..
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -299,7 +299,7 @@ int main(void) {
         //if some_value is not NULL then the CJSON_Object struct contains a key "some-key"
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -338,7 +338,7 @@ int main(void) {
         //numerical types will be equal to 0, bool will be equal to false, null is always NULL
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -358,7 +358,7 @@ int main(void) {
 
     CJSON_Object_delete(object, "some-key");
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -384,7 +384,7 @@ int main(void) {
         //this only happen if memory allocation fails when resizing the internal data array or copying the key
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -423,7 +423,7 @@ int main(void) {
         //this only happen if memory allocation fails when resizing the internal data array or copying the key
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -449,7 +449,7 @@ int main(void) {
         //if some_value is not NULL then the CJSON_Array struct has a value at index 10.
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -488,7 +488,7 @@ int main(void) {
         //numerical types will be equal to 0, bool will be equal to false, null is always NULL
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -515,7 +515,7 @@ int main(void) {
         //...
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -543,7 +543,7 @@ int main(void) {
         //this only happen if memory allocation fails when resizing the internal data array
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -584,7 +584,7 @@ int main(void) {
         //this only happen if memory allocation fails when resizing the internal data array
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }
@@ -612,7 +612,7 @@ int main(void) {
         //this only happen if memory allocation fails when resizing the internal data array
     }
 
-    CJSON_free(&parser);
+    CJSON_Parser_free(&parser);
 
     return EXIT_SUCCESS;
 }

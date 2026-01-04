@@ -15,8 +15,10 @@ static: $(SOURCE)
 
 static++: $(SOURCE)
 	$(CC++) $(INCLUDES) $(FLAGS++) $(STD++) -D NDEBUG -O3 -c $(SOURCE)
-	ar rcs cjson.a *.o
+	ar rcs cjson++.a *.o
 	make cleanup
+
+all: static static++ test1.exe test1++.exe test2_debug.exe test2_debug++.exe test2_release.exe test2_release++.exe
 
 test1.exe: ./tests/test1.c $(SOURCE)
 	$(CC) $(INCLUDES) $(FLAGS) $(STD) -g -Og -o test1 ./tests/test1.c $(SOURCE)

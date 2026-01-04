@@ -1,9 +1,11 @@
 #include <string.h>
 #include <assert.h>
+
 #include "lexer.h"
 #include "token.h"
+#include "parser.h"
 #include "util.h"
-#include "cjson.h"
+#include "json.h"
 #include "array.h"
 #include "object.h"
 

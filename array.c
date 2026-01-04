@@ -1,8 +1,10 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <assert.h>
 #include <string.h>
-#include "cjson.h"
+
+#include "json.h"
+#include "parser.h"
 #include "util.h"
 
 EXTERN_C void CJSON_Array_init(struct CJSON_Array *const array) {

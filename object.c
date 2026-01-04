@@ -2,7 +2,9 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <string.h>
-#include "cjson.h"
+
+#include "json.h"
+#include "parser.h"
 #include "util.h"
 
 static char DELETED_ENTRY[] = {0};
