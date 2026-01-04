@@ -120,9 +120,7 @@ EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_get(struct CJSON_FileC
         CJSON_FileContents_free(file_contents);
     }
     
-    if(fclose(file) == EOF) {
-        error = CJSON_FILECONTENTS_ERROR_FCLOSE;
-    }
+    fclose(file);
     
     return error;
 }
