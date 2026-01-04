@@ -53,7 +53,7 @@ EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_get(struct CJSON_FileC
 #ifdef _WIN32
     const int wide_length = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0);
     if(wide_length == 0) {
-        return CJSON_FILECONTENTS_ERROR_WIN32API;
+        return CJSON_FILECONTENTS_ERROR_WIN32_API;
     }
 
     wchar_t *const wpath = (wchar_t*)CJSON_MALLOC((size_t)wide_length * sizeof(wchar_t));
