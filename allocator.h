@@ -72,7 +72,11 @@ const struct CJSON_AllocationStats *CJSON_get_allocation_stats(void);
 #define CJSON_CALLOC  calloc
 #define CJSON_REALLOC realloc
 #define CJSON_FREE    free
-#define CJSON_STRDUP  strdup
+#if defined(__MINGW32__) || not defined(_WIN32)
+    #define CJSON_STRDUP strdup
+#else
+    #define CJSON_STRDUP _strdup
+#endif
 
 #endif
 

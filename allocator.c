@@ -44,12 +44,20 @@ void *CJSON_debug_realloc(void *const ptr, const size_t size) {
 }
 
 char *CJSON_debug_strdup(const char *const str) {
-    char *const ret = strdup(str);
+#if defined(__MINGW32__) || not defined(_WIN32)
+    #define CJSON_STRDUP_FUNC strdup
+#else
+    #define CJSON_STRDUP_FUNC _strdup
+#endif
+
+    char *const ret = CJSON_STRDUP_FUNC(str);
     if(ret != NULL) {
         allocation_stats.allocated++;
     }
 
     return ret;
+
+#undef CJSON_STRDUP_FUNC
 }
 
 void CJSON_debug_free(void *ptr) {

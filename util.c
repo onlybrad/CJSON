@@ -202,7 +202,7 @@ EXTERN_C unsigned long long usec_timestamp(void) {
     struct timeval current_time;
     gettimeofday(&current_time, NULL);
     return (unsigned long long)(current_time.tv_sec * 1000000L + current_time.tv_usec);
-#elif defined(_WIN32)
+#else
     FILETIME ft;
     GetSystemTimeAsFileTime(&ft);
     unsigned long long tt = (unsigned long long)ft.dwHighDateTime;
@@ -211,7 +211,5 @@ EXTERN_C unsigned long long usec_timestamp(void) {
     tt /= 10ULL;
     tt -= 11644473600000000ULL;
     return tt;
-#else
-    #error "Unknown platform. Missing implementation for usec_timestamp."
 #endif
 }
