@@ -11,7 +11,7 @@
 #define CJSON_DEFAULT_ARENA_SIZE     CJSON_ARENA_MINIMUM_SIZE
 #define CJSON_DEFAULT_ARENA_NODE_MAX CJSON_ARENA_INFINITE_NODES
 
-static bool CJSON_parse_tokens(struct CJSON_Parser*, struct CJSON*);
+static bool CJSON_parse_token(struct CJSON_Parser*, struct CJSON*);
 
 static bool CJSON_decode_string_token(struct CJSON_String *const string, struct CJSON_Parser *const parser) {
     assert(string != NULL);
@@ -167,15 +167,18 @@ static bool CJSON_parse_number(struct CJSON *const json, struct CJSON_Tokens *co
     assert(json != NULL);
     assert(tokens != NULL);
 
-    char str[1 << 9] = {0};
+    char number[1 << 9] = {0};
 
     bool success;
-    const struct CJSON_Token *const token = tokens->current_token; 
+    const struct CJSON_Token *const token = tokens->current_token;
+    if((size_t)token->length >= sizeof(number)) {
+        return false;
+    }
 
-    memcpy(str, token->value, MIN(sizeof(str) - 1, token->length));
+    memcpy(number, token->value, (size_t)token->length);
 
     if(token->type == CJSON_TOKEN_FLOAT) {
-        const double value = parse_float64(str, &success);
+        const double value = parse_float64(number, &success);
         if(!success) {
             json->type = CJSON_ERROR;
             json->value.error = CJSON_ERROR_FLOAT64;
@@ -185,9 +188,9 @@ static bool CJSON_parse_number(struct CJSON *const json, struct CJSON_Tokens *co
 
         json->type          = CJSON_FLOAT64;
         json->value.float64 = value;
-    } else if(str[0] == '-') {
+    } else if(number[0] == '-') {
         if(token->type == CJSON_TOKEN_SCIENTIFIC_INT) {
-            const long double value = parse_long_double(str, &success);
+            const long double value = parse_long_double(number, &success);
             if(!success || value < INT64_MIN || value > INT64_MAX) {
                 json->type        = CJSON_ERROR;
                 json->value.error = CJSON_ERROR_INT64;
@@ -199,7 +202,7 @@ static bool CJSON_parse_number(struct CJSON *const json, struct CJSON_Tokens *co
             json->value.int64 = (int64_t)value;
 
         } else {
-            const int64_t value = parse_int64(str, &success);
+            const int64_t value = parse_int64(number, &success);
             if(!success) {
                 json->type        = CJSON_ERROR;
                 json->value.error = CJSON_ERROR_INT64;
@@ -211,7 +214,7 @@ static bool CJSON_parse_number(struct CJSON *const json, struct CJSON_Tokens *co
             json->value.int64 = value;
         }
     } else if(token->type == CJSON_TOKEN_SCIENTIFIC_INT) {
-        const long double value = parse_long_double(str, &success);
+        const long double value = parse_long_double(number, &success);
         if(!success || value > UINT64_MAX) {
             json->type        = CJSON_ERROR;
             json->value.error = CJSON_ERROR_UINT64;
@@ -219,10 +222,10 @@ static bool CJSON_parse_number(struct CJSON *const json, struct CJSON_Tokens *co
             return false;
         }
 
-        json->type = CJSON_UINT64;
+        json->type         = CJSON_UINT64;
         json->value.uint64 = (uint64_t)value;
     } else {
-        const uint64_t value = parse_uint64(str, &success);
+        const uint64_t value = parse_uint64(number, &success);
         if(!success) {
             json->type        = CJSON_ERROR;
             json->value.error = CJSON_ERROR_UINT64;
@@ -230,7 +233,7 @@ static bool CJSON_parse_number(struct CJSON *const json, struct CJSON_Tokens *co
             return false; 
         }
 
-        json->type = CJSON_UINT64;
+        json->type         = CJSON_UINT64;
         json->value.uint64 = value;
     }
 
@@ -319,7 +322,7 @@ static bool CJSON_parse_object(struct CJSON *const json, struct CJSON_Parser *co
         }
         entry->key = key.chars;
 
-        if(!CJSON_parse_tokens(parser, &entry->value)) {
+        if(!CJSON_parse_token(parser, &entry->value)) {
             if(entry->value.value.error == CJSON_ERROR_TOKEN) {
                 json->value.error = CJSON_ERROR_OBJECT_VALUE;
             } else {
@@ -381,12 +384,9 @@ static bool CJSON_parse_array(struct CJSON *const json, struct CJSON_Parser *con
 
     while(last_token - tokens->current_token >= 2) {
         struct CJSON *const next_json = CJSON_Array_next(array, parser);
-        if(next_json == NULL) {
-            json->value.error = CJSON_ERROR_MEMORY;
-            return false;
-        }
+        assert(next_json != NULL);
 
-        if(!CJSON_parse_tokens(parser, next_json)) {
+        if(!CJSON_parse_token(parser, next_json)) {
             if(next_json->value.error == CJSON_ERROR_TOKEN) {
                 json->value.error = CJSON_ERROR_ARRAY_VALUE;
             } else {
@@ -414,40 +414,40 @@ static bool CJSON_parse_array(struct CJSON *const json, struct CJSON_Parser *con
     return false;
 }
 
-static bool CJSON_parse_tokens(struct CJSON_Parser *const parser, struct CJSON *const json) {
+static bool CJSON_parse_token(struct CJSON_Parser *const parser, struct CJSON *const json) {
     assert(parser != NULL);
     assert(json != NULL);
 
     switch(parser->tokens.current_token->type) {
-    case CJSON_TOKEN_STRING: {
+    case CJSON_TOKEN_STRING:
         return CJSON_parse_string(json, parser);
-    }
+    
     case CJSON_TOKEN_INT:
     case CJSON_TOKEN_FLOAT:
-    case CJSON_TOKEN_SCIENTIFIC_INT: {
+    case CJSON_TOKEN_SCIENTIFIC_INT:
         return CJSON_parse_number(json, &parser->tokens);
-    }
-    case CJSON_TOKEN_BOOL: {
+
+    case CJSON_TOKEN_BOOL:
         CJSON_parse_bool(json, &parser->tokens);
         return true;
-    }
-    case CJSON_TOKEN_NULL: {
+
+    case CJSON_TOKEN_NULL:
         CJSON_parse_null(json, &parser->tokens);
         return true;
-    }
-    case CJSON_TOKEN_LBRACKET: {
+
+    case CJSON_TOKEN_LBRACKET:
         return CJSON_parse_array(json, parser);
-    }
-    case CJSON_TOKEN_LCURLY: {
+
+    case CJSON_TOKEN_LCURLY:
         return CJSON_parse_object(json, parser);
-    }
+
     case CJSON_TOKEN_COLON:
     case CJSON_TOKEN_COMMA:
     case CJSON_TOKEN_RBRACKET:
     case CJSON_TOKEN_RCURLY:
     case CJSON_TOKEN_INVALID:
     case CJSON_TOKEN_DONE:
-        json->type       = CJSON_ERROR;
+        json->type        = CJSON_ERROR;
         json->value.error = CJSON_ERROR_TOKEN;
     }
 
@@ -576,7 +576,7 @@ EXTERN_C bool CJSON_parse(struct CJSON_Parser *const parser, const char *const d
         return false;
     }
 
-    CJSON_parse_tokens(parser, &parser->json);
+    CJSON_parse_token(parser, &parser->json);
 
     return parser->json.type != CJSON_ERROR;
 }

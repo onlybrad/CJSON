@@ -57,29 +57,30 @@ static bool CJSON_Lexer_read_number(struct CJSON_Lexer *const lexer, struct CJSO
     assert(lexer != NULL);
     assert(token != NULL);
 
-    unsigned position, i, length;
-    length = lexer->length;
-    const char *data = lexer->data;
-    bool success = true;
-    bool read_dot = false;
-    bool read_e = false;
+    const char *data   = lexer->data;
+    unsigned    length = lexer->length;
+
+    unsigned position, i;
+    bool success   = true;
+    bool read_dot  = false;
+    bool read_e    = false;
     bool read_sign = false;
 
     if(data[lexer->position] == '-') {
-        position = lexer->position + 1U;
+        position      = lexer->position + 1U;
         token->length = 1U;
     } else {
-        position = lexer->position;
+        position      = lexer->position;
         token->length = 0U;
     }
 
-    data += position;
-    length -= position;
+    data       += position;
+    length     -= position;
     token->type = CJSON_TOKEN_INT;
 
     //0 as the first character is only allowed if it's followed by a dot or by an non-digit character
     if(data[0] == '0' && length > 1U && data[1] != '.' && is_digit(data[1])) {
-        success = false;
+        success     = false;
         token->type = CJSON_TOKEN_INVALID;
 
         for(i = 0U; i < length; i++) {
@@ -105,7 +106,7 @@ static bool CJSON_Lexer_read_number(struct CJSON_Lexer *const lexer, struct CJSO
                 read_dot = true;
             } else {
                 token->type = CJSON_TOKEN_INVALID;
-                success = false;
+                success     = false;
             }
             break;
         }
@@ -128,7 +129,7 @@ static bool CJSON_Lexer_read_number(struct CJSON_Lexer *const lexer, struct CJSO
                 read_sign = true;
             } else {
                 token->type = CJSON_TOKEN_INVALID;
-                success = false;                
+                success     = false;                
             }
             break;
         }
