@@ -44,7 +44,7 @@ void *CJSON_debug_realloc(void *const ptr, const size_t size) {
 }
 
 char *CJSON_debug_strdup(const char *const str) {
-#if defined(__MINGW32__) || not defined(_WIN32)
+#if defined(__MINGW32__) || !defined(_WIN32)
     #define CJSON_STRDUP_FUNC strdup
 #else
     #define CJSON_STRDUP_FUNC _strdup
@@ -197,6 +197,18 @@ EXTERN_C void CJSON_Arena_reset(struct CJSON_Arena *const arena) {
     
     arena->current      = arena->head;
     arena->head->offset = 0U;
+}
+
+EXTERN_C void *CJSON_Arena_alloc_objects(struct CJSON_Arena *const arena, const unsigned count, const unsigned size, const unsigned alignment) {
+    assert(arena != NULL);
+    assert(count > 0U);
+    assert(size > 0U);
+    assert((alignment & (alignment - 1U)) == 0U);
+
+    bool success;
+    const unsigned total_size = safe_unsigned_mult(count, size, &success);
+    
+    return success ? CJSON_Arena_alloc(arena, total_size, alignment) : NULL;
 }
 
 EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned size, unsigned alignment) {

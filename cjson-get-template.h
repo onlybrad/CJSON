@@ -11,7 +11,7 @@
 #endif
 
 #if !defined CJSON_GET_SUFFIX && !defined CJSON_GET_SUFFIX_BOOL
-    #error "CJSON_GET_SUFFIX or CJSON_GET_SUFFIX_BOOL are not defined."
+    #error "CJSON_GET_SUFFIX or CJSON_GET_SUFFIX_BOOL are !defined."
 #elif defined CJSON_GET_SUFFIX && defined CJSON_GET_SUFFIX_BOOL
     #error "CJSON_GET_SUFFIX and CJSON_GET_SUFFIX_BOOL cannot be defined at the same time."
 #endif

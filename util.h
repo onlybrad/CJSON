@@ -58,6 +58,9 @@ int64_t            parse_int64         (const char *str, bool *success);
 void               print_bytes         (const void *buffer, const size_t size);
 unsigned long long usec_timestamp      (void);
 
+unsigned safe_unsigned_mult(unsigned a, unsigned b, bool *success);
+bool     check_unsigned_mult_overflow(unsigned a, unsigned b);
+
 #endif
 
 #ifdef __cplusplus

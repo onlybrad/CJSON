@@ -36,15 +36,16 @@ struct CJSON_Arena {
 #endif
 };
 
-#define CJSON_ARENA_ALLOC(ARENA, COUNT, TYPE) (TYPE*)CJSON_Arena_alloc(ARENA, (COUNT) * sizeof(TYPE), CJSON_ALIGNOF(TYPE))
+#define CJSON_ARENA_ALLOC(ARENA, COUNT, TYPE) (TYPE*)CJSON_Arena_alloc_objects(ARENA, (COUNT), sizeof(TYPE), CJSON_ALIGNOF(TYPE))
 
-void  CJSON_Arena_init       (struct CJSON_Arena*, unsigned node_max, const char *name);
-bool  CJSON_Arena_create_node(struct CJSON_Arena*, unsigned size);
-void  CJSON_Arena_free       (struct CJSON_Arena*);
-void  CJSON_Arena_reset      (struct CJSON_Arena*);
-void *CJSON_Arena_alloc      (struct CJSON_Arena*, unsigned size, unsigned alignment);
-bool  CJSON_Arena_reserve    (struct CJSON_Arena*, unsigned size, unsigned alignment);
-char *CJSON_Arena_strdup     (struct CJSON_Arena*, const char *str, unsigned *length);
+void  CJSON_Arena_init         (struct CJSON_Arena*, unsigned node_max, const char *name);
+bool  CJSON_Arena_create_node  (struct CJSON_Arena*, unsigned size);
+void  CJSON_Arena_free         (struct CJSON_Arena*);
+void  CJSON_Arena_reset        (struct CJSON_Arena*);
+void *CJSON_Arena_alloc_objects(struct CJSON_Arena*, unsigned count, unsigned size, unsigned alignment);
+void *CJSON_Arena_alloc        (struct CJSON_Arena*, unsigned size, unsigned alignment);
+bool  CJSON_Arena_reserve      (struct CJSON_Arena*, unsigned size, unsigned alignment);
+char *CJSON_Arena_strdup       (struct CJSON_Arena*, const char *str, unsigned *length);
 
 #ifndef NDEBUG
 
@@ -72,7 +73,7 @@ const struct CJSON_AllocationStats *CJSON_get_allocation_stats(void);
 #define CJSON_CALLOC  calloc
 #define CJSON_REALLOC realloc
 #define CJSON_FREE    free
-#if defined(__MINGW32__) || not defined(_WIN32)
+#if defined(__MINGW32__) || !defined(_WIN32)
     #define CJSON_STRDUP strdup
 #else
     #define CJSON_STRDUP _strdup

@@ -213,3 +213,24 @@ EXTERN_C unsigned long long usec_timestamp(void) {
     return tt;
 #endif
 }
+
+unsigned safe_unsigned_mult(const unsigned a, const unsigned b, bool *const success) {
+    assert(success != NULL);
+
+    if(b == 0U) {
+        *success = true;
+        return 0U;
+    }
+
+    if(a > UINT_MAX / b) {
+        *success = false;
+        return 0U;
+    }
+
+    *success = true;
+    return a * b;
+}
+
+bool check_unsigned_mult_overflow(const unsigned a, const unsigned b) {
+    return b != 0U && a > UINT_MAX / b;
+}

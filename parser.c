@@ -495,6 +495,8 @@ static bool CJSON_init_arenas(struct CJSON_Parser *const parser, const unsigned 
         *arena != NULL; 
         arena++, sizes++, object_size++
     ) {
+        assert(!check_unsigned_mult_overflow(CJSON_DEFAULT_ARENA_SIZE, *object_size));
+
         const unsigned arena_size = MAX(*sizes, CJSON_DEFAULT_ARENA_SIZE * *object_size);
         if(!CJSON_Arena_create_node(*arena, arena_size)) {
             return false;
