@@ -107,55 +107,109 @@ EXTERN_C bool CJSON_Array_push(struct CJSON_Array *const array, struct CJSON_Par
     return true;
 }
 
-#define CJSON_GET_TYPE        CJSON_STRING
-#define CJSON_GET_MEMBER      string.chars
-#define CJSON_GET_SUFFIX      string
-#define CJSON_GET_RETURN_TYPE const char*
-#include "cjson-array-get-template.h"
+EXTERN_C const char *CJSON_Array_get_string(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+    assert(array != NULL);
+    assert(success != NULL);
 
-#define CJSON_GET_TYPE        CJSON_FLOAT64
-#define CJSON_GET_MEMBER      float64
-#define CJSON_GET_SUFFIX      float64
-#define CJSON_GET_RETURN_TYPE double
-#include "cjson-array-get-template.h"
+    struct CJSON *const json = CJSON_Array_get(array, index);
+    if(json == NULL) {
+        *success = false;
+        return 0;
+    }
+    
+    return CJSON_as_string(json, success);
+}
 
-#define CJSON_GET_TYPE        CJSON_INT64
-#define CJSON_GET_MEMBER      int64
-#define CJSON_GET_SUFFIX      int64
-#define CJSON_GET_RETURN_TYPE int64_t
-#include "cjson-array-get-template.h"
+EXTERN_C double CJSON_Array_get_float64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+    assert(array != NULL);
+    assert(success != NULL);
 
-#define CJSON_GET_TYPE        CJSON_UINT64
-#define CJSON_GET_MEMBER      uint64
-#define CJSON_GET_SUFFIX      uint64
-#define CJSON_GET_RETURN_TYPE uint64_t
-#include "cjson-array-get-template.h"
+    struct CJSON *const json = CJSON_Array_get(array, index);
+    if(json == NULL) {
+        *success = false;
+        return 0;
+    }
+    
+    return CJSON_as_float64(json, success);
+}
 
-#define CJSON_GET_TYPE        CJSON_OBJECT
-#define CJSON_GET_MEMBER      object
-#define CJSON_GET_SUFFIX      object
-#define CJSON_GET_RETURN_TYPE struct CJSON_Object*
-#define CJSON_GET_RETURN_PTR
-#include "cjson-array-get-template.h"
+EXTERN_C int64_t CJSON_Array_get_int64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+    assert(array != NULL);
+    assert(success != NULL);
 
-#define CJSON_GET_TYPE        CJSON_ARRAY
-#define CJSON_GET_MEMBER      array
-#define CJSON_GET_SUFFIX      array
-#define CJSON_GET_RETURN_TYPE struct CJSON_Array*
-#define CJSON_GET_RETURN_PTR
-#include "cjson-array-get-template.h"
+    struct CJSON *const json = CJSON_Array_get(array, index);
+    if(json == NULL) {
+        *success = false;
+        return 0;
+    }
+    
+    return CJSON_as_int64(json, success);
+}
 
-#define CJSON_GET_TYPE        CJSON_NULL
-#define CJSON_GET_MEMBER      null
-#define CJSON_GET_SUFFIX      null
-#define CJSON_GET_RETURN_TYPE void*
-#include "cjson-array-get-template.h"
+EXTERN_C uint64_t CJSON_Array_get_uint64(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+    assert(array != NULL);
+    assert(success != NULL);
 
-#define CJSON_GET_TYPE        CJSON_BOOL
-#define CJSON_GET_MEMBER      boolean
-#define CJSON_GET_RETURN_TYPE bool
-#define CJSON_GET_SUFFIX_BOOL
-#include "cjson-array-get-template.h"
+    struct CJSON *const json = CJSON_Array_get(array, index);
+    if(json == NULL) {
+        *success = false;
+        return 0;
+    }
+    
+    return CJSON_as_uint64(json, success);
+}
+
+EXTERN_C struct CJSON_Object *CJSON_Array_get_object(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+    assert(array != NULL);
+    assert(success != NULL);
+
+    struct CJSON *const json = CJSON_Array_get(array, index);
+    if(json == NULL) {
+        *success = false;
+        return 0;
+    }
+    
+    return CJSON_as_object(json, success);
+}
+
+EXTERN_C struct CJSON_Array *CJSON_Array_get_array(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+    assert(array != NULL);
+    assert(success != NULL);
+
+    struct CJSON *const json = CJSON_Array_get(array, index);
+    if(json == NULL) {
+        *success = false;
+        return 0;
+    }
+    
+    return CJSON_as_array(json, success);
+}
+
+EXTERN_C void *CJSON_Array_get_null(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+    assert(array != NULL);
+    assert(success != NULL);
+
+    struct CJSON *const json = CJSON_Array_get(array, index);
+    if(json == NULL) {
+        *success = false;
+        return 0;
+    }
+    
+    return CJSON_as_null(json, success);
+}
+
+EXTERN_C bool CJSON_Array_get_bool(const struct CJSON_Array *const array, const unsigned index, bool *const success) {
+    assert(array != NULL);
+    assert(success != NULL);
+
+    struct CJSON *const json = CJSON_Array_get(array, index);
+    if(json == NULL) {
+        *success = false;
+        return 0;
+    }
+    
+    return CJSON_as_bool(json, success);
+}
 
 EXTERN_C bool CJSON_Array_set_string(struct CJSON_Array *const array, struct CJSON_Parser *const parser, const unsigned index, const char *const value) {
     assert(array != NULL);

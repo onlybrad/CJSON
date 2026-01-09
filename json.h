@@ -83,6 +83,14 @@ struct CJSON_Object *CJSON_get_object (struct CJSON*, const char *query, bool *s
 struct CJSON_Array  *CJSON_get_array  (struct CJSON*, const char *query, bool *success);
 void                *CJSON_get_null   (struct CJSON*, const char *query, bool *success);
 bool                 CJSON_get_bool   (struct CJSON*, const char *query, bool *success);
+const char          *CJSON_as_string  (struct CJSON*, bool *success);
+double               CJSON_as_float64 (struct CJSON*, bool *success);
+int64_t              CJSON_as_int64   (struct CJSON*, bool *success);
+uint64_t             CJSON_as_uint64  (struct CJSON*, bool *success);
+struct CJSON_Object *CJSON_as_object  (struct CJSON*, bool *success);
+struct CJSON_Array  *CJSON_as_array   (struct CJSON*, bool *success);
+void                *CJSON_as_null    (struct CJSON*, bool *success);
+bool                 CJSON_as_bool    (struct CJSON*, bool *success);
 bool                 CJSON_set_string (struct CJSON*, struct CJSON_Parser*, const char*);
 void                 CJSON_set_float64(struct CJSON*, double);
 void                 CJSON_set_int64  (struct CJSON*, int64_t);
