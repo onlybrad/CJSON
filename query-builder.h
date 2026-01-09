@@ -2,7 +2,6 @@
 extern "C" {
 #endif
 
-
 #ifndef CJSON_QUERY_BUILDER_H
 #define CJSON_QUERY_BUILDER_H
 

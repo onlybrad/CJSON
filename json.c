@@ -129,17 +129,65 @@ EXTERN_C struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
 #define CJSON_GET_RETURN_TYPE double
 #include "cjson-get-template.h"
 
-#define CJSON_GET_TYPE        CJSON_INT64
-#define CJSON_GET_MEMBER      int64
-#define CJSON_GET_SUFFIX      int64
-#define CJSON_GET_RETURN_TYPE int64_t
-#include "cjson-get-template.h"
+EXTERN_C int64_t CJSON_get_int64(struct CJSON *const json, const char *const query, bool *const success) {
+    assert(json != NULL);
+    assert(json->type != CJSON_ERROR);
+    assert(query != NULL);
+    assert(success != NULL);
+                            
+    struct CJSON *const ret = CJSON_get(json, query);
+    if(ret == NULL) {
+        *success = false;
+        return 0;
+    }
 
-#define CJSON_GET_TYPE        CJSON_UINT64
-#define CJSON_GET_MEMBER      uint64
-#define CJSON_GET_SUFFIX      uint64
-#define CJSON_GET_RETURN_TYPE uint64_t
-#include "cjson-get-template.h"
+    if(ret->type == CJSON_UINT64) {
+        if(ret->value.uint64 > INT64_MAX) {
+            *success = false;
+            return 0;
+        }
+        *success = true;
+        return (int64_t)ret->value.uint64;
+    }
+
+    if(ret->type != CJSON_INT64) {
+        *success = false;
+        return 0;
+    }
+
+    *success = true;
+    return ret->value.int64;
+}
+
+EXTERN_C uint64_t CJSON_get_uint64(struct CJSON *const json, const char *const query, bool *const success) {
+    assert(json != NULL);
+    assert(json->type != CJSON_ERROR);
+    assert(query != NULL);
+    assert(success != NULL);
+                            
+    struct CJSON *const ret = CJSON_get(json, query);
+    if(ret == NULL) {
+        *success = false;
+        return 0;
+    }
+
+    if(ret->type == CJSON_INT64) {
+        if(ret->value.int64 < 0) {
+            *success = false;
+            return 0;
+        }
+        *success = true;
+        return (uint64_t)ret->value.int64;
+    }
+
+    if(ret->type != CJSON_UINT64) {
+        *success = false;
+        return 0;
+    }
+
+    *success = true;
+    return ret->value.uint64;
+}
 
 #define CJSON_GET_TYPE        CJSON_OBJECT
 #define CJSON_GET_MEMBER      object
