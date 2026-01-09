@@ -13,7 +13,7 @@ static unsigned CJSON_hash(const char *const key) {
     assert(key != NULL);
 
     const size_t length = strlen(key);
-    assert(length > 0 && length <= UINT_MAX);
+    assert(length <= UINT_MAX);
     unsigned i = 0U;
     unsigned hash = 0U;
 

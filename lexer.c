@@ -304,9 +304,9 @@ EXTERN_C enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer *const l
     assert(lexer != NULL);
     assert(parser != NULL);
 
-    while(lexer->position < lexer->length) {
-        CJSON_Lexer_skip_whitespace(lexer);
+    CJSON_Lexer_skip_whitespace(lexer);
 
+    while(lexer->position < lexer->length) {
         struct CJSON_Token *token = CJSON_Tokens_next(&parser->tokens);
         if(token == NULL) {
             return CJSON_LEXER_ERROR_MEMORY;
@@ -381,6 +381,7 @@ EXTERN_C enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer *const l
         }
         
         lexer->position += token->length;
+        CJSON_Lexer_skip_whitespace(lexer);
     }
 
     struct CJSON_Token *token = CJSON_Tokens_next(&parser->tokens);

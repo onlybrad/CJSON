@@ -19,7 +19,6 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
     assert(parser->tokens.current_token->length >= 2);
 
     const struct CJSON_Token *const token = parser->tokens.current_token;
-
     char *output_current = CJSON_ARENA_ALLOC(&parser->string_arena, token->length - 1U, char);
     if(output_current == NULL) {
         return false;
@@ -137,10 +136,10 @@ static bool CJSON_decode_string_token(struct CJSON_String *const string, struct 
         return false;
     }
 
-    const unsigned length  = (unsigned)(output_current - output_start);
-    output_current[length] = '\0';
-    string->chars          = output_start;
-    string->length         = length;
+    const unsigned length = (unsigned)(output_current - output_start);
+    output_start[length]  = '\0';
+    string->chars         = output_start;
+    string->length        = length;
 
     return true;
 }
