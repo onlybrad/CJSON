@@ -345,6 +345,13 @@ static void test_deep_nesting(void) {
     assert(query_builder.json->type == CJSON_STRING);
     value = query_builder.json->value.string.chars;
     assert(strcmp(value, "value") == 0);
+
+    query_builder = CJSON_get_query_builder(&parser.json);
+    CJSON_QueryBuilder_format(&query_builder, "kkkkki", "key1", "key2", "key3", "key4", "key5", 5U);
+    assert(query_builder.json != NULL);
+    assert(query_builder.json->type == CJSON_STRING);
+    value = query_builder.json->value.string.chars;
+    assert(strcmp(value, "value") == 0);
     
     CJSON_Parser_free(&parser);
 }

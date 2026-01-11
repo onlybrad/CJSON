@@ -160,7 +160,7 @@ example:
 "some-key.some-array[10].someOtherKey" //equivalent
 ```
 
- Or you can use the struct QueryBuilder.
+ Or you can use the struct CJSON_QueryBuilder and associated functions.
 
 ```c
 #include <cjson.h>
@@ -182,6 +182,15 @@ int main(void) {
     CJSON_QueryBuilder_key(&query_builder, "key1");
     CJSON_QueryBuilder_key(&query_builder, "innerKey");
     CJSON_QueryBuilder_index(&query_builder, 5U);
+    if(query_builder.json != NULL) {
+        //if my_value is not NULL then the CJSON struct at the parser has this form: {"key1": {"innerKey": [...,...,...,...,...,my_value]}}
+        
+        //...
+    }
+
+    //third way. the format accepts 2 characters: 'k' for keys and 'i' for index. The types are const char* and unsigned respectively. Any other character is ignored.
+    query_builder = CJSON_get_query_builder(&parser->json);
+    CJSON_QueryBuilder_format(&query_builder, "kki", "key1", "key2", 5U);
     if(query_builder.json != NULL) {
         //if my_value is not NULL then the CJSON struct at the parser has this form: {"key1": {"innerKey": [...,...,...,...,...,my_value]}}
         

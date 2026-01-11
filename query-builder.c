@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "query-builder.h"
 #include "json.h"
@@ -15,6 +16,7 @@ EXTERN_C struct CJSON_QueryBuilder CJSON_get_query_builder(struct CJSON *json) {
 
 EXTERN_C void CJSON_QueryBuilder_key(struct CJSON_QueryBuilder *const query_builder, const char *key) {
     assert(query_builder != NULL);
+    assert(key != NULL);
 
     if(query_builder->json == NULL) {
         return;
@@ -41,4 +43,24 @@ EXTERN_C void CJSON_QueryBuilder_index(struct CJSON_QueryBuilder *const query_bu
     }
 
     query_builder->json = CJSON_Array_get(&query_builder->json->value.array, index);
+}
+
+void CJSON_QueryBuilder_format(struct CJSON_QueryBuilder *const query_builder, const char *format, ...) {
+    assert(query_builder != NULL);
+
+    va_list args;
+    for(va_start(args, format); query_builder->json != NULL && *format != '\0'; format++) {
+        switch(*format) {
+        case 'k': {
+            CJSON_QueryBuilder_key(query_builder, va_arg(args, const char*));
+            break;
+        }
+        case 'i': {
+            CJSON_QueryBuilder_index(query_builder, va_arg(args, unsigned));
+            break;
+        }
+        }
+    }
+
+    va_end(args);
 }

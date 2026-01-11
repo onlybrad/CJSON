@@ -14,6 +14,7 @@ struct CJSON_QueryBuilder {
 struct CJSON_QueryBuilder CJSON_get_query_builder(struct CJSON*);
 void CJSON_QueryBuilder_key  (struct CJSON_QueryBuilder*, const char *key);
 void CJSON_QueryBuilder_index(struct CJSON_QueryBuilder*, unsigned index);
+void CJSON_QueryBuilder_format(struct CJSON_QueryBuilder*, const char *format, ...);
 
 #endif
 
