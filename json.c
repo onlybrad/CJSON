@@ -95,7 +95,7 @@ EXTERN_C struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
             key[key_size] = '\0';
 
             bool success;
-            uint64_t index = parse_uint64(key, &success);
+            uint64_t index = CJSON_parse_uint64(key, &success);
             if(!success) {
                 return NULL;
             }
@@ -119,7 +119,6 @@ EXTERN_C struct CJSON *CJSON_get(struct CJSON *json, const char *query) {
 
 EXTERN_C const char *CJSON_get_string(struct CJSON *const json, const char *const query, bool *const success) {
     assert(json != NULL);
-    assert(json->type != CJSON_ERROR);
     assert(query != NULL);
     assert(success != NULL);
                             
@@ -134,7 +133,6 @@ EXTERN_C const char *CJSON_get_string(struct CJSON *const json, const char *cons
 
 EXTERN_C double CJSON_get_float64(struct CJSON *const json, const char *const query, bool *const success) {
     assert(json != NULL);
-    assert(json->type != CJSON_ERROR);
     assert(query != NULL);
     assert(success != NULL);
                             
@@ -149,7 +147,6 @@ EXTERN_C double CJSON_get_float64(struct CJSON *const json, const char *const qu
 
 EXTERN_C int64_t CJSON_get_int64(struct CJSON *const json, const char *const query, bool *const success) {
     assert(json != NULL);
-    assert(json->type != CJSON_ERROR);
     assert(query != NULL);
     assert(success != NULL);
                             
@@ -164,7 +161,6 @@ EXTERN_C int64_t CJSON_get_int64(struct CJSON *const json, const char *const que
 
 EXTERN_C uint64_t CJSON_get_uint64(struct CJSON *const json, const char *const query, bool *const success) {
     assert(json != NULL);
-    assert(json->type != CJSON_ERROR);
     assert(query != NULL);
     assert(success != NULL);
                             
@@ -179,7 +175,6 @@ EXTERN_C uint64_t CJSON_get_uint64(struct CJSON *const json, const char *const q
 
 EXTERN_C struct CJSON_Object *CJSON_get_object(struct CJSON *const json, const char *const query, bool *const success) {
     assert(json != NULL);
-    assert(json->type != CJSON_ERROR);
     assert(query != NULL);
     assert(success != NULL);
                             
@@ -194,7 +189,6 @@ EXTERN_C struct CJSON_Object *CJSON_get_object(struct CJSON *const json, const c
 
 EXTERN_C struct CJSON_Array *CJSON_get_array(struct CJSON *const json, const char *const query, bool *const success) {
     assert(json != NULL);
-    assert(json->type != CJSON_ERROR);
     assert(query != NULL);
     assert(success != NULL);
                             
@@ -209,7 +203,6 @@ EXTERN_C struct CJSON_Array *CJSON_get_array(struct CJSON *const json, const cha
 
 EXTERN_C void *CJSON_get_null(struct CJSON *const json, const char *const query, bool *const success) {
     assert(json != NULL);
-    assert(json->type != CJSON_ERROR);
     assert(query != NULL);
     assert(success != NULL);
                             
@@ -224,7 +217,6 @@ EXTERN_C void *CJSON_get_null(struct CJSON *const json, const char *const query,
 
 EXTERN_C bool CJSON_get_bool(struct CJSON *const json, const char *const query, bool *const success) {
     assert(json != NULL);
-    assert(json->type != CJSON_ERROR);
     assert(query != NULL);
     assert(success != NULL);
                             
@@ -279,7 +271,7 @@ int64_t CJSON_as_int64(struct CJSON *const json, bool *success) {
         return json->value.int64;
 
     case CJSON_UINT64:
-        if(json->value.uint64 > INT64_MAX) {
+        if(json->value.uint64 > (uint64_t)INT64_MAX) {
             *success = false;
             return 0;
         }
@@ -287,7 +279,7 @@ int64_t CJSON_as_int64(struct CJSON *const json, bool *success) {
         return (int64_t)json->value.uint64;
 
     case CJSON_FLOAT64:
-        if(json->value.float64 < INT64_MIN || json->value.float64 > INT64_MAX) {
+        if(json->value.float64 < (double)INT64_MIN || json->value.float64 > (double)INT64_MAX) {
             *success = false;
             return 0;
         }
@@ -315,7 +307,7 @@ uint64_t CJSON_as_uint64(struct CJSON *const json, bool *success) {
         return json->value.uint64;
 
     case CJSON_FLOAT64:
-        if(json->value.float64 < 0.0 || json->value.float64 > UINT64_MAX) {
+        if(json->value.float64 < 0.0 || json->value.float64 > (double)UINT64_MAX) {
             *success = false;
             return 0;
         }

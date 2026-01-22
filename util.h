@@ -43,21 +43,21 @@ extern "C" {
 #define IS_VALID_2_BYTES_UTF16(CODEPOINT) (CODEPOINT < 0xD7FF || CODEPOINT >= 0xE000)
 #define IS_VALID_4_BYTES_UTF16(HIGH, LOW) (HIGH >= 0xD800 && HIGH <= 0xDBFF && LOW >= 0xDC00 && LOW <= 0xDFFF)
 
-bool        is_whitespace       (char c);
-bool        is_delimiter        (char c);
-bool        is_digit            (char c);
-uint16_t    hex_to_utf16        (const char *unicode, bool *success);
-unsigned    utf16_to_utf8_2bytes(char *destination, uint16_t codepoint);
-void        utf16_to_utf8_4bytes(char *destination, uint16_t high, uint16_t low);
-double      parse_float64       (const char *str, bool *success);
-long double parse_long_double   (const char *str, bool *success);
-uint64_t    parse_uint64        (const char *str, bool *success);
-int64_t     parse_int64         (const char *str, bool *success);
-void        print_bytes         (const void *buffer, const size_t size);
-uint64_t    usec_timestamp      (void);
+bool        CJSON_is_whitespace       (char c);
+bool        CJSON_is_delimiter        (char c);
+bool        CJSON_is_digit            (char c);
+uint16_t    CJSON_hex_to_utf16        (const char *unicode, bool *success);
+unsigned    CJSON_utf16_to_utf8_2bytes(char *destination, uint16_t codepoint);
+void        CJSON_utf16_to_utf8_4bytes(char *destination, uint16_t high, uint16_t low);
+double      CJSON_parse_float64       (const char *str, bool *success);
+long double CJSON_parse_long_double   (const char *str, bool *success);
+uint64_t    CJSON_parse_uint64        (const char *str, bool *success);
+int64_t     CJSON_parse_int64         (const char *str, bool *success);
+void        CJSON_print_bytes         (const void *buffer, const size_t size);
+uint64_t    CJSON_usec_timestamp      (void);
 
-unsigned safe_unsigned_mult(unsigned a, unsigned b, bool *success);
-bool     check_unsigned_mult_overflow(unsigned a, unsigned b);
+unsigned CJSON_safe_unsigned_mult          (unsigned a, unsigned b, bool *success);
+bool     CJSON_check_unsigned_mult_overflow(unsigned a, unsigned b);
 
 #endif
 

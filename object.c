@@ -9,18 +9,16 @@
 
 static char DELETED_ENTRY[] = {0};
 
-static unsigned CJSON_hash(const char *const key) {
+static unsigned CJSON_hash(const char *key) {
     assert(key != NULL);
+    assert(strlen(key) <= UINT_MAX);
 
-    const size_t length = strlen(key);
-    assert(length <= UINT_MAX);
-    unsigned i = 0U;
     unsigned hash = 0U;
-
-    while (i != (unsigned)length) {
-        hash += (unsigned)key[i++];
+    while(*key != '\0') {
+        hash += (unsigned)(*key);
         hash += hash << 10;
         hash ^= hash >> 6;
+        key++;
     }
     hash += hash << 3;
     hash ^= hash >> 11;

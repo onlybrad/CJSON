@@ -57,7 +57,7 @@ EXTERN_C struct CJSON_Token *CJSON_Tokens_next(struct CJSON_Tokens *const tokens
 
     if(tokens->count == tokens->capacity) {
         bool success;
-        const unsigned new_capacity = safe_unsigned_mult(tokens->capacity, 2U, &success);
+        const unsigned new_capacity = CJSON_safe_unsigned_mult(tokens->capacity, 2U, &success);
         if(!success || !CJSON_Tokens_reserve(tokens, new_capacity)) {
             return NULL;
         }

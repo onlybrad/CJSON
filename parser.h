@@ -11,21 +11,19 @@ extern "C" {
 #include "json.h"
 #include "tokens.h"
 #include "allocator.h"
-
 struct CJSON_Parser {
-    struct CJSON_Counters counters;
-    struct CJSON          json;
-    struct CJSON_Tokens   tokens;
-    struct CJSON_Arena    array_arena,
-                          object_arena,
-                          string_arena;
+    enum   CJSON_Error error;
+    struct CJSON_Arena array_arena,
+                       object_arena,
+                       string_arena,
+                       json_arena;
 };
 
-bool CJSON_Parser_init      (struct CJSON_Parser*);
-void CJSON_Parser_parse_init(struct CJSON_Parser*);
-void CJSON_Parser_free      (struct CJSON_Parser*);
-bool CJSON_parse            (struct CJSON_Parser*, const char *data, unsigned length);
-bool CJSON_parse_file       (struct CJSON_Parser*, const char *path);
+void          CJSON_Parser_init(struct CJSON_Parser*);
+void          CJSON_Parser_free(struct CJSON_Parser*);
+struct CJSON *CJSON_new        (struct CJSON_Parser*);
+struct CJSON *CJSON_parse      (struct CJSON_Parser*, const char *data, unsigned length);
+struct CJSON *CJSON_parse_file (struct CJSON_Parser*, const char *path);
 
 const char *CJSON_get_error(const struct CJSON_Parser*);
 

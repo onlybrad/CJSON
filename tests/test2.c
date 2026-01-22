@@ -17,15 +17,15 @@ int main(void) {
         return EXIT_FAILURE;
     }
 
-    const uint64_t start = usec_timestamp();
+    const uint64_t start = CJSON_usec_timestamp();
     struct CJSON_Parser parser;
-    CJSON_Parser_parse_init(&parser);
-    if(!CJSON_parse(&parser, (const char*)file_contents.data, file_contents.size)) {
+    CJSON_Parser_init(&parser);
+    if(CJSON_parse(&parser, (const char*)file_contents.data, file_contents.size) == NULL) {
         fputs(CJSON_get_error(&parser), stderr);
         CJSON_FileContents_free(&file_contents);
         return EXIT_FAILURE;
     }
-    const uint64_t end = usec_timestamp();
+    const uint64_t end = CJSON_usec_timestamp();
     printf("Parsing time: %" PRIu64 " microseconds\n", end - start);
 
     CJSON_FileContents_free(&file_contents);

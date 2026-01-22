@@ -52,9 +52,10 @@ This will create a release build of the static library as cjson.a, link your pro
 
 int main(void) {
     struct CJSON_Parser parser;
-    //call CJSON_Parser_parse_init to initialize the struct in a valid state for parsing
-    CJSON_Parser_parse_init(&parser);
-    if(!CJSON_parse_file(&parser, "path/to/file")) {
+    //call CJSON_Parser_init to initialize the CJSON_Parser struct in a valid
+    CJSON_Parser_init(&parser);
+    const struct CJSON *const json = CJSON_parse_file(&parser, "path/to/file");
+    if(json == NULL) {
         return EXIT_FAILURE;
     }
 
@@ -80,8 +81,10 @@ int main(void) {
     "}";
 
     struct CJSON_Parser parser;
-    CJSON_Parser_parse_init(&parser);
-    if(!CJSON_parse(&parser, json_example, (unsigned)(sizeof(json_example)) - 1U)) {
+    //call CJSON_Parser_init to initialize the CJSON_Parser struct in a valid
+    CJSON_Parser_init(&parser);
+    const struct CJSON *const json = CJSON_parse(&parser, json_example, (unsigned)(sizeof(json_example)) - 1U);
+    if(json == NULL) {
         return EXIT_FAILURE;
     }
 
@@ -106,35 +109,35 @@ int main(void) {
 int main(void) {
     //...
 
-    switch(parser.json->type) {
+    switch(json->type) {
     case CJSON_OBJECT:
-        const struct CJSON_Object *const object = &parser.json->data.object;
+        const struct CJSON_Object *const object = &json->data.object;
         break;
     case CJSON_ARRAY:
-        const struct CJSON_Array *const array = &parser.json->data.array;
+        const struct CJSON_Array *const array = &json->data.array;
         break;
     case CJSON_STRING:
-        const struct CJSON_String *const string = &parser.json->data.string;
+        const struct CJSON_String *const string = &json->data.string;
         const char *const c_string              = string->chars;
         const unsigned length                   = string->length;
         break;
     case CJSON_FLOAT64:
-        const double float64 = parser.json->data.float64;
+        const double float64 = json->data.float64;
         break;
     case CJSON_INT64:
-        const int64_t int64 = parser.json->data.int64;
+        const int64_t int64 = json->data.int64;
         break;
     case CJSON_UINT64:
-        const int64_t uint64 = parser.json->data.uint64;
+        const int64_t uint64 = json->data.uint64;
         break;
     case CJSON_BOOL:
-        const bool boolean = parser.json->data.boolean;
+        const bool boolean = json->data.boolean;
         break;
     case CJSON_NULL:
-        const void *const null = parser.json->data.null;
+        const void *const null = json->data.null;
         break;
     case CJSON_ERROR:
-        const enum CJSON_Error error = parser.json->data.error;
+        const enum CJSON_Error error = json->data.error;
         break;
     }
 
@@ -170,7 +173,7 @@ int main(void) {
     //...
 
     //first way
-    const struct CJSON *const my_value = CJSON_get(&parser->json, ".key1.innerKey[5]");
+    const struct CJSON *const my_value = CJSON_get(json, ".key1.innerKey[5]");
     if(my_value != NULL) {
         //if my_value is not NULL then the CJSON struct at the parser has this form: {"key1": {"innerKey": [...,...,...,...,...,my_value]}}
         
@@ -178,7 +181,7 @@ int main(void) {
     }
 
     //second way
-    struct CJSON_QueryBuilder query_builder = CJSON_get_query_builder(&parser->json);
+    struct CJSON_QueryBuilder query_builder = CJSON_get_query_builder(json);
     CJSON_QueryBuilder_key(&query_builder, "key1");
     CJSON_QueryBuilder_key(&query_builder, "innerKey");
     CJSON_QueryBuilder_index(&query_builder, 5U);
@@ -189,7 +192,7 @@ int main(void) {
     }
 
     //third way. the format accepts 2 characters: 'k' for keys and 'i' for index. The types are const char* and unsigned respectively. Any other character is ignored.
-    query_builder = CJSON_get_query_builder(&parser->json);
+    query_builder = CJSON_get_query_builder(json);
     CJSON_QueryBuilder_format(&query_builder, "kki", "key1", "key2", 5U);
     if(query_builder.json != NULL) {
         //if my_value is not NULL then the CJSON struct at the parser has this form: {"key1": {"innerKey": [...,...,...,...,...,my_value]}}
@@ -224,7 +227,7 @@ int main(void) {
     //...
 
     bool success;
-    const struct CJSON_Array *const my_array = CJSON_get_array(&parser->json, ".someKey.innerKey", &success);
+    const struct CJSON_Array *const my_array = CJSON_get_array(json, ".someKey.innerKey", &success);
     if(success) {
         //if success is true
         //   the CJSON struct at the parser has this form: {"key1": {"innerKey": my_value}}
@@ -267,10 +270,10 @@ int main(void) {
 
     //The CJSON_Array struct will be shallow copied by the CJSON_set_array function
     //The parser is now "[]"
-    CJSON_set_array(&parser->json, &array);
+    CJSON_set_array(json, &array);
 
     //The parser is now "true"
-    CJSON_set_bool(&parser->json, true);
+    CJSON_set_bool(json, true);
     
     //..
 
@@ -290,7 +293,7 @@ use the CJSON_get_error function to get the error as a statically allocated c-st
 #include <stdio.h>
 
 int main(void) {
-    struct CJSON_Parser parser;
+    struct CJSON_Parser parser = ...;
 
     if(!CJSON_parse_file(&parser, "/some/path/to/file.json")) {
         fputs(CJSON_get_error(&parser), stderr);
@@ -313,7 +316,7 @@ int main(void) {
 int main(void) {
     //...
 
-    struct CJSON_Object *object;
+    struct CJSON_Object *object = ...;
 
     //...
 
@@ -348,7 +351,7 @@ Available functions:
 int main(void) {
     //...
 
-    struct CJSON_Object *object;
+    struct CJSON_Object *object = ...;
 
     //...
 
@@ -375,7 +378,7 @@ int main(void) {
 int main(void) {
     //...
 
-    struct CJSON_Object *object;
+    struct CJSON_Object *object = ...;
 
     //...
 
@@ -396,8 +399,8 @@ int main(void) {
 int main(void) {
     //...
 
-    struct CJSON        *some_value;
-    struct CJSON_Object *object;
+    struct CJSON        *some_value = ...;
+    struct CJSON_Object *object     = ...;
 
     //...
 
@@ -433,7 +436,7 @@ Available functions:
 int main(void) {
     //...
 
-    struct CJSON_Object *object;
+    struct CJSON_Object *object = ...;
 
     //...
 
@@ -463,7 +466,7 @@ int main(void) {
 int main(void) {
     //...
 
-    struct CJSON_Array *array;
+    struct CJSON_Array *array = ...;
 
     //...
 
@@ -498,7 +501,7 @@ Available functions:
 int main(void) {
     //...
 
-    struct CJSON_Array *array;
+    struct CJSON_Array *array = ...;
 
     //...
 
@@ -528,7 +531,7 @@ use the "count" member to access the length of the CJSON_Array struct, and "valu
 int main(void) {
     //...
 
-    struct CJSON_Array *array;
+    struct CJSON_Array *array = ...;
 
     //...
 
@@ -555,8 +558,8 @@ If the index is greater than the length of the array, all CJSON struct values be
 int main(void) {
     //...
 
-    struct CJSON       *some_value;
-    struct CJSON_Array *array;
+    struct CJSON       *some_value = ...;
+    struct CJSON_Array *array      = ...;
 
     //...
 
@@ -622,7 +625,7 @@ int main(void) {
 int main(void) {
     //...
 
-    struct CJSON_Array *array;
+    struct CJSON_Array *array = ...;
 
     //...
 

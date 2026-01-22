@@ -206,7 +206,7 @@ EXTERN_C void *CJSON_Arena_alloc_objects(struct CJSON_Arena *const arena, const 
     assert((alignment & (alignment - 1U)) == 0U);
 
     bool success;
-    const unsigned total_size = safe_unsigned_mult(count, size, &success);
+    const unsigned total_size = CJSON_safe_unsigned_mult(count, size, &success);
     
     return success ? CJSON_Arena_alloc(arena, total_size, alignment) : NULL;
 }
@@ -246,7 +246,6 @@ bool CJSON_Arena_reserve(struct CJSON_Arena *const arena, const unsigned size, u
     assert(size > 0U);
     assert((alignment & (alignment - 1U)) == 0U);
 
-    
     if(alignment == 0) {
         alignment = CJSON_ALIGNOF(uintmax_t);
     }

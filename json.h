@@ -29,6 +29,7 @@ enum CJSON_Error {
     CJSON_ERROR_ARRAY_VALUE,
     CJSON_ERROR_MISSING_COLON,
     CJSON_ERROR_MISSING_COMMA_OR_RCURLY,
+    CJSON_ERROR_MISSING_COMMA_OR_RBRACKET,
     CJSON_ERROR_FILE,
     CJSON_ERROR_MEMORY
 };
@@ -39,7 +40,6 @@ struct CJSON_String {
 };
 
 enum CJSON_Type {
-    CJSON_ERROR,
     CJSON_STRING,
     CJSON_FLOAT64,
     CJSON_INT64,
@@ -59,7 +59,6 @@ union CJSON_Value {
     struct CJSON_Object object;
     void               *null;
     bool                boolean;
-    enum CJSON_Error    error;
 };
 
 struct CJSON {

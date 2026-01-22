@@ -61,7 +61,7 @@ EXTERN_C bool CJSON_Stack_push(struct CJSON_Stack *const stack, void *const datu
     
     if(stack->count == stack->capacity) {
         bool success;
-        const unsigned new_capacity = safe_unsigned_mult(stack->capacity, 2U, &success);
+        const unsigned new_capacity = CJSON_safe_unsigned_mult(stack->capacity, 2U, &success);
         if(!success || !CJSON_Stack_reserve(stack, new_capacity)) {
             return false;
         }
