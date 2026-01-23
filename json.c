@@ -135,7 +135,7 @@ static char *CJSON_Object_to_string(const struct CJSON_Object *const object, cha
         key_value = object->entries + object->capacity - 1U;
         if(CJSON_KV_is_used(key_value)) {
             string = CJSON_KV_to_string_with_indentation(key_value, string, indentation, level);
-        } else {
+        } else if(*string == ',') {
             string--;
         }
 
@@ -155,7 +155,7 @@ static char *CJSON_Object_to_string(const struct CJSON_Object *const object, cha
         key_value = object->entries + object->capacity - 1U;
         if(CJSON_KV_is_used(key_value)) {
             string = CJSON_KV_to_string(key_value, string);
-        } else {
+        } else if(*string == ',') {
             string--;
         }
     }
