@@ -50,24 +50,31 @@ static char *CJSON_Array_to_string(const struct CJSON_Array *const array, char *
 
     *(string++) = '[';
 
-    if(indentation > 0U) {
-        for(unsigned i = 0U; i < array->count - 1U; i++) {
-            string = CJSON_Array_element_to_string(array->values + i, string, indentation, level);
-            *(string++) = ',';
+    do {
+        if(array->count == 0U) {
+            break;
         }
-        string = CJSON_Array_element_to_string(array->values + array->count - 1U, string, indentation, level);
-        *(string++) = '\n';
-        const size_t whitespace_size = (size_t)(indentation * (level - 1U));
-        memset(string, ' ', whitespace_size);
-        string += whitespace_size;
 
-    } else {
+        if(indentation > 0U) {
+            for(unsigned i = 0U; i < array->count - 1U; i++) {
+                string = CJSON_Array_element_to_string(array->values + i, string, indentation, level);
+                *(string++) = ',';
+            }
+            string = CJSON_Array_element_to_string(array->values + array->count - 1U, string, indentation, level);
+            *(string++) = '\n';
+            const size_t whitespace_size = (size_t)(indentation * (level - 1U));
+            memset(string, ' ', whitespace_size);
+            string += whitespace_size;
+            break;
+        }
+
         for(unsigned i = 0U; i < array->count - 1U; i++) {
             string = CJSON_JSON_to_string(array->values + i, string, 0U, 0U);
             *(string++) = ',';
         }
         string = CJSON_JSON_to_string(array->values + array->count - 1U, string, 0U, 0U);
-    }
+        
+    } while(0);
 
     *(string++) = ']';
     *string     = '\0';
@@ -123,28 +130,34 @@ static char *CJSON_Object_to_string(const struct CJSON_Object *const object, cha
 
     *(string++) = '{';
 
-    if(indentation > 0U) {
-        for(unsigned i = 0U; i < object->capacity - 1U; i++) {
-            key_value = object->entries + i;
+    do {
+        if(object->capacity == 0U) {
+            break;
+        }
+
+        if(indentation > 0U) {
+            for(unsigned i = 0U; i < object->capacity - 1U; i++) {
+                key_value = object->entries + i;
+                if(CJSON_KV_is_used(key_value)) {
+                    string = CJSON_KV_to_string_with_indentation(key_value, string, indentation, level);
+                    *(string++) = ',';
+                }
+            }
+
+            key_value = object->entries + object->capacity - 1U;
             if(CJSON_KV_is_used(key_value)) {
                 string = CJSON_KV_to_string_with_indentation(key_value, string, indentation, level);
-                *(string++) = ',';
+            } else if(string[-1] == ',') {
+                string--;
             }
+
+            *(string++) = '\n';
+            const size_t whitespace_size = (size_t)(indentation * (level - 1U));
+            memset(string, ' ', whitespace_size);
+            string += whitespace_size;
+            break;
         }
 
-        key_value = object->entries + object->capacity - 1U;
-        if(CJSON_KV_is_used(key_value)) {
-            string = CJSON_KV_to_string_with_indentation(key_value, string, indentation, level);
-        } else if(*string == ',') {
-            string--;
-        }
-
-        *(string++) = '\n';
-        const size_t whitespace_size = (size_t)(indentation * (level - 1U));
-        memset(string, ' ', whitespace_size);
-        string += whitespace_size;
-
-    } else {
         for(unsigned i = 0U; i < object->capacity - 1U; i++) {
             key_value = object->entries + i;
             if(CJSON_KV_is_used(key_value)) {
@@ -155,10 +168,11 @@ static char *CJSON_Object_to_string(const struct CJSON_Object *const object, cha
         key_value = object->entries + object->capacity - 1U;
         if(CJSON_KV_is_used(key_value)) {
             string = CJSON_KV_to_string(key_value, string);
-        } else if(*string == ',') {
+        } else if(string[-1] == ',') {
             string--;
         }
-    }
+
+    } while(0);
 
     *(string++) = '}';
     *string     = '\0';
