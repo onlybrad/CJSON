@@ -40,6 +40,14 @@ extern "C" {
     #define VOID_PTR_TO_UNSIGNED(VOID_PTR)((unsigned)(uintptr_t)(VOID_PTR))
 #endif
 
+#ifndef DBL_PRECISION
+    #ifdef DBL_DECIMAL_DIG
+        #define DBL_PRECISION DBL_DECIMAL_DIG
+    #else
+        #define DBL_PRECISION DBL_DIG
+    #endif
+#endif
+
 #define IS_VALID_2_BYTES_UTF16(CODEPOINT) (CODEPOINT < 0xD7FF || CODEPOINT >= 0xE000)
 #define IS_VALID_4_BYTES_UTF16(HIGH, LOW) (HIGH >= 0xD800 && HIGH <= 0xDBFF && LOW >= 0xDC00 && LOW <= 0xDFFF)
 

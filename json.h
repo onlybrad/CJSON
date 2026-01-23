@@ -98,6 +98,9 @@ void                 CJSON_set_object (struct CJSON*, const struct CJSON_Object*
 void                 CJSON_set_array  (struct CJSON*, const struct CJSON_Array*);
 void                 CJSON_set_null   (struct CJSON*);
 void                 CJSON_set_bool   (struct CJSON*, bool);
+char                *CJSON_to_string  (const struct CJSON*, unsigned indentation);
+unsigned             CJSON_to_string_size(const struct CJSON*, unsigned indentation);
+bool                 CJSON_to_file(const struct CJSON*, const char *path, unsigned indentation);
 
 #endif
 

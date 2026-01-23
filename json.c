@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
+#include <inttypes.h>
 
 #include "json.h"
 #include "parser.h"
@@ -8,8 +10,309 @@
 #include "tokens.h"
 #include "allocator.h"
 #include "util.h"
+#include "file.h"
 
 #define UNSIGNED_MAX_LENGTH 10U
+
+static unsigned CJSON_JSON_to_string_size(const struct CJSON *const json, const unsigned indentation, const unsigned level);
+
+static char *CJSON_JSON_to_string(const struct CJSON *const json, char *const string, const unsigned indentation, const unsigned level);
+
+static char *CJSON_String_to_string(const struct CJSON_String *const value, char *string) {
+    assert(value != NULL);
+    assert(string != NULL);
+
+    *(string++) = '"';
+    *string     = '\0';
+    strcat(string, value->chars);
+    string[value->length     ] = '"';
+    string[value->length + 1U] = '\0';
+
+    return string + value->length + 1U;
+}
+
+static char *CJSON_Array_element_to_string(const struct CJSON *const json, char *string, const unsigned indentation, const unsigned level) {
+    assert(json != NULL);
+    assert(string != NULL);
+
+    const size_t whitespace_size = (size_t)(indentation * level);
+
+    *(string++) = '\n';
+    memset(string, ' ', whitespace_size);
+    string += whitespace_size;
+
+    return CJSON_JSON_to_string(json, string, indentation, level + 1U);
+}
+
+static char *CJSON_Array_to_string(const struct CJSON_Array *const array, char *string, const unsigned indentation, const unsigned level) {
+    assert(array != NULL);
+    assert(string != NULL);
+
+    *(string++) = '[';
+
+    if(indentation > 0U) {
+        for(unsigned i = 0U; i < array->count - 1U; i++) {
+            string = CJSON_Array_element_to_string(array->values + i, string, indentation, level);
+            *(string++) = ',';
+        }
+        string = CJSON_Array_element_to_string(array->values + array->count - 1U, string, indentation, level);
+        *(string++) = '\n';
+        const size_t whitespace_size = (size_t)(indentation * (level - 1U));
+        memset(string, ' ', whitespace_size);
+        string += whitespace_size;
+
+    } else {
+        for(unsigned i = 0U; i < array->count - 1U; i++) {
+            string = CJSON_JSON_to_string(array->values + i, string, 0U, 0U);
+            *(string++) = ',';
+        }
+        string = CJSON_JSON_to_string(array->values + array->count - 1U, string, 0U, 0U);
+    }
+
+    *(string++) = ']';
+    *string     = '\0';
+
+    return string;
+}
+
+static char *CJSON_KV_to_string_with_indentation(const struct CJSON_KV *const key_value, char *string, const unsigned indentation, const unsigned level) {
+    assert(key_value != NULL);
+    assert(string != NULL);
+
+    const size_t whitespace_size = (size_t)(indentation * level);
+
+    const size_t key_length = strlen(key_value->key);
+    assert(key_length < UINT_MAX);
+
+    struct CJSON_String json_string;
+    json_string.chars  = key_value->key;
+    json_string.length = (unsigned)key_length;
+
+    *(string++) = '\n';
+    memset(string, ' ', whitespace_size);
+    string     += whitespace_size;
+    string      = CJSON_String_to_string(&json_string, string);
+    *(string++) = ':';
+    *(string++) = ' ';
+    
+    return CJSON_JSON_to_string(&key_value->value, string, indentation, level + 1U);
+}
+
+static char *CJSON_KV_to_string(const struct CJSON_KV *const key_value, char *string) {
+    assert(key_value != NULL);
+    assert(string != NULL);
+
+    const size_t key_length = strlen(key_value->key);
+    assert(key_length < UINT_MAX);
+
+    struct CJSON_String json_string;
+    json_string.chars  = key_value->key;
+    json_string.length = (unsigned)key_length;
+
+    string      = CJSON_String_to_string(&json_string, string);
+    *(string++) = ':';
+
+    return CJSON_JSON_to_string(&key_value->value, string, 0U, 0U);
+}
+
+static char *CJSON_Object_to_string(const struct CJSON_Object *const object, char *string, const unsigned indentation, const unsigned level) {
+    assert(object != NULL);
+    assert(string != NULL);
+
+    const struct CJSON_KV *key_value;
+
+    *(string++) = '{';
+
+    if(indentation > 0U) {
+        for(unsigned i = 0U; i < object->capacity - 1U; i++) {
+            key_value = object->entries + i;
+            if(CJSON_KV_is_used(key_value)) {
+                string = CJSON_KV_to_string_with_indentation(key_value, string, indentation, level);
+                *(string++) = ',';
+            }
+        }
+
+        key_value = object->entries + object->capacity - 1U;
+        if(CJSON_KV_is_used(key_value)) {
+            string = CJSON_KV_to_string_with_indentation(key_value, string, indentation, level);
+        } else {
+            string--;
+        }
+
+        *(string++) = '\n';
+        const size_t whitespace_size = (size_t)(indentation * (level - 1U));
+        memset(string, ' ', whitespace_size);
+        string += whitespace_size;
+
+    } else {
+        for(unsigned i = 0U; i < object->capacity - 1U; i++) {
+            key_value = object->entries + i;
+            if(CJSON_KV_is_used(key_value)) {
+                string = CJSON_KV_to_string(key_value, string);
+                *(string++) = ',';
+            }
+        }
+        key_value = object->entries + object->capacity - 1U;
+        if(CJSON_KV_is_used(key_value)) {
+            string = CJSON_KV_to_string(key_value, string);
+        } else {
+            string--;
+        }
+    }
+
+    *(string++) = '}';
+    *string     = '\0';
+
+    return string;
+}
+
+static char *CJSON_JSON_to_string(const struct CJSON *const json, char *const string, const unsigned indentation, const unsigned level) {
+    assert(json != NULL);
+    assert(string != NULL);
+
+    switch(json->type) {
+    case CJSON_STRING:
+        return CJSON_String_to_string(&json->value.string, string);
+
+    case CJSON_FLOAT64: {
+        const int count = sprintf(string, "%.*g", DBL_PRECISION, json->value.float64); 
+        assert(count > 0);
+
+        return string + count;
+    }
+
+    case CJSON_INT64: {
+        const int count = sprintf(string, "%" PRIi64, json->value.int64); 
+        assert(count > 0);
+
+        return string + count;
+    }
+
+    case CJSON_UINT64: {
+        const int count = sprintf(string, "%" PRIu64, json->value.uint64);
+        assert(count > 0);
+
+        return string + count;
+    }
+
+    case CJSON_ARRAY:
+        return CJSON_Array_to_string(&json->value.array, string, indentation, level);
+
+    case CJSON_OBJECT:
+        return CJSON_Object_to_string(&json->value.object, string, indentation, level);
+
+    case CJSON_NULL:
+        *string = '\0';
+        strcat(string, "null");
+        return string + static_strlen("null");
+
+    case CJSON_BOOL:
+        *string = '\0';
+        if(json->value.boolean) {
+            strcat(string, "true");
+            return string + static_strlen("true");
+        }
+        strcat(string, "false");
+        return string + static_strlen("false");
+    }
+
+    return NULL;
+}
+
+static unsigned CJSON_Array_to_string_size(const struct CJSON_Array *const array, const unsigned indentation, const unsigned level) {
+    assert(array != NULL);
+
+    unsigned size = (unsigned)(static_strlen("[") + static_strlen("]"));
+
+    if(array->count > 0U) {
+        size += (array->count - 1U) * (unsigned)static_strlen(",");
+    }
+
+    if(indentation > 0U) {
+        const unsigned whitespace_size = indentation * level;
+        size += ((unsigned)static_strlen("\n") + whitespace_size) * array->count + (unsigned)static_strlen("\n") + whitespace_size - indentation;
+    }
+
+    for(unsigned i = 0U; i < array->count; i++) {
+        size += CJSON_JSON_to_string_size(array->values + i, indentation, level + 1U);
+    }
+
+    return size;
+}
+
+static unsigned CJSON_Object_to_string_size(const struct CJSON_Object *const object, const unsigned indentation, const unsigned level) {
+    assert(object != NULL);
+
+    unsigned entry_count = 0U;
+    unsigned size = (unsigned)(static_strlen("{") + static_strlen("}"));
+
+    for(unsigned i = 0U; i < object->capacity; i++) {
+        const struct CJSON_KV *const key_value = object->entries + i;
+        if(CJSON_KV_is_used(key_value)) {
+            const size_t key_length = strlen(key_value->key);
+            assert(key_length < UINT_MAX);
+
+            size += (unsigned)(static_strlen("\"") + key_length + static_strlen("\""));
+            size += CJSON_JSON_to_string_size(&object->entries[i].value, indentation, level + 1U);
+
+            entry_count++;
+        }
+    }
+
+    if(entry_count > 0U) {
+        const unsigned colon_size = indentation > 0U
+            ? (unsigned)(static_strlen(": "))
+            : (unsigned)(static_strlen(":"));
+
+        size += (entry_count - 1U) * (unsigned)(static_strlen(","));
+        size += entry_count        * colon_size;
+    }
+
+    if(indentation > 0U) {
+        const unsigned whitespace_size = indentation * level;
+        size += ((unsigned)static_strlen("\n") + whitespace_size) * entry_count + (unsigned)static_strlen("\n") + whitespace_size - indentation;
+    }
+
+    return size;
+}
+
+static unsigned CJSON_JSON_to_string_size(const struct CJSON *const json, const unsigned indentation, const unsigned level) {
+    assert(json != NULL);
+
+    switch(json->type) {
+    case CJSON_STRING:
+        return static_strlen("\"") + json->value.string.length + static_strlen("\"");
+
+    case CJSON_FLOAT64: {
+        return (unsigned)snprintf(NULL, 0, "%.*g", DBL_PRECISION, json->value.float64); 
+    }
+
+    case CJSON_INT64: {
+        return (unsigned)snprintf(NULL, 0, "%" PRIi64, json->value.int64); 
+    }
+
+    case CJSON_UINT64: {
+        return (unsigned)snprintf(NULL, 0, "%" PRIu64, json->value.uint64); 
+    }
+
+    case CJSON_ARRAY:
+        return CJSON_Array_to_string_size(&json->value.array, indentation, level);
+    
+    case CJSON_OBJECT:
+        return CJSON_Object_to_string_size(&json->value.object, indentation, level);
+
+    case CJSON_NULL:
+        return 4U;
+
+    case CJSON_BOOL:
+        return (json->value.boolean 
+            ? (unsigned)sizeof("true") 
+            : (unsigned)sizeof("false")
+        ) - 1U;
+    }
+
+    return 0U;
+}
 
 EXTERN_C struct CJSON_Array *CJSON_make_array(struct CJSON *const json, struct CJSON_Parser *const parser) {
     assert(json != NULL);
@@ -229,7 +532,7 @@ EXTERN_C bool CJSON_get_bool(struct CJSON *const json, const char *const query, 
     return CJSON_as_bool(ret, success);
 }
 
-const char *CJSON_as_string(struct CJSON *const json, bool *success) {
+EXTERN_C const char *CJSON_as_string(struct CJSON *const json, bool *success) {
     assert(json != NULL);
     assert(success != NULL);
 
@@ -441,4 +744,52 @@ EXTERN_C void CJSON_set_bool(struct CJSON *const json, const bool value) {
 
     json->type          = CJSON_BOOL;
     json->value.boolean = value;
+}
+
+EXTERN_C unsigned CJSON_to_string_size(const struct CJSON *const json, const unsigned indentation) {
+    assert(json != NULL);
+
+    return CJSON_JSON_to_string_size(json, indentation, 1U);
+}
+
+EXTERN_C char *CJSON_to_string(const struct CJSON *const json, const unsigned indentation) { 
+    assert(json != NULL);
+
+    const unsigned total_size = CJSON_to_string_size(json, indentation);
+    assert(total_size > 0U);
+
+    char *const string = (char*)CJSON_MALLOC(((size_t)total_size + 1) * sizeof(char));
+    if(string == NULL) {
+        return NULL;
+    }
+
+    const char *const end = CJSON_JSON_to_string(json, string, indentation, 1U);
+
+    assert(end - string == (unsigned)total_size);
+    (void)end;
+
+    return string;
+}
+
+bool CJSON_to_file(const struct CJSON *const json, const char *const path, const unsigned indentation) {
+    assert(json != NULL);
+    assert(path != NULL);
+    assert(path[0] != '\0');
+
+    char *const string = CJSON_to_string(json, indentation);
+    if(string == NULL) {
+        return false;
+    }
+
+    struct CJSON_FileContents file_contents;
+    file_contents.data = (unsigned char*)string;
+    file_contents.size = 0U;
+
+    if(CJSON_FileContents_put(&file_contents, path) != CJSON_FILECONTENTS_ERROR_NONE) {
+        CJSON_FREE(string);
+        return false;
+    }
+
+    CJSON_FREE(string);
+    return true;
 }

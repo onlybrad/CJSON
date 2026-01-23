@@ -38,5 +38,11 @@ test2_release.exe: ./tests/test2.c $(SOURCE)
 test2_release++.exe: ./tests/test2.c $(SOURCE)
 	$(CC++) $(INCLUDES) $(FLAGS++) $(STD++) -D NDEBUG -O3 -o test2_release++ ./tests/test2.c $(SOURCE)
 
+test3.exe: ./tests/test3.c $(SOURCE)
+	$(CC) $(INCLUDES) $(FLAGS) $(STD) -g -Og -o test3 ./tests/test3.c $(SOURCE)
+
+test3++.exe: ./tests/test3.c $(SOURCE)
+	$(CC++) $(INCLUDES) $(FLAGS++) $(STD++) -g -Og -o test3 ./tests/test3.c $(SOURCE)
+
 cleanup:
 	rm *.o

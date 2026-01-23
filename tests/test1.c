@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <stdlib.h>
+
 #include "../cjson.h"
 
 static bool success;

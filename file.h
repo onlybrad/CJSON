@@ -17,8 +17,10 @@ enum CJSON_FileContents_Error {
     CJSON_FILECONTENTS_ERROR_MEMORY,
     CJSON_FILECONTENTS_ERROR_FOPEN,
     CJSON_FILECONTENTS_ERROR_FREAD,
+    CJSON_FILECONTENTS_ERROR_FWRITE,
     CJSON_FILECONTENTS_ERROR_FSEEK,
-    CJSON_FILECONTENTS_ERROR_FTELL
+    CJSON_FILECONTENTS_ERROR_FTELL,
+    CJSON_FILECONTENTS_ERROR_FCLOSE
 };
 
 struct CJSON_FileContents {
@@ -29,6 +31,7 @@ struct CJSON_FileContents {
 void                          CJSON_FileContents_init(struct CJSON_FileContents*);
 void                          CJSON_FileContents_free(struct CJSON_FileContents*);
 enum CJSON_FileContents_Error CJSON_FileContents_get(struct CJSON_FileContents*, const char *path);
+enum CJSON_FileContents_Error CJSON_FileContents_put(const struct CJSON_FileContents*, const char *path);
 
 #endif
 

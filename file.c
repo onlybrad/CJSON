@@ -32,6 +32,37 @@ static int64_t CJSON_ftell(FILE *const file) {
 #endif    
 }
 
+static enum CJSON_FileContents_Error CJSON_fopen(FILE **const file, const char *const path, const char *const mode) {
+    assert(file != NULL);
+    assert(strcmp(mode, "rb") == 0 || strcmp(mode, "wb") == 0);
+
+#ifdef _WIN32
+    const int wide_length = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0);
+    if(wide_length == 0) {
+        *file = NULL;
+        return CJSON_FILECONTENTS_ERROR_WIN32_API;
+    }
+
+    wchar_t *const wpath = (wchar_t*)CJSON_MALLOC((size_t)wide_length * sizeof(wchar_t));
+    if(wpath == NULL) {
+        *file = NULL;
+        return CJSON_FILECONTENTS_ERROR_MEMORY;
+    }
+
+    MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, wide_length);
+
+    *file = _wfopen(wpath, strcmp(mode, "rb") == 0 ? L"rb" : L"wb");
+
+    CJSON_FREE(wpath);
+#else
+    file = fopen(path, mode);
+#endif
+
+    return *file == NULL 
+        ? CJSON_FILECONTENTS_ERROR_FOPEN
+        : CJSON_FILECONTENTS_ERROR_NONE;
+}
+
 EXTERN_C void CJSON_FileContents_init(struct CJSON_FileContents *const file_contents) {
     assert(file_contents != NULL);
 
@@ -47,31 +78,17 @@ void CJSON_FileContents_free(struct CJSON_FileContents *const file_contents) {
 }
 
 EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_get(struct CJSON_FileContents *const file_contents, const char *const path) {
+    assert(file_contents != NULL);
     assert(path != NULL);
     assert(path[0] != '\0');
 
-#ifdef _WIN32
-    const int wide_length = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0);
-    if(wide_length == 0) {
-        return CJSON_FILECONTENTS_ERROR_WIN32_API;
+    FILE *file;
+    enum CJSON_FileContents_Error error = CJSON_fopen(&file, path, "rb");
+    if(error != CJSON_FILECONTENTS_ERROR_NONE) {
+        return error;
     }
 
-    wchar_t *const wpath = (wchar_t*)CJSON_MALLOC((size_t)wide_length * sizeof(wchar_t));
-    if(wpath == NULL) {
-        return CJSON_FILECONTENTS_ERROR_MEMORY;
-    }
-
-    MultiByteToWideChar(CP_UTF8, 0, path, -1, wpath, wide_length);
-
-    FILE *const file = _wfopen(wpath, L"rb");
-
-    CJSON_FREE(wpath);
-#else
-    FILE *const file = fopen(path, "rb");
-#endif
-    enum CJSON_FileContents_Error error;
     int64_t length;
-
     do {
         if(file == NULL) {
             error = CJSON_FILECONTENTS_ERROR_FOPEN;
@@ -107,7 +124,12 @@ EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_get(struct CJSON_FileC
         }
         file_contents->data[length] = '\0';
         
-        if(fread(file_contents->data, sizeof(unsigned char), (size_t)length, file) != (size_t)length) {
+        if(fread(
+            file_contents->data,
+            sizeof(unsigned char),
+            (size_t)length, 
+            file
+        ) != (size_t)length) {
             error = CJSON_FILECONTENTS_ERROR_FREAD;
             break;
         }
@@ -125,3 +147,34 @@ EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_get(struct CJSON_FileC
     return error;
 }
 
+enum CJSON_FileContents_Error CJSON_FileContents_put(const struct CJSON_FileContents *const file_contents, const char *const path) {
+    assert(file_contents != NULL);
+    assert(path != NULL);
+    assert(path[0] != '\0');
+
+    const size_t size = file_contents->size == 0U
+        ? strlen((char*)file_contents->data)
+        : (size_t)file_contents->size;
+
+    FILE *file;
+    enum CJSON_FileContents_Error error = CJSON_fopen(&file, path, "wb");
+    if(error != CJSON_FILECONTENTS_ERROR_NONE) {
+        return error;
+    }
+
+    if(fwrite(
+        file_contents->data,
+        sizeof(file_contents->data[0]),
+        size,
+        file
+    ) != size) {
+        fclose(file);
+        return CJSON_FILECONTENTS_ERROR_FREAD;
+    }
+
+    if(fclose(file) != 0) {
+        error = CJSON_FILECONTENTS_ERROR_FCLOSE;
+    }
+       
+    return error;
+}

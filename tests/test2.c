@@ -12,7 +12,7 @@ int main(void) {
     struct CJSON_FileContents file_contents;
     CJSON_FileContents_init(&file_contents);
 
-    const enum CJSON_FileContents_Error error = CJSON_FileContents_get(&file_contents, "tests\\really-big-json-file.json");
+    const enum CJSON_FileContents_Error error = CJSON_FileContents_get(&file_contents, "tests/really-big-json-file.json");
     if(error != CJSON_FILECONTENTS_ERROR_NONE) {
         return EXIT_FAILURE;
     }

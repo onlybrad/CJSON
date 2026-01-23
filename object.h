@@ -16,6 +16,7 @@ struct CJSON_Object {
     unsigned         capacity;
 };
 
+bool                 CJSON_KV_is_used        (const struct CJSON_KV *entry);
 void                 CJSON_Object_init       (struct CJSON_Object*);
 bool                 CJSON_Object_reserve    (struct CJSON_Object*, struct CJSON_Parser*, unsigned capacity);
 struct CJSON_KV     *CJSON_Object_get_entry  (struct CJSON_Object*, struct CJSON_Parser*, const char *key);

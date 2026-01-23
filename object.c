@@ -6,6 +6,7 @@
 #include "json.h"
 #include "parser.h"
 #include "util.h"
+#include "object.h"
 
 static char DELETED_ENTRY[] = {0};
 
@@ -44,15 +45,20 @@ static bool CJSON_Object_resize(struct CJSON_Object *const object, struct CJSON_
 
     for(unsigned i = 0U; i < old_capacity; i++) {
         struct CJSON_KV *const old_entry = old_entries + i;
-        if(old_entry->key == NULL || old_entry->key == DELETED_ENTRY) {
-            continue;
+        if(CJSON_KV_is_used(old_entries)) {
+            struct CJSON_KV *const entry = CJSON_Object_get_entry(object, parser, old_entry->key);
+            entry->key   = old_entry->key;
+            entry->value = old_entry->value;
         }
-        struct CJSON_KV *const entry = CJSON_Object_get_entry(object, parser, old_entry->key);
-        entry->key   = old_entry->key;
-        entry->value = old_entry->value;
     }
 
     return true;
+}
+
+EXTERN_C bool CJSON_KV_is_used(const struct CJSON_KV *const entry) { 
+    assert(entry != NULL);
+
+    return entry->key != NULL && entry->key != DELETED_ENTRY;
 }
 
 EXTERN_C void CJSON_Object_init(struct CJSON_Object *const object) {
