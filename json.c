@@ -136,9 +136,12 @@ static char *CJSON_Object_to_string(const struct CJSON_Object *const object, cha
         }
 
         if(indentation > 0U) {
+            bool is_empty = true;
+
             for(unsigned i = 0U; i < object->capacity - 1U; i++) {
                 key_value = object->entries + i;
                 if(CJSON_KV_is_used(key_value)) {
+                    is_empty = false;
                     string = CJSON_KV_to_string_with_indentation(key_value, string, indentation, level);
                     *(string++) = ',';
                 }
@@ -146,9 +149,14 @@ static char *CJSON_Object_to_string(const struct CJSON_Object *const object, cha
 
             key_value = object->entries + object->capacity - 1U;
             if(CJSON_KV_is_used(key_value)) {
+                is_empty = false;
                 string = CJSON_KV_to_string_with_indentation(key_value, string, indentation, level);
             } else if(string[-1] == ',') {
                 string--;
+            }
+
+            if(is_empty) {
+                break;
             }
 
             *(string++) = '\n';
@@ -171,7 +179,6 @@ static char *CJSON_Object_to_string(const struct CJSON_Object *const object, cha
         } else if(string[-1] == ',') {
             string--;
         }
-
     } while(0);
 
     *(string++) = '}';
@@ -240,11 +247,11 @@ static unsigned CJSON_Array_to_string_size(const struct CJSON_Array *const array
 
     if(array->count > 0U) {
         size += (array->count - 1U) * (unsigned)static_strlen(",");
-    }
 
-    if(indentation > 0U) {
-        const unsigned whitespace_size = indentation * level;
-        size += ((unsigned)static_strlen("\n") + whitespace_size) * array->count + (unsigned)static_strlen("\n") + whitespace_size - indentation;
+        if(indentation > 0U) {
+            const unsigned whitespace_size = indentation * level;
+            size += ((unsigned)static_strlen("\n") + whitespace_size) * array->count + (unsigned)static_strlen("\n") + whitespace_size - indentation;
+        }
     }
 
     for(unsigned i = 0U; i < array->count; i++) {
@@ -280,11 +287,11 @@ static unsigned CJSON_Object_to_string_size(const struct CJSON_Object *const obj
 
         size += (entry_count - 1U) * (unsigned)(static_strlen(","));
         size += entry_count        * colon_size;
-    }
 
-    if(indentation > 0U) {
-        const unsigned whitespace_size = indentation * level;
-        size += ((unsigned)static_strlen("\n") + whitespace_size) * entry_count + (unsigned)static_strlen("\n") + whitespace_size - indentation;
+        if(indentation > 0U) {
+            const unsigned whitespace_size = indentation * level;
+            size += ((unsigned)static_strlen("\n") + whitespace_size) * entry_count + (unsigned)static_strlen("\n") + whitespace_size - indentation;
+        }
     }
 
     return size;

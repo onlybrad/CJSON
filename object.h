@@ -40,6 +40,7 @@ bool                 CJSON_Object_set_object (struct CJSON_Object*, struct CJSON
 bool                 CJSON_Object_set_array  (struct CJSON_Object*, struct CJSON_Parser*, const char *key, const struct CJSON_Array*);
 bool                 CJSON_Object_set_null   (struct CJSON_Object*, struct CJSON_Parser*, const char *key);
 bool                 CJSON_Object_set_bool   (struct CJSON_Object*, struct CJSON_Parser*, const char *key, bool);
+bool                 CJSON_Object_is_empty   (const struct CJSON_Object*);
 
 #endif
 
