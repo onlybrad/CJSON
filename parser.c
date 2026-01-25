@@ -30,13 +30,8 @@ static bool CJSON_decode_string_token(struct CJSON_Parser *const parser, struct 
     bool escaping               = false;
 
     while(input_current != input_end + 1) {
-        switch(*input_current) {
-            case '\b':
-            case '\f':
-            case '\n':
-            case '\r':
-            case '\t':
-                return false;
+        if(CJSON_is_control_char(*input_current)) {
+            return false;
         }
 
         if(!escaping) {

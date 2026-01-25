@@ -5,8 +5,6 @@ extern "C" {
 #ifndef CJSON_PARSER_H
 #define CJSON_PARSER_H
 
-#include <stdbool.h>
-
 #include "counters.h"
 #include "json.h"
 #include "tokens.h"
