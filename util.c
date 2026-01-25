@@ -47,7 +47,7 @@ EXTERN_C bool CJSON_is_digit(const char c) {
 }
 
 EXTERN_C bool CJSON_is_control_char(const char c) {
-    return c >= 0x00 && c <= 0x1F;
+    return c >= (char)0x00 && c <= (char)0x1F;
 }
 
 EXTERN_C uint16_t CJSON_hex_to_utf16(const char *const codepoint, bool *const success) {
