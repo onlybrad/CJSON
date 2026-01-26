@@ -86,7 +86,7 @@ static void test_deeply_nested_array(void) {
     const struct CJSON *const json = CJSON_parse(&parser, array, (unsigned)(sizeof(array)) - 1U);
     assert(json != NULL);
     const unsigned size = CJSON_to_string_size(json, 2U);
-    assert(size == 106U);
+    assert(size == static_strlen(array));
 }
 
 static void test_to_string(void) {
