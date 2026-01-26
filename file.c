@@ -169,7 +169,7 @@ enum CJSON_FileContents_Error CJSON_FileContents_put(const struct CJSON_FileCont
         file
     ) != size) {
         fclose(file);
-        return CJSON_FILECONTENTS_ERROR_FREAD;
+        return CJSON_FILECONTENTS_ERROR_FWRITE;
     }
 
     if(fclose(file) != 0) {

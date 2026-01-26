@@ -302,7 +302,7 @@ static unsigned CJSON_JSON_to_string_size(const struct CJSON *const json, const 
 
     switch(json->type) {
     case CJSON_STRING:
-        return static_strlen("\"") + json->value.string.length + static_strlen("\"");
+        return (unsigned)static_strlen("\"") + json->value.string.length + (unsigned)static_strlen("\"");
 
     case CJSON_FLOAT64: {
         return (unsigned)snprintf(NULL, 0, "%.*g", DBL_PRECISION, json->value.float64); 
@@ -326,10 +326,9 @@ static unsigned CJSON_JSON_to_string_size(const struct CJSON *const json, const 
         return 4U;
 
     case CJSON_BOOL:
-        return (json->value.boolean 
-            ? (unsigned)sizeof("true") 
-            : (unsigned)sizeof("false")
-        ) - 1U;
+        return json->value.boolean 
+            ? (unsigned)static_strlen("true") 
+            : (unsigned)static_strlen("false");
     }
 
     return 0U;
