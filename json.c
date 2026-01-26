@@ -814,3 +814,19 @@ bool CJSON_to_file(const struct CJSON *const json, const char *const path, const
     CJSON_FREE(string);
     return true;
 }
+
+char *CJSON_format(const char *const data, const unsigned length, const unsigned indentation) {
+    assert(data != NULL);
+    assert(length > 0U);
+
+    struct CJSON_Parser parser;
+    CJSON_Parser_init(&parser);
+    const struct CJSON *const json = CJSON_parse(&parser, data, length);
+    if(json == NULL) {
+        return NULL;
+    }
+
+    char *const string = CJSON_to_string(json, indentation);
+    CJSON_Parser_free(&parser);
+    return string;
+}

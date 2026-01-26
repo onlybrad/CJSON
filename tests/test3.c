@@ -103,7 +103,7 @@ static void test_to_string(void) {
     const char expected_indentation2[] = "[\n  {\n    \"key1\": \"value1\"\n  },\n  {\n    \"key2\": {\n      \"key3\": [\n        true,\n        {\n          \"key4\": false\n        },\n        null\n      ]\n    }\n  },\n  {\n    \"key5\": {}\n  },\n  {\n    \"key6\": []\n  },\n  {\n    \"key7\": \"\"\n  },\n  {\n    \"key8\": 100000\n  }\n]";
     const char expected_indentation4[] = "[\n    {\n        \"key1\": \"value1\"\n    },\n    {\n        \"key2\": {\n            \"key3\": [\n                true,\n                {\n                    \"key4\": false\n                },\n                null\n            ]\n        }\n    },\n    {\n        \"key5\": {}\n    },\n    {\n        \"key6\": []\n    },\n    {\n        \"key7\": \"\"\n    },\n    {\n        \"key8\": 100000\n    }\n]";
 
-    const struct CJSON *const json = CJSON_parse(&parser, array, (unsigned)static_strlen(array));
+    const struct CJSON *json = CJSON_parse(&parser, array, (unsigned)static_strlen(array));
     assert(json != NULL);
 
     char *string = CJSON_to_string(json, 0U);
@@ -117,19 +117,20 @@ static void test_to_string(void) {
     string = CJSON_to_string(json, 4U);
     assert(strcmp(string, expected_indentation4) == 0);
     CJSON_FREE(string);
-}
 
-static void test_to_file(void) {
-    const char array[] = "["
-        "{\"key1\": \"value1\"},"
-        "{\"key2\": {\"key3\": [true, {\"key4\": false}, null]}},"
-        "{\"key5\": {}},"
-        "{\"key6\": []},"
-        "{\"key7\": \"\"},"
-        "{\"key8\": 1e5}"
-    "]";
+    string = CJSON_format(array, (unsigned)static_strlen(array), 0U);
+    assert(strcmp(string, expected_indentation0) == 0);
+    CJSON_FREE(string);
 
-    const struct CJSON *const json = CJSON_parse(&parser, array, (unsigned)static_strlen(array));
+    string = CJSON_format(array, (unsigned)static_strlen(array), 2U);
+    assert(strcmp(string, expected_indentation2) == 0);
+    CJSON_FREE(string);
+
+    string = CJSON_format(array, (unsigned)static_strlen(array), 4U);
+    assert(strcmp(string, expected_indentation4) == 0);
+    CJSON_FREE(string);
+
+    json = CJSON_parse(&parser, array, (unsigned)static_strlen(array));
     assert(json != NULL);    
 
     assert(CJSON_to_file(json, "tests/test3-0-identation.json", 0U));
@@ -149,7 +150,6 @@ int main(void) {
     test_array_of_object_to_string();
     test_deeply_nested_array();
     test_to_string();
-    test_to_file();
 
     puts("All tests successful");
 
