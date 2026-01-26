@@ -106,7 +106,7 @@ EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_get(struct CJSON_FileC
             break;
         }
 
-        if((uintmax_t)length >= (uintmax_t)UINT_MAX) {
+        if(length >= (int64_t)UINT_MAX) {
             error = CJSON_FILECONTENTS_ERROR_TOO_LARGE;
             break;
         }
