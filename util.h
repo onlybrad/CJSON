@@ -53,7 +53,6 @@ extern "C" {
 
 bool        CJSON_is_whitespace       (char c);
 bool        CJSON_is_delimiter        (char c);
-bool        CJSON_is_digit            (char c);
 bool        CJSON_is_control_char     (char c);
 uint16_t    CJSON_hex_to_utf16        (const char *unicode, bool *success);
 unsigned    CJSON_utf16_to_utf8_2bytes(char *destination, uint16_t codepoint);

@@ -42,10 +42,6 @@ EXTERN_C bool CJSON_is_delimiter(const char c) {
     }
 }
 
-EXTERN_C bool CJSON_is_digit(const char c) {
-    return c >= '0' && c <= '9';
-}
-
 EXTERN_C bool CJSON_is_control_char(const char c) {
     return c >= (char)0x00 && c <= (char)0x1F;
 }

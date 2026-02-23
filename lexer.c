@@ -1,4 +1,5 @@
 #include <string.h>
+#include <ctype.h>
 #include <assert.h>
 
 #include "lexer.h"
@@ -79,7 +80,7 @@ static bool CJSON_Lexer_read_number(struct CJSON_Lexer *const lexer, struct CJSO
     token->type = CJSON_TOKEN_INT;
 
     //0 as the first character is only allowed if it's followed by a dot or by an non-digit character
-    if(data[0] == '0' && length > 1U && CJSON_is_digit(data[1])) {
+    if(data[0] == '0' && length > 1U && isdigit(data[1])) {
         success     = false;
         token->type = CJSON_TOKEN_INVALID;
 
