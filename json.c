@@ -791,7 +791,7 @@ EXTERN_C char *CJSON_to_string(const struct CJSON *const json, const unsigned in
     return string;
 }
 
-bool CJSON_to_file(const struct CJSON *const json, const char *const path, const unsigned indentation) {
+EXTERN_C bool CJSON_to_file(const struct CJSON *const json, const char *const path, const unsigned indentation) {
     assert(json != NULL);
     assert(path != NULL);
     assert(path[0] != '\0');
@@ -814,7 +814,7 @@ bool CJSON_to_file(const struct CJSON *const json, const char *const path, const
     return true;
 }
 
-char *CJSON_format(const char *const data, const unsigned length, const unsigned indentation) {
+EXTERN_C char *CJSON_format(const char *const data, const unsigned length, const unsigned indentation) {
     assert(data != NULL);
     assert(length > 0U);
 

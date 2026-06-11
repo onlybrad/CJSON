@@ -45,7 +45,7 @@ EXTERN_C void CJSON_QueryBuilder_index(struct CJSON_QueryBuilder *const query_bu
     query_builder->json = CJSON_Array_get(&query_builder->json->value.array, index);
 }
 
-void CJSON_QueryBuilder_format(struct CJSON_QueryBuilder *const query_builder, const char *format, ...) {
+EXTERN_C void CJSON_QueryBuilder_format(struct CJSON_QueryBuilder *const query_builder, const char *format, ...) {
     assert(query_builder != NULL);
 
     va_list args;

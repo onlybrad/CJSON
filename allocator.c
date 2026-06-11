@@ -241,7 +241,7 @@ EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned
     return (void*)aligned_address;
 }
 
-bool CJSON_Arena_reserve(struct CJSON_Arena *const arena, const unsigned size, unsigned alignment) {
+EXTERN_C bool CJSON_Arena_reserve(struct CJSON_Arena *const arena, const unsigned size, unsigned alignment) {
     assert(arena != NULL);
     assert(size > 0U);
     assert((alignment & (alignment - 1U)) == 0U);
@@ -264,7 +264,6 @@ bool CJSON_Arena_reserve(struct CJSON_Arena *const arena, const unsigned size, u
 
     return CJSON_Arena_create_next_node(arena, size);
 }
-
 
 EXTERN_C char *CJSON_Arena_strdup(struct CJSON_Arena *const arena, const char *const str, unsigned *const length) {
     assert(arena != NULL);

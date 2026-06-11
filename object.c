@@ -414,7 +414,7 @@ EXTERN_C bool CJSON_Object_set_bool(struct CJSON_Object *const object, struct CJ
     return CJSON_Object_set(object, parser, key, &json);
 }
 
-bool CJSON_Object_is_empty(const struct CJSON_Object *const object) {
+EXTERN_C bool CJSON_Object_is_empty(const struct CJSON_Object *const object) {
     assert(object != NULL);
 
     for(unsigned i = 0U; i < object->capacity; i++) {

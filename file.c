@@ -147,7 +147,7 @@ EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_get(struct CJSON_FileC
     return error;
 }
 
-enum CJSON_FileContents_Error CJSON_FileContents_put(const struct CJSON_FileContents *const file_contents, const char *const path) {
+EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_put(const struct CJSON_FileContents *const file_contents, const char *const path) {
     assert(file_contents != NULL);
     assert(path != NULL);
     assert(path[0] != '\0');
