@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "parser.h"
+#include "counters.h"
 #include "allocator.h"
 #include "util.h"
 #include "file.h"

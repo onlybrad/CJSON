@@ -6,9 +6,7 @@ extern "C" {
 #define CJSON_LEXER_H
 
 #include <stdbool.h>
-#include "token.h"
 #include "tokens.h"
-#include "stack.h"
 #include "counters.h"
 
 enum CJSON_Lexer_Error {
@@ -25,8 +23,8 @@ struct CJSON_Lexer {
 };
 
 void CJSON_Lexer_init(struct CJSON_Lexer*, const char *data, unsigned length);
-enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer*, struct CJSON_Tokens*, struct CJSON_Counters*);
 
+enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer*, struct CJSON_Tokens*, struct CJSON_Counters*);
 #endif
 
 #ifdef __cplusplus

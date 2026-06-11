@@ -9,6 +9,7 @@
 #include "json.h"
 #include "array.h"
 #include "object.h"
+#include "stack.h"
 
 static void CJSON_Lexer_skip_whitespace(struct CJSON_Lexer *const lexer) {
     assert(lexer != NULL);
@@ -25,7 +26,7 @@ static void CJSON_Lexer_skip_whitespace(struct CJSON_Lexer *const lexer) {
     lexer->position = position;
 }
 
-static bool CJSON_Lexer_read_string(struct CJSON_Lexer *const lexer, struct CJSON_Token *const token) {
+static bool CJSON_Lexer_read_string(const struct CJSON_Lexer *const lexer, struct CJSON_Token *const token) {
     assert(lexer != NULL);
     assert(token != NULL);
 

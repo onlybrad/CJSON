@@ -190,7 +190,7 @@ EXTERN_C uint64_t CJSON_usec_timestamp(void) {
 #endif
 }
 
-unsigned CJSON_safe_unsigned_mult(const unsigned a, const unsigned b, bool *const success) {
+EXTERN_C unsigned CJSON_safe_unsigned_mult(const unsigned a, const unsigned b, bool *const success) {
     assert(success != NULL);
 
     if(b == 0U) {
@@ -207,6 +207,6 @@ unsigned CJSON_safe_unsigned_mult(const unsigned a, const unsigned b, bool *cons
     return a * b;
 }
 
-bool CJSON_check_unsigned_mult_overflow(const unsigned a, const unsigned b) {
+EXTERN_C bool CJSON_check_unsigned_mult_overflow(const unsigned a, const unsigned b) {
     return b != 0U && a > UINT_MAX / b;
 }
