@@ -45,7 +45,7 @@ static bool CJSON_Object_resize(struct CJSON_Object *const object, struct CJSON_
 
     for(unsigned i = 0U; i < old_capacity; i++) {
         struct CJSON_KV *const old_entry = old_entries + i;
-        if(CJSON_KV_is_used(old_entries)) {
+        if(CJSON_KV_is_used(old_entry)) {
             struct CJSON_KV *const entry = CJSON_Object_get_entry(object, parser, old_entry->key);
             entry->key   = old_entry->key;
             entry->value = old_entry->value;
