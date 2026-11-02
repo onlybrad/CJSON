@@ -24,11 +24,14 @@ struct CJSON        *CJSON_Array_get        (const struct CJSON_Array*, unsigned
 bool                 CJSON_Array_set        (struct CJSON_Array*, struct CJSON_Parser*, unsigned index, const struct CJSON *);
 bool                 CJSON_Array_push       (struct CJSON_Array*, struct CJSON_Parser*, const struct CJSON*);
 const char          *CJSON_Array_get_string (const struct CJSON_Array*, unsigned index, bool *success);
+const char          *CJSON_Array_get_string2(const struct CJSON_Array*, unsigned index);
 double               CJSON_Array_get_float64(const struct CJSON_Array*, unsigned index, bool *success);
 int64_t              CJSON_Array_get_int64  (const struct CJSON_Array*, unsigned index, bool *success);
 uint64_t             CJSON_Array_get_uint64 (const struct CJSON_Array*, unsigned index, bool *success);
 struct CJSON_Array  *CJSON_Array_get_array  (const struct CJSON_Array*, unsigned index, bool *success);
+struct CJSON_Array  *CJSON_Array_get_array2 (const struct CJSON_Array*, unsigned index);
 struct CJSON_Object *CJSON_Array_get_object (const struct CJSON_Array*, unsigned index, bool *success);
+struct CJSON_Object *CJSON_Array_get_object2(const struct CJSON_Array*, unsigned index);
 void                *CJSON_Array_get_null   (const struct CJSON_Array*, unsigned index, bool *success);
 bool                 CJSON_Array_get_bool   (const struct CJSON_Array*, unsigned index, bool *success);
 bool                 CJSON_Array_set_string (struct CJSON_Array*, struct CJSON_Parser*, unsigned index, const char*);

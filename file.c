@@ -63,7 +63,7 @@ static enum CJSON_FileContents_Error CJSON_fopen(FILE **const file, const char *
         : CJSON_FILECONTENTS_ERROR_NONE;
 }
 
-EXTERN_C void CJSON_FileContents_init(struct CJSON_FileContents *const file_contents) {
+CJSON_EXTERN_C void CJSON_FileContents_init(struct CJSON_FileContents *const file_contents) {
     assert(file_contents != NULL);
 
     file_contents->data = NULL;
@@ -77,7 +77,7 @@ void CJSON_FileContents_free(struct CJSON_FileContents *const file_contents) {
     CJSON_FileContents_init(file_contents);
 }
 
-EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_get(struct CJSON_FileContents *const file_contents, const char *const path) {
+CJSON_EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_get(struct CJSON_FileContents *const file_contents, const char *const path) {
     assert(file_contents != NULL);
     assert(path != NULL);
     assert(path[0] != '\0');
@@ -147,7 +147,7 @@ EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_get(struct CJSON_FileC
     return error;
 }
 
-EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_put(const struct CJSON_FileContents *const file_contents, const char *const path) {
+CJSON_EXTERN_C enum CJSON_FileContents_Error CJSON_FileContents_put(const struct CJSON_FileContents *const file_contents, const char *const path) {
     assert(file_contents != NULL);
     assert(path != NULL);
     assert(path[0] != '\0');

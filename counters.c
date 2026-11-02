@@ -4,7 +4,7 @@
 #include "counters.h"
 #include "util.h"
 
-EXTERN_C void CJSON_Counters_init(struct CJSON_Counters *const counters) {
+CJSON_EXTERN_C void CJSON_Counters_init(struct CJSON_Counters *const counters) {
     assert(counters != NULL);
 
     counters->object          = 0U;

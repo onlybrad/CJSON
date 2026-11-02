@@ -137,7 +137,7 @@ static bool CJSON_Arena_create_next_node(struct CJSON_Arena *const arena, const 
     return true;
 }
 
-EXTERN_C void CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned node_max, const char *const name) {
+CJSON_EXTERN_C void CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned node_max, const char *const name) {
     assert(arena != NULL);
 
     arena->node_count = 0U;
@@ -153,7 +153,7 @@ EXTERN_C void CJSON_Arena_init(struct CJSON_Arena *const arena, const unsigned n
 
 }
 
-EXTERN_C bool CJSON_Arena_create_node(struct CJSON_Arena *const arena, unsigned size) {
+CJSON_EXTERN_C bool CJSON_Arena_create_node(struct CJSON_Arena *const arena, unsigned size) {
     assert(arena != NULL);
     assert(size > 0U);
 
@@ -174,7 +174,7 @@ EXTERN_C bool CJSON_Arena_create_node(struct CJSON_Arena *const arena, unsigned 
     return arena->head != NULL;
 }
 
-EXTERN_C void CJSON_Arena_free(struct CJSON_Arena *const arena) {
+CJSON_EXTERN_C void CJSON_Arena_free(struct CJSON_Arena *const arena) {
     assert(arena != NULL);
     
     struct CJSON_ArenaNode *current = arena->head;
@@ -192,14 +192,14 @@ EXTERN_C void CJSON_Arena_free(struct CJSON_Arena *const arena) {
 #endif
 }
 
-EXTERN_C void CJSON_Arena_reset(struct CJSON_Arena *const arena) {
+CJSON_EXTERN_C void CJSON_Arena_reset(struct CJSON_Arena *const arena) {
     assert(arena != NULL);
     
     arena->current      = arena->head;
     arena->head->offset = 0U;
 }
 
-EXTERN_C void *CJSON_Arena_alloc_objects(struct CJSON_Arena *const arena, const unsigned count, const unsigned size, const unsigned alignment) {
+CJSON_EXTERN_C void *CJSON_Arena_alloc_objects(struct CJSON_Arena *const arena, const unsigned count, const unsigned size, const unsigned alignment) {
     assert(arena != NULL);
     assert(count > 0U);
     assert(size > 0U);
@@ -211,7 +211,7 @@ EXTERN_C void *CJSON_Arena_alloc_objects(struct CJSON_Arena *const arena, const 
     return success ? CJSON_Arena_alloc(arena, total_size, alignment) : NULL;
 }
 
-EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned size, unsigned alignment) {
+CJSON_EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned size, unsigned alignment) {
     assert(arena != NULL);
     assert(size > 0U);
     assert((alignment & (alignment - 1U)) == 0U);
@@ -241,7 +241,7 @@ EXTERN_C void *CJSON_Arena_alloc(struct CJSON_Arena *const arena, const unsigned
     return (void*)aligned_address;
 }
 
-EXTERN_C bool CJSON_Arena_reserve(struct CJSON_Arena *const arena, const unsigned size, unsigned alignment) {
+CJSON_EXTERN_C bool CJSON_Arena_reserve(struct CJSON_Arena *const arena, const unsigned size, unsigned alignment) {
     assert(arena != NULL);
     assert(size > 0U);
     assert((alignment & (alignment - 1U)) == 0U);
@@ -265,7 +265,7 @@ EXTERN_C bool CJSON_Arena_reserve(struct CJSON_Arena *const arena, const unsigne
     return CJSON_Arena_create_next_node(arena, size);
 }
 
-EXTERN_C char *CJSON_Arena_strdup(struct CJSON_Arena *const arena, const char *const str, unsigned *const length) {
+CJSON_EXTERN_C char *CJSON_Arena_strdup(struct CJSON_Arena *const arena, const char *const str, unsigned *const length) {
     assert(arena != NULL);
     assert(str != NULL);
 

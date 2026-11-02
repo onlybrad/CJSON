@@ -25,11 +25,14 @@ struct CJSON        *CJSON_Object_get        (const struct CJSON_Object*, const 
 bool                 CJSON_Object_set        (struct CJSON_Object*, struct CJSON_Parser*, const char *key, const struct CJSON*);
 void                 CJSON_Object_delete     (struct CJSON_Object*, const char *key);
 const char          *CJSON_Object_get_string (const struct CJSON_Object*, const char *key, bool *success);
+const char          *CJSON_Object_get_string2(const struct CJSON_Object*, const char *key);
 double               CJSON_Object_get_float64(const struct CJSON_Object*, const char *key, bool *success);
 int64_t              CJSON_Object_get_int64  (const struct CJSON_Object*, const char *key, bool *success);
 uint64_t             CJSON_Object_get_uint64 (const struct CJSON_Object*, const char *key, bool *success);
 struct CJSON_Object *CJSON_Object_get_object (const struct CJSON_Object*, const char *key, bool *success);
+struct CJSON_Object *CJSON_Object_get_object2(const struct CJSON_Object*, const char *key);
 struct CJSON_Array  *CJSON_Object_get_array  (const struct CJSON_Object*, const char *key, bool *success);
+struct CJSON_Array  *CJSON_Object_get_array2 (const struct CJSON_Object*, const char *key);
 void                *CJSON_Object_get_null   (const struct CJSON_Object*, const char *key, bool *success);
 bool                 CJSON_Object_get_bool   (const struct CJSON_Object*, const char *key, bool *success);
 bool                 CJSON_Object_set_string (struct CJSON_Object*, struct CJSON_Parser*, const char *key, const char*);

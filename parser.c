@@ -509,7 +509,7 @@ static struct CJSON *CJSON_Parser_new_json(struct CJSON_Parser *const parser) {
     return json;
 }
 
-EXTERN_C void CJSON_Parser_init(struct CJSON_Parser *const parser) {
+CJSON_EXTERN_C void CJSON_Parser_init(struct CJSON_Parser *const parser) {
     assert(parser != NULL);
 
     parser->error = CJSON_ERROR_NONE;
@@ -519,7 +519,7 @@ EXTERN_C void CJSON_Parser_init(struct CJSON_Parser *const parser) {
     CJSON_Arena_init(&parser->json_arena,   CJSON_DEFAULT_ARENA_NODE_MAX, "JSON Arena");
 }
 
-EXTERN_C void CJSON_Parser_free(struct CJSON_Parser *const parser) {
+CJSON_EXTERN_C void CJSON_Parser_free(struct CJSON_Parser *const parser) {
     assert(parser != NULL);
 
     CJSON_Arena_free(&parser->object_arena);
@@ -528,7 +528,7 @@ EXTERN_C void CJSON_Parser_free(struct CJSON_Parser *const parser) {
     CJSON_Arena_free(&parser->json_arena);
 }
 
-EXTERN_C struct CJSON *CJSON_parse(struct CJSON_Parser *const parser, const char *const data, const unsigned length) {
+CJSON_EXTERN_C struct CJSON *CJSON_parse(struct CJSON_Parser *const parser, const char *const data, const unsigned length) {
     assert(parser != NULL);
     assert(data != NULL);
     assert(length > 0U);
@@ -597,7 +597,7 @@ EXTERN_C struct CJSON *CJSON_parse(struct CJSON_Parser *const parser, const char
     return json;
 }
 
-EXTERN_C struct CJSON *CJSON_parse_file(struct CJSON_Parser *const parser, const char *const path) {
+CJSON_EXTERN_C struct CJSON *CJSON_parse_file(struct CJSON_Parser *const parser, const char *const path) {
     assert(parser != NULL);
     assert(path != NULL);
     assert(path[0] != '\0');
@@ -618,7 +618,7 @@ EXTERN_C struct CJSON *CJSON_parse_file(struct CJSON_Parser *const parser, const
     return json;
 }
 
-EXTERN_C struct CJSON *CJSON_new(struct CJSON_Parser *const parser) {
+CJSON_EXTERN_C struct CJSON *CJSON_new(struct CJSON_Parser *const parser) {
     assert(parser != NULL);
 
     static const unsigned arena_default_sizes[] = {0U, 0U, 0U, 0U};
@@ -646,7 +646,7 @@ EXTERN_C struct CJSON *CJSON_new(struct CJSON_Parser *const parser) {
     return json;
 }
 
-EXTERN_C const char *CJSON_get_error(const struct CJSON_Parser *const parser) {
+CJSON_EXTERN_C const char *CJSON_get_error(const struct CJSON_Parser *const parser) {
     assert(parser != NULL);
 
     switch(parser->error) {

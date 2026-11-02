@@ -6,7 +6,7 @@
 #include "allocator.h"
 #include "util.h"
 
-EXTERN_C void CJSON_Tokens_init(struct CJSON_Tokens *const tokens) {
+CJSON_EXTERN_C void CJSON_Tokens_init(struct CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
     tokens->data          = NULL;
@@ -15,7 +15,7 @@ EXTERN_C void CJSON_Tokens_init(struct CJSON_Tokens *const tokens) {
     tokens->count         = 0U;
 }
 
-EXTERN_C bool CJSON_Tokens_reserve(struct CJSON_Tokens *const tokens, unsigned capacity) {
+CJSON_EXTERN_C bool CJSON_Tokens_reserve(struct CJSON_Tokens *const tokens, unsigned capacity) {
     assert(tokens != NULL);
 
     if(capacity < CJSON_TOKENS_MINIMUM_CAPACITY) {
@@ -38,21 +38,21 @@ EXTERN_C bool CJSON_Tokens_reserve(struct CJSON_Tokens *const tokens, unsigned c
     return true;
 }
 
-void CJSON_Tokens_reset(struct CJSON_Tokens *const tokens) {
+CJSON_EXTERN_C void CJSON_Tokens_reset(struct CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
     tokens->count         = 0U;
     tokens->current_token = tokens->data;
 }
 
-EXTERN_C void CJSON_Tokens_free(struct CJSON_Tokens *const tokens) {
+CJSON_EXTERN_C void CJSON_Tokens_free(struct CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
     CJSON_FREE(tokens->data);
     CJSON_Tokens_init(tokens);
 }
 
-EXTERN_C struct CJSON_Token *CJSON_Tokens_next(struct CJSON_Tokens *const tokens) {
+CJSON_EXTERN_C struct CJSON_Token *CJSON_Tokens_next(struct CJSON_Tokens *const tokens) {
     assert(tokens != NULL);
 
     if(tokens->count == tokens->capacity) {

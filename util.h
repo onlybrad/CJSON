@@ -14,11 +14,11 @@ extern "C" {
 #include <stdint.h>
 #include <stdio.h>
 
-#ifndef EXTERN_C
+#ifndef CJSON_EXTERN_C
 #ifdef __cplusplus
-    #define EXTERN_C extern "C"
+    #define CJSON_EXTERN_C extern "C"
 #else
-    #define EXTERN_C
+    #define CJSON_EXTERN_C
 #endif
 #endif
 

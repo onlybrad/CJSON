@@ -16,7 +16,7 @@
 
 #include "allocator.h"
 
-EXTERN_C bool CJSON_is_whitespace(const char c) {
+CJSON_EXTERN_C bool CJSON_is_whitespace(const char c) {
     switch(c) {
     case ' ':
     case '\t':
@@ -28,7 +28,7 @@ EXTERN_C bool CJSON_is_whitespace(const char c) {
     }
 }
 
-EXTERN_C bool CJSON_is_delimiter(const char c) {
+CJSON_EXTERN_C bool CJSON_is_delimiter(const char c) {
     switch(c) {
     case '[':
     case ']':
@@ -42,11 +42,11 @@ EXTERN_C bool CJSON_is_delimiter(const char c) {
     }
 }
 
-EXTERN_C bool CJSON_is_control_char(const char c) {
+CJSON_EXTERN_C bool CJSON_is_control_char(const char c) {
     return c >= (char)0x00 && c <= (char)0x1F;
 }
 
-EXTERN_C uint16_t CJSON_hex_to_utf16(const char *const codepoint, bool *const success) {
+CJSON_EXTERN_C uint16_t CJSON_hex_to_utf16(const char *const codepoint, bool *const success) {
     assert(codepoint != NULL);
     assert(success != NULL);
 
@@ -65,7 +65,7 @@ EXTERN_C uint16_t CJSON_hex_to_utf16(const char *const codepoint, bool *const su
     return ret;
 }
 
-EXTERN_C unsigned CJSON_utf16_to_utf8_2bytes(char *const destination, const uint16_t high) {
+CJSON_EXTERN_C unsigned CJSON_utf16_to_utf8_2bytes(char *const destination, const uint16_t high) {
     assert(destination != NULL);
 
     if(high <= 0x7F) {
@@ -83,7 +83,7 @@ EXTERN_C unsigned CJSON_utf16_to_utf8_2bytes(char *const destination, const uint
     }
 }
 
-EXTERN_C void CJSON_utf16_to_utf8_4bytes(char *const destination, const uint16_t high, const uint16_t low) {
+CJSON_EXTERN_C void CJSON_utf16_to_utf8_4bytes(char *const destination, const uint16_t high, const uint16_t low) {
     assert(destination != NULL);
 
     const uint32_t codepoint = (uint32_t)(((high - 0xD800) << 10) | (low - 0xDC00)) + 0x10000;
@@ -94,7 +94,7 @@ EXTERN_C void CJSON_utf16_to_utf8_4bytes(char *const destination, const uint16_t
     destination[3] = (char)(((codepoint >> 0)  & 0x3F) | 0x80);
 }
 
-EXTERN_C double CJSON_parse_float64(const char *const str, bool *const success) {
+CJSON_EXTERN_C double CJSON_parse_float64(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
     
@@ -111,7 +111,7 @@ EXTERN_C double CJSON_parse_float64(const char *const str, bool *const success) 
     return ret;
 }
 
-EXTERN_C long double CJSON_parse_long_double(const char *const str, bool *const success) {
+CJSON_EXTERN_C long double CJSON_parse_long_double(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
 
@@ -128,7 +128,7 @@ EXTERN_C long double CJSON_parse_long_double(const char *const str, bool *const 
     return ret;
 }
 
-EXTERN_C uint64_t CJSON_parse_uint64(const char *const str, bool *const success) {
+CJSON_EXTERN_C uint64_t CJSON_parse_uint64(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
     
@@ -145,7 +145,7 @@ EXTERN_C uint64_t CJSON_parse_uint64(const char *const str, bool *const success)
     return ret;
 }
 
-EXTERN_C int64_t CJSON_parse_int64(const char *const str, bool *const success) {
+CJSON_EXTERN_C int64_t CJSON_parse_int64(const char *const str, bool *const success) {
     assert(str != NULL);
     assert(success != NULL);
 
@@ -162,7 +162,7 @@ EXTERN_C int64_t CJSON_parse_int64(const char *const str, bool *const success) {
     return ret;
 }
 
-EXTERN_C void CJSON_print_bytes(const void *const buffer, const size_t size) {
+CJSON_EXTERN_C void CJSON_print_bytes(const void *const buffer, const size_t size) {
     assert(buffer != NULL);
     assert(size > 0);
 
@@ -173,7 +173,7 @@ EXTERN_C void CJSON_print_bytes(const void *const buffer, const size_t size) {
     printf("0x%02hhx]\n", ((const unsigned char*)buffer)[size - 1]);
 }
 
-EXTERN_C uint64_t CJSON_usec_timestamp(void) {
+CJSON_EXTERN_C uint64_t CJSON_usec_timestamp(void) {
 #if defined(__MINGW32__) || !defined(_WIN32)
     struct timeval current_time;
     gettimeofday(&current_time, NULL);
@@ -190,7 +190,7 @@ EXTERN_C uint64_t CJSON_usec_timestamp(void) {
 #endif
 }
 
-EXTERN_C unsigned CJSON_safe_unsigned_mult(const unsigned a, const unsigned b, bool *const success) {
+CJSON_EXTERN_C unsigned CJSON_safe_unsigned_mult(const unsigned a, const unsigned b, bool *const success) {
     assert(success != NULL);
 
     if(b == 0U) {
@@ -207,6 +207,6 @@ EXTERN_C unsigned CJSON_safe_unsigned_mult(const unsigned a, const unsigned b, b
     return a * b;
 }
 
-EXTERN_C bool CJSON_check_unsigned_mult_overflow(const unsigned a, const unsigned b) {
+CJSON_EXTERN_C bool CJSON_check_unsigned_mult_overflow(const unsigned a, const unsigned b) {
     return b != 0U && a > UINT_MAX / b;
 }

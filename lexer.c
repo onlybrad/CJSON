@@ -293,7 +293,7 @@ static bool CJSON_count_containers_elements(struct CJSON_Tokens *const tokens, s
     return true;
 }
 
-EXTERN_C void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *const data, const unsigned length) {
+CJSON_EXTERN_C void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *const data, const unsigned length) {
     assert(lexer != NULL);
     assert(data != NULL);
     assert(length > 0U);
@@ -303,7 +303,7 @@ EXTERN_C void CJSON_Lexer_init(struct CJSON_Lexer *const lexer, const char *cons
     lexer->position = 0U;
 }
 
-EXTERN_C enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens, struct CJSON_Counters *const counters) {
+CJSON_EXTERN_C enum CJSON_Lexer_Error CJSON_Lexer_tokenize(struct CJSON_Lexer *const lexer, struct CJSON_Tokens *const tokens, struct CJSON_Counters *const counters) {
     assert(lexer != NULL);
     assert(tokens != NULL);
     assert(counters != NULL);
