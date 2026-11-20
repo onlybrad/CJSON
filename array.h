@@ -3,6 +3,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifndef CJSON_ARRAY_H
 #define CJSON_ARRAY_H
