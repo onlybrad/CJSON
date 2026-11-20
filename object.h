@@ -7,6 +7,8 @@ extern "C" {
 
 #define CJSON_OBJECT_MINIMUM_CAPACITY 8U
 
+#define CJSON_OBJECT_TO_CJSON(OBJECT) ((struct CJSON*)(union CJSON_Value*)(OBJECT))
+
 struct CJSON_Parser;
 struct CJSON_KV;
 struct CJSON_Array;

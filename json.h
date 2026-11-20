@@ -62,8 +62,8 @@ union CJSON_Value {
 };
 
 struct CJSON {
-    enum CJSON_Type   type;
     union CJSON_Value value;
+    enum CJSON_Type   type;
 };
 
 struct CJSON_KV {
