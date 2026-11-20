@@ -13,9 +13,19 @@ static: $(SOURCE)
 	ar rcs cjson.a *.o
 	make cleanup
 
+static-d: $(SOURCE)
+	$(CC) $(INCLUDES) $(FLAGS) $(STD) -g -Og -c $(SOURCE)
+	ar rcs cjson-d.a *.o
+	make cleanup
+
 static++: $(SOURCE)
 	$(CC++) $(INCLUDES) $(FLAGS++) $(STD++) -D NDEBUG -O3 -c $(SOURCE)
 	ar rcs cjson++.a *.o
+	make cleanup
+
+static-d++: $(SOURCE)
+	$(CC++) $(INCLUDES) $(FLAGS++) $(STD++) -g -Og -c $(SOURCE)
+	ar rcs cjson-d++.a *.o
 	make cleanup
 
 all: static static++ test1.exe test1++.exe test2_debug.exe test2_debug++.exe test2_release.exe test2_release++.exe

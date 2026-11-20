@@ -6,6 +6,7 @@ extern "C" {
 #define CJSON_OBJECT_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define CJSON_OBJECT_MINIMUM_CAPACITY 8U
 
