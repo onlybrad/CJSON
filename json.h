@@ -7,9 +7,6 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "allocator.h"
-#include "token.h"
-#include "tokens.h"
 #include "object.h"
 #include "array.h"
 

@@ -5,6 +5,8 @@ extern "C" {
 #ifndef CJSON_OBJECT_H
 #define CJSON_OBJECT_H
 
+#include <stdbool.h>
+
 #define CJSON_OBJECT_MINIMUM_CAPACITY 8U
 
 #define CJSON_OBJECT_TO_CJSON(OBJECT) ((struct CJSON*)(union CJSON_Value*)(OBJECT))

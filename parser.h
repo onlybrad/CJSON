@@ -6,7 +6,6 @@ extern "C" {
 #define CJSON_PARSER_H
 
 #include "json.h"
-#include "tokens.h"
 #include "allocator.h"
 struct CJSON_Parser {
     enum   CJSON_Error error;
