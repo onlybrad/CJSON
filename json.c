@@ -714,7 +714,7 @@ CJSON_EXTERN_C bool CJSON_as_bool(struct CJSON *const json, bool *success) {
 
     if(json->type != CJSON_BOOL) {
         *success = false;
-        return NULL;
+        return false;
     }
     *success = true;
     return json->value.boolean;
@@ -855,7 +855,6 @@ CJSON_EXTERN_C char *CJSON_format(const char *const data, const unsigned length,
     CJSON_Parser_init(&parser);
     const struct CJSON *const json = CJSON_parse(&parser, data, length);
     if(json == NULL) {
-        CJSON_Parser_free(&parser);
         return NULL;
     }
 
