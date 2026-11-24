@@ -638,7 +638,7 @@ CJSON_EXTERN_C int64_t CJSON_as_int64(struct CJSON *const json, bool *success) {
 
     default:
         *success = false;
-        return 0.0;
+        return 0;
     }
 }
 
@@ -666,7 +666,7 @@ CJSON_EXTERN_C uint64_t CJSON_as_uint64(struct CJSON *const json, bool *success)
 
     default:
         *success = false;
-        return 0.0;
+        return 0;
     }
 }
 
@@ -855,6 +855,7 @@ CJSON_EXTERN_C char *CJSON_format(const char *const data, const unsigned length,
     CJSON_Parser_init(&parser);
     const struct CJSON *const json = CJSON_parse(&parser, data, length);
     if(json == NULL) {
+        CJSON_Parser_free(&parser);
         return NULL;
     }
 
